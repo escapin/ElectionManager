@@ -38,6 +38,8 @@ def link(dest):
     os.symlink(dstroot+"/MixServer/cleanData.sh", dstroot+"/mix/02/cleanData.sh")
     os.symlink(dstroot+"/MixServer/mixServer.js", dstroot+"/mix/02/mixServer.js")
     os.symlink(dstroot+"/templates/config_mix02.json", dstroot+"/mix/02/config.json")
+    
+    os.symlink(dstroot+"/"+manifest, dstroot+"/"+votingManifest)
 
 def copyFast(src, dest):
     if sys.platform.startswith("win"):
@@ -104,7 +106,7 @@ def addSec(tm, secs):
 
 def createElec():
     jsonFile = open(electionConfig, 'w')
-    jsonData = {"electionIDs": [], "maxElections": (3500-3300)//5, "available-ports": [3300, 3500], "used-ports": [["VotingBooth", 3333]]}
+    jsonData = {"electionIDs": [], "maxElections": (3500-3300)//6, "available-ports": [3300, 3500], "used-ports": []}
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.close()
 
@@ -119,9 +121,9 @@ def usePortsOld():
             if openPort in usingPorts:
                 continue
             newPorts.append(openPort)
-            if len(newPorts) >= 5:
+            if len(newPorts) >= 6:
                 break
-        if len(newPorts) < 5:
+        if len(newPorts) < 6:
             print("Not enough ports available.")
             quit()
         usingPorts.extend(newPorts)
@@ -131,7 +133,7 @@ def usePortsOld():
         jsonFile.close()
     except IOError:
         createElec()
-        newPorts = [3300, 3301, 3302, 3111, 3299]
+        newPorts = [3300, 3301, 3302, 3111, 3299, 3333]
     return newPorts
 
 def usePorts():
@@ -148,9 +150,9 @@ def usePorts():
             if openPort in usingPorts:
                 continue
             newPorts.append(openPort)
-            if len(newPorts) >= 5:
+            if len(newPorts) >= 6:
                 break
-        if len(newPorts) < 5:
+        if len(newPorts) < 6:
             print("Not enough ports available.")
             quit()
         listPorts.append(newPorts)
@@ -158,7 +160,7 @@ def usePorts():
         jsonFile.close()
     except IOError:
         createElec()
-        newPorts = [3300, 3301, 3302, 3111, 3299]
+        newPorts = [3300, 3301, 3302, 3111, 3299, 3333]
     return newPorts
 
 def getID():
@@ -178,7 +180,8 @@ electionConfig = "ElectionConfigFile.json"
 manifest = "_sElectConfigFiles_/ElectionManifest.json"
 collectingConf = "CollectingServer/config.json"
 bulletinConf = "BulletinBoard/config.json"
-mixConf = "MixServer/config.json"       #needed? same as mix00
+votingManifest = "VotingBooth/ElectionManifest.json"     
+votingConf = "VotingBooth/config.json"  
 mix00Conf = "templates/config_mix00.json"
 mix01Conf = "templates/config_mix01.json"
 mix02Conf = "templates/config_mix02.json"
@@ -195,26 +198,26 @@ jwrite(manifest, "startTime", currentTime)
 jwrite(manifest, "endTime", endingTime)
 jwriteAdv(manifest, "collectingServer", "http://localhost:" + str(ports[4]), "URI")
 jwriteAdv(manifest, "bulletinBoards", "http://localhost:" + str(ports[3]), 0, "URI")
-jwriteAdv(manifest, "collectingServer", "http://localhost:" + str(ports[4]), "URI")
 jwriteAdv(manifest, "mixServers", "http://localhost:" + str(ports[0]), 0, "URI")
 jwriteAdv(manifest, "mixServers", "http://localhost:" + str(ports[1]), 1, "URI")
 jwriteAdv(manifest, "mixServers", "http://localhost:" + str(ports[2]), 2, "URI")
 
 #get ID after modifying Manifest
 electionID = getID()
-srcfile = os.getcwd()
-dstroot = os.path.join(os.path.split(srcfile)[0], electionID + "_" + os.path.split(srcfile)[1])
+srcfile = os.path.realpath(__file__)
+srcdir = os.path.split(os.path.split(srcfile)[0])
+dstroot = os.path.join(os.path.split(srcdir[0])[0], electionID + "_" + os.path.split(srcdir[0])[1])
 jAddList(electionConfig, "electionIDs", electionID)
 ports.insert(0, electionID)
 jAddList(electionConfig, "used-ports", ports)
 
 #modify Server ports
-jwrite(mix00Conf, "port", ports[0])
-jwrite(mix01Conf, "port", ports[1])
-jwrite(mix02Conf, "port", ports[2])
-jwrite(bulletinConf, "port", ports[3])
-jwrite(collectingConf, "port", ports[4])
-jwrite(mixConf, "port", ports[0])   #needed?
+jwrite(mix00Conf, "port", ports[1])
+jwrite(mix01Conf, "port", ports[2])
+jwrite(mix02Conf, "port", ports[3])
+jwrite(bulletinConf, "port", ports[4])
+jwrite(collectingConf, "port", ports[5])
+jwrite(votingConf, "port", ports[6])
 
 #modify nginx File
 nginxFile = open(nginxConf, 'r+')
@@ -227,11 +230,12 @@ for line in nginxData:
     counter = counter + 1
 bracketIt = nginxData[lastBracket:]
 del nginxData[lastBracket:]
-comments = ["\n     # Collecting server_" + electionID + " \n", "    location /collectingServer_" + electionID + "/ {\n", "        proxy_pass http://localhost:" + str(ports[4]) + "/;\n", "    }\n", "\n",
-            "    # Mix server_" + electionID + " #1\n", "    location /mix/00_" + electionID + "/ {\n", "        proxy_pass http://localhost:" + str(ports[0]) + "/;\n", "    }\n", "\n",
-            "    # Mix server_" + electionID + " #2\n", "    location /mix/01_" + electionID + "/ {\n", "        proxy_pass http://localhost:" + str(ports[1]) + "/;\n", "    }\n", "\n",
-            "    # Mix server_" + electionID + " #3\n", "    location /mix/03_" + electionID + "/ {\n", "        proxy_pass http://localhost:" + str(ports[2]) + "/;\n", "    }\n", "\n",
-            "    # Bulletin board_" + electionID + " \n", "    location /bulletinBoard_" + electionID + "/ {\n", "        proxy_pass http://localhost:" + str(ports[3]) + "/;\n", "    }\n"]
+comments = ["\n    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
+            "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass http://localhost:" + str(ports[5]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #1\n", "    location " + "/" + electionID + "/mix/00/ {\n", "        proxy_pass http://localhost:" + str(ports[1]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #2\n", "    location " + "/" + electionID + "/mix/01/ {\n", "        proxy_pass http://localhost:" + str(ports[2]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #3\n", "    location " + "/" + electionID + "/mix/03/ {\n", "        proxy_pass http://localhost:" + str(ports[3]) + "/;\n", "    }\n", "\n",
+            "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass http://localhost:" + str(ports[4]) + "/;\n", "    }\n"]
 comments.extend(bracketIt)
 nginxData.extend(comments)
 nginxFile.seek(0)
@@ -239,11 +243,11 @@ nginxFile.writelines(nginxData)
 nginxFile.close()
 
 
-copy(srcfile, dstroot)
+copy(srcdir[0], dstroot)
 link(dstroot)
 
 os.system("nginx -s reload")
-subprocess.call([dstroot + "/start.sh"], cwd=dstroot)
+subprocess.call([dstroot + "/" + srcdir[1] + "/start.sh"], cwd=dstroot)
 
 #subprocess.call([dstroot + "/clean.sh"], cwd=dstroot)
 #subprocess.call([dstroot + "/CollectingServer", "node collectingServer.js &"], cwd=dstroot+"/CollectingServer")
