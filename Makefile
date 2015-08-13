@@ -46,6 +46,7 @@ npminstall:
 	cd MixServer; npm install
 	cd VotingBooth; npm install
 	cd node_modules/cryptofunc; npm install
+	cd ElectionHandler; npm install
 
 
 
@@ -59,7 +60,6 @@ filesconfigs:
 	cp templates/config_bb.json BulletinBoard/config.json
 	cp templates/config_cs.json CollectingServer/config.json
 	cp templates/config_mix.json MixServer/config.json
-	ln -fs ../_sElectConfigFiles_/ElectionManifest.json VotingBooth/
 
 mixconfigs:
 	python configMixServers.py

@@ -12,7 +12,7 @@ import subprocess
  
 def copy(src, dest):
     try:
-        shutil.copytree(src, dest, symlinks=True, ignore=ignore_patterns("*.py", "00", "01", "02"))
+        shutil.copytree(src, dest, symlinks=True, ignore=ignore_patterns("*.py", "00", "01", "02", "ElectionHandler"))
     except OSError as e:
         # source is a file, not a directory
         if e.errno == errno.ENOTDIR:
@@ -39,7 +39,7 @@ def link(dest):
     os.symlink(dstroot+"/MixServer/mixServer.js", dstroot+"/mix/02/mixServer.js")
     os.symlink(dstroot+"/templates/config_mix02.json", dstroot+"/mix/02/config.json")
     
-    os.symlink(dstroot+"/"+manifest, dstroot+"/"+votingManifest)
+    os.symlink(dstroot + manifest, dstroot + votingManifest)
 
 def copyFast(src, dest):
     if sys.platform.startswith("win"):
@@ -57,6 +57,7 @@ def jwrite(src, key, value):
         jsonFile = open(src, 'w')
         jsonData = {key: value}
     json.dump(jsonData, jsonFile, indent = 4)
+    jsonFile.truncate()
     jsonFile.close()
     
 def jwriteAdv(src, key, value, pos="", key2=""):
@@ -79,6 +80,7 @@ def jwriteAdv(src, key, value, pos="", key2=""):
                 jsonData = {key: {key2: value}}
             jsonData = {key: value}
         json.dump(jsonData, jsonFile, indent = 4)
+        jsonFile.truncate()
         jsonFile.close()
         
 def jAddList(src, key, value):
@@ -93,6 +95,7 @@ def jAddList(src, key, value):
         jsonFile = open(src, 'w')
         jsonData = {key: value}
     json.dump(jsonData, jsonFile, indent = 4)
+    jsonFile.truncate()
     jsonFile.close()
 
 def getTime():
@@ -105,41 +108,15 @@ def addSec(tm, secs):
     return fulldate
 
 def createElec():
-    jsonFile = open(electionConfig, 'w')
+    jsonFile = open(srcdir[0] + electionConfig, 'w')
     jsonData = {"electionIDs": [], "maxElections": (3500-3300)//6, "available-ports": [3300, 3500], "used-ports": []}
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.close()
 
-def usePortsOld():
-    newPorts = []
-    try:
-        jsonFile = open(electionConfig, 'r+')
-        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        rangePorts = jsonData["available-ports"]
-        usingPorts = jsonData["used-ports"]
-        for openPort in range(rangePorts[0], rangePorts[1]):
-            if openPort in usingPorts:
-                continue
-            newPorts.append(openPort)
-            if len(newPorts) >= 6:
-                break
-        if len(newPorts) < 6:
-            print("Not enough ports available.")
-            quit()
-        usingPorts.extend(newPorts)
-        jsonData["used-ports"] = usingPorts
-        jsonFile.seek(0)
-        json.dump(jsonData, jsonFile, sort_keys=True, indent = 4)
-        jsonFile.close()
-    except IOError:
-        createElec()
-        newPorts = [3300, 3301, 3302, 3111, 3299, 3333]
-    return newPorts
-
 def usePorts():
     newPorts = []
     try:
-        jsonFile = open(electionConfig, 'r')
+        jsonFile = open(srcdir[0] + electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         rangePorts = jsonData["available-ports"]
         listPorts = jsonData["used-ports"]
@@ -153,8 +130,7 @@ def usePorts():
             if len(newPorts) >= 6:
                 break
         if len(newPorts) < 6:
-            print("Not enough ports available.")
-            quit()
+            sys.exit("Not enough ports available.")
         listPorts.append(newPorts)
         jsonData["used-ports"] = listPorts
         jsonFile.close()
@@ -170,23 +146,25 @@ def getID():
     return elecID
 
 def hashManifest():
-    manifest_raw = codecs.open(manifest, 'r', encoding='utf8').read()
+    manifest_raw = codecs.open(srcdir[0] + manifest, 'r', encoding='utf8').read()
     manifest_raw = manifest_raw.replace("\n", '').replace("\r", '').strip()
     m = hashlib.sha1()
     m.update(manifest_raw)
     return m.hexdigest()
 
-electionConfig = "ElectionConfigFile.json"
-manifest = "_sElectConfigFiles_/ElectionManifest.json"
-collectingConf = "CollectingServer/config.json"
-bulletinConf = "BulletinBoard/config.json"
-votingManifest = "VotingBooth/ElectionManifest.json"     
-votingConf = "VotingBooth/config.json"  
-mix00Conf = "templates/config_mix00.json"
-mix01Conf = "templates/config_mix01.json"
-mix02Conf = "templates/config_mix02.json"
-nginxConf = "nginx_select.conf"
+electionConfig = "/ElectionConfigFile.json"
+manifest = "/_sElectConfigFiles_/ElectionManifest.json"
+collectingConf = "/CollectingServer/config.json"
+bulletinConf = "/BulletinBoard/config.json"
+votingManifest = "/VotingBooth/ElectionManifest.json"     
+votingConf = "/VotingBooth/config.json"  
+mix00Conf = "/templates/config_mix00.json"
+mix01Conf = "/templates/config_mix01.json"
+mix02Conf = "/templates/config_mix02.json"
+nginxConf = "/nginx_select.conf"
 
+srcfile = os.path.realpath(__file__)
+srcdir = os.path.split(os.path.split(srcfile)[0])
 
 votingTime = 300    #sec
 ports = usePorts()
@@ -194,33 +172,31 @@ ports = usePorts()
 #modify ElectionManifest
 currentTime = getTime().strftime("%Y.%m.%d %H:%M GMT+0100")
 endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
-jwrite(manifest, "startTime", currentTime)
-jwrite(manifest, "endTime", endingTime)
-jwriteAdv(manifest, "collectingServer", "http://localhost:" + str(ports[4]), "URI")
-jwriteAdv(manifest, "bulletinBoards", "http://localhost:" + str(ports[3]), 0, "URI")
-jwriteAdv(manifest, "mixServers", "http://localhost:" + str(ports[0]), 0, "URI")
-jwriteAdv(manifest, "mixServers", "http://localhost:" + str(ports[1]), 1, "URI")
-jwriteAdv(manifest, "mixServers", "http://localhost:" + str(ports[2]), 2, "URI")
+jwrite(srcdir[0] + manifest, "startTime", currentTime)
+jwrite(srcdir[0] + manifest, "endTime", endingTime)
+jwriteAdv(srcdir[0] + manifest, "collectingServer", "http://localhost:" + str(ports[4]), "URI")
+jwriteAdv(srcdir[0] + manifest, "bulletinBoards", "http://localhost:" + str(ports[3]), 0, "URI")
+jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[0]), 0, "URI")
+jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[1]), 1, "URI")
+jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[2]), 2, "URI")
 
 #get ID after modifying Manifest
 electionID = getID()
-srcfile = os.path.realpath(__file__)
-srcdir = os.path.split(os.path.split(srcfile)[0])
 dstroot = os.path.join(os.path.split(srcdir[0])[0], electionID + "_" + os.path.split(srcdir[0])[1])
-jAddList(electionConfig, "electionIDs", electionID)
+jAddList(srcdir[0] + electionConfig, "electionIDs", electionID)
 ports.insert(0, electionID)
-jAddList(electionConfig, "used-ports", ports)
+jAddList(srcdir[0] + electionConfig, "used-ports", ports)
 
 #modify Server ports
-jwrite(mix00Conf, "port", ports[1])
-jwrite(mix01Conf, "port", ports[2])
-jwrite(mix02Conf, "port", ports[3])
-jwrite(bulletinConf, "port", ports[4])
-jwrite(collectingConf, "port", ports[5])
-jwrite(votingConf, "port", ports[6])
+jwrite(srcdir[0] + mix00Conf, "port", ports[1])
+jwrite(srcdir[0] + mix01Conf, "port", ports[2])
+jwrite(srcdir[0] + mix02Conf, "port", ports[3])
+jwrite(srcdir[0] + bulletinConf, "port", ports[4])
+jwrite(srcdir[0] + collectingConf, "port", ports[5])
+jwrite(srcdir[0] + votingConf, "port", ports[6])
 
 #modify nginx File
-nginxFile = open(nginxConf, 'r+')
+nginxFile = open(srcdir[0] + nginxConf, 'r+')
 nginxData = nginxFile.readlines()
 lastBracket = 0
 counter = 0
@@ -247,17 +223,5 @@ copy(srcdir[0], dstroot)
 link(dstroot)
 
 os.system("nginx -s reload")
+subprocess.call([srcdir[0] + "/ElectionHandler/refreshConfig2.sh"], cwd=(srcdir[0]+"/ElectionHandler"))
 subprocess.call([dstroot + "/" + srcdir[1] + "/start.sh"], cwd=dstroot)
-
-#subprocess.call([dstroot + "/clean.sh"], cwd=dstroot)
-#subprocess.call([dstroot + "/CollectingServer", "node collectingServer.js &"], cwd=dstroot+"/CollectingServer")
-#subprocess.call([dstroot + "/BulletinBoard/node bb.js &"], cwd=dstroot+"/BulletinBoard")
-#subprocess.call([dstroot + "/mix/00/node mixServer.js &"], cwd=dstroot+"/mix/00")
-#subprocess.call([dstroot + "/mix/01/node mixServer.js &"], cwd=dstroot+"/mix/01")
-#subprocess.call([dstroot + "/mix/02/node mixServer.js"], cwd=dstroot+"/mix/02")
-
-#os.system("cd "+dstroot+"/CollectingServer && node collectingServer.js &")
-#os.system("cd "+dstroot+"/BulletinBoard && node bb.js &")
-#os.system("cd "+dstroot+"/mix/00 && node mixServer.js &")
-#os.system("cd "+dstroot+"/mix/01 && node mixServer.js &")
-#os.system("cd "+dstroot+"/mix/02 && node mixServer.js")

@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Simple login</title>
+    <script src="js/buildElectionTable.js"></script>
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/ElectionConfigFile.js"></script>
+    <script src="js/electionButtons.js"></script>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1>Hello people !</h1>
+	<div style="width:400px; height:300px; overflow:auto;">
+	  <table id="elections" border="1"></table>
+	</div>
+	<input type="button" id="create" value="create Election">
+	<input type="button" id="vote" value="Vote">
+	<input type="button" id="close" value="close Election">
+	<input type="button" id="remove" value="remove Election">
+    </body>
+</html>
+<script type="text/javascript">
+    $(document).ready(buildElectionTable);
+    $(document).ready(electionButtons);
+</script>

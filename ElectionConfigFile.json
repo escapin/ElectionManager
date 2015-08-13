@@ -1,0 +1,11 @@
+{
+    "available-ports": [
+        3300, 
+        3500
+    ], 
+    "electionIDs": [], 
+    "used-ports": [
+        []
+    ], 
+    "maxElections": 33
+}
