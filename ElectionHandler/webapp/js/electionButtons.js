@@ -50,15 +50,20 @@ function electionButtons() {
     
 	/* Remove Button */
 	$("#remove").click(function() {
-		$.post(address+":"+port+"/election", {task: "remove", ID: value}, function(data) {
-			if (data == "removed") {
-				alert("Election removed");
-				window.location.reload(true);
-			}
-			else{
-				alert(data);
-			}
-		});
+    	if(value == null){
+    		alert("no election selected");
+    	}
+    	else{
+    		$.post(address+":"+port+"/election", {task: "remove", ID: value}, function(data) {
+    			if (data == "removed") {
+					alert("Election removed");
+					window.location.reload(true);
+				}
+				else{
+					alert(data);
+				}
+    		});
+    	    }
 	});
     
     /* Vote Button */

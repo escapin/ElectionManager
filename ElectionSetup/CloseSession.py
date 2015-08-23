@@ -3,6 +3,8 @@ import os
 import collections
 import sys
 import subprocess
+from psutil import process_iter
+from signal import SIGKILL
 
 def jRemList(src, key, value):
     try:
@@ -25,12 +27,24 @@ def jRemList(src, key, value):
     jsonFile.truncate()
     jsonFile.close()
 
-def remLines(src, lines):
-    if lines[-1]-lines[0] == 26:
-        del src[lines[0]:lines[-1]+3]
-    else:
-        for x in range(len(lines)):
-            del src[lines[-x-1]:lines[-x-1]+3]
+def getProcIDs(src, key, value):
+    procID = []
+    try:
+        jsonFile = open(src, 'r+')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        pidList = jsonData[key]
+        for x in range(len(pidList)):
+            if value in pidList[x]:
+                procID = pidList.pop(x)
+                break
+        jsonData[key] = pidList
+        jsonFile.seek(0)
+        json.dump(jsonData, jsonFile, indent = 4)
+        jsonFile.truncate()
+        jsonFile.close()
+        return procID
+    except IOError:
+        sys.exit("cannot find process ID.")
 
 electionConfig = "/ElectionConfigFile.json"
 nginxConf = "/nginx_select.conf"
@@ -38,10 +52,28 @@ nginxConf = "/nginx_select.conf"
 srcfile = os.path.realpath(__file__)
 srcdir = os.path.split(os.path.split(srcfile)[0])
 
-#modify electionconfig File
+#get ElectionID
 electionID = sys.argv[1]
+
+#kill processes
+nPIDs = getProcIDs(srcdir[0] + electionConfig, "processIDs", electionID)
+nPIDs.remove(electionID)
+for x in nPIDs:
+    os.kill(x, SIGKILL)
+
+#alternative using ports, no PID required, needs sudo
+#procs = getProcIDs(srcdir[0] + electionConfig, "used-ports", electionID)
+#procs.remove(electionID)
+#for ports in procs:
+#    for proc in process_iter():
+#        for conns in proc.get_connections(kind='inet'):
+#            if conns.laddr[1] == ports:
+#                proc.send_signal(SIGKILL)
+#                continue
+
+#modify electionconfig File
 jRemList(srcdir[0] + electionConfig, "electionIDs", electionID)
-jRemList(srcdir[0] + electionConfig, "used-ports", electionID)
+jRemList(srcdir[0] + electionConfig, "used-ports", electionID) #if using ports to kill process, already doing this with getProcIDs
 
 #modify nginx File
 nginxFile = open(srcdir[0] + nginxConf, 'r+')

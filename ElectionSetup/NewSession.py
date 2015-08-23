@@ -9,7 +9,9 @@ import sys
 import hashlib
 import codecs
 import subprocess
- 
+import time
+from signal import SIGKILL
+
 def copy(src, dest):
     try:
         shutil.copytree(src, dest, symlinks=True, ignore=ignore_patterns("*.py", "00", "01", "02", "ElectionHandler"))
@@ -222,6 +224,52 @@ nginxFile.close()
 copy(srcdir[0], dstroot)
 link(dstroot)
 
+#get all PIDs with node
+nodes = subprocess.check_output(["pgrep", "node"])
+oldPIDs = nodes.split()
+
 os.system("nginx -s reload")
 subprocess.call([srcdir[0] + "/ElectionHandler/refreshConfig2.sh"], cwd=(srcdir[0]+"/ElectionHandler"))
 subprocess.call([dstroot + "/" + srcdir[1] + "/start.sh"], cwd=dstroot)
+#alternative maybe
+#vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
+#col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
+#m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
+#m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
+#m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
+#bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
+#procs = [electionID, vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
+#jAddList(srcdir[0] + electionConfig, "processIDs", procs)
+
+time.sleep(2)
+#get all PIDs with Node
+nodes = subprocess.check_output(["pgrep", "node"])
+allPIDs = nodes.split()
+newPIDs = []
+for x in allPIDs:
+    if x not in oldPIDs:
+        newPIDs.append(x)
+        
+newPIDs = [int(i) for i in newPIDs]
+print(newPIDs)
+
+timeout = 10
+while len(newPIDs) < 6 and timeout > 0:
+    nodes = subprocess.check_output(["pgrep", "node"])
+    allPIDs = nodes.split()
+    newPIDs = []
+    for x in allPIDs:
+        if x not in oldPIDs:
+            newPIDs.append(x)
+    timeout = timeout - 1
+    time.sleep(1)
+
+#add PIDs to config
+newPIDs = [int(i) for i in newPIDs]
+newPIDs.insert(0, electionID)
+jAddList(srcdir[0] + electionConfig, "processIDs", newPIDs)
+
+#should be 6 new processes, otherwise close and ERROR, this should not happen
+if len(newPIDs) != 6:
+    subprocess.call([srcdir[0] + "/ElectionSetup/CloseSession.py", electionID], cwd=(srcdir[0]+"/ElectionSetup"))
+    sys.exit("multiple calls, try again")

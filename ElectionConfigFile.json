@@ -7,5 +7,8 @@
     "used-ports": [
         []
     ], 
+    "processIDs": [
+        []
+    ], 
     "maxElections": 33
 }

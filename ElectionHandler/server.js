@@ -23,6 +23,9 @@ app.post('/election', function(req, res) {
 				console.log(err.code);
 			}
 			console.log(stdout);
+			if(stdout === "done"){
+				res.end("created");
+			}
 			if (stderr) {
 				console.log(stderr);
 				res.end(stderr);
