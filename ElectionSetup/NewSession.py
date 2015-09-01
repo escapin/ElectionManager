@@ -270,6 +270,6 @@ newPIDs.insert(0, electionID)
 jAddList(srcdir[0] + electionConfig, "processIDs", newPIDs)
 
 #should be 6 new processes, otherwise close and ERROR, this should not happen
-if len(newPIDs) != 6:
+if len(newPIDs) != 7:
     subprocess.call([srcdir[0] + "/ElectionSetup/CloseSession.py", electionID], cwd=(srcdir[0]+"/ElectionSetup"))
     sys.exit("multiple calls, try again")
