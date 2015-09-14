@@ -186,7 +186,7 @@ if(len(sys.argv) > 1):
     elecTitle = sys.argv[1]
     elecDescr = sys.argv[2]
 jwrite(srcdir[0] + manifest, "title", elecTitle)
-jwrite(srcdir[0] + manifest, "description", elecTitle)
+jwrite(srcdir[0] + manifest, "description", elecDescr)
 
 #get ID after modifying Manifest
 electionID = getID()
