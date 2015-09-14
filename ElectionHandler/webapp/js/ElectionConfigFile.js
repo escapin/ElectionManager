@@ -1,1 +1,1 @@
-var electionConfigRaw = "{    \"available-ports\": [        3300,         3500    ],     \"electionIDs\": [],     \"used-ports\": [        []    ],     \"processIDs\": [        []    ],     \"maxElections\": 33}";
+var electionConfigRaw = "{    \"available-ports\": [        3300,         3500    ],     \"elections\": []}";

@@ -3,12 +3,5 @@
         3300, 
         3500
     ], 
-    "electionIDs": [], 
-    "used-ports": [
-        []
-    ], 
-    "processIDs": [
-        []
-    ], 
-    "maxElections": 33
+    "elections": []
 }

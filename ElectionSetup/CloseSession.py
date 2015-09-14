@@ -27,20 +27,33 @@ def jRemList(src, key, value):
     jsonFile.truncate()
     jsonFile.close()
 
-def getProcIDs(src, key, value):
-    procID = []
+def jRemElec(src, value):
     try:
         jsonFile = open(src, 'r+')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        pidList = jsonData[key]
-        for x in range(len(pidList)):
-            if value in pidList[x]:
-                procID = pidList.pop(x)
+        elecs = jsonData["elections"]
+        for x in range(len(elecs)):
+            if elecs[x]["electionID"] == value:
+                elecs.pop(x)
                 break
-        jsonData[key] = pidList
+        jsonData["elections"] = elecs
         jsonFile.seek(0)
-        json.dump(jsonData, jsonFile, indent = 4)
-        jsonFile.truncate()
+    except IOError:
+        print("no such file")
+    json.dump(jsonData, jsonFile, indent = 4)
+    jsonFile.truncate()
+    jsonFile.close()
+
+def getProcIDs(src, key, value):
+    procID = []
+    try:
+        jsonFile = open(src, 'r')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        elecs = jsonData["elections"]
+        for x in range(len(elecs)):
+            if elecs[x]["electionID"] == value:
+                procID = elecs[x][key]
+                break
         jsonFile.close()
         return procID
     except IOError:
@@ -57,10 +70,11 @@ electionID = sys.argv[1]
 
 #kill processes
 nPIDs = getProcIDs(srcdir[0] + electionConfig, "processIDs", electionID)
-nPIDs.remove(electionID)
 for x in nPIDs:
-    os.kill(x, SIGKILL)
-
+    try:
+        os.kill(x, SIGKILL)
+    except:
+        pass
 #alternative using ports, no PID required, needs sudo
 #procs = getProcIDs(srcdir[0] + electionConfig, "used-ports", electionID)
 #procs.remove(electionID)
@@ -72,8 +86,7 @@ for x in nPIDs:
 #                continue
 
 #modify electionconfig File
-jRemList(srcdir[0] + electionConfig, "electionIDs", electionID)
-jRemList(srcdir[0] + electionConfig, "used-ports", electionID) #if using ports to kill process, already doing this with getProcIDs
+jRemElec(srcdir[0] + electionConfig, electionID)
 
 #modify nginx File
 nginxFile = open(srcdir[0] + nginxConf, 'r+')
@@ -100,5 +113,5 @@ nginxFile.writelines(nginxData)
 nginxFile.truncate()
 nginxFile.close()
 
-os.system("nginx -s reload")
+#os.system("nginx -s reload")
 subprocess.call([srcdir[0] + "/ElectionHandler/refreshConfig2.sh"], cwd=(srcdir[0]+"/ElectionHandler"))

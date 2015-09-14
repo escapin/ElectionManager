@@ -111,7 +111,7 @@ def addSec(tm, secs):
 
 def createElec():
     jsonFile = open(srcdir[0] + electionConfig, 'w')
-    jsonData = {"electionIDs": [], "maxElections": (3500-3300)//6, "available-ports": [3300, 3500], "used-ports": []}
+    jsonData = {"available-ports": [3300, 3500], "elections": []}
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.close()
 
@@ -121,10 +121,10 @@ def usePorts():
         jsonFile = open(srcdir[0] + electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         rangePorts = jsonData["available-ports"]
-        listPorts = jsonData["used-ports"]
+        elecs = jsonData["elections"]
         usingPorts = []
-        for x in range(len(listPorts)):
-            usingPorts.extend(listPorts[x])        
+        for x in range (len(elecs)):
+            usingPorts.extend(elecs[x]["used-ports"]) 
         for openPort in range(rangePorts[0], rangePorts[1]):
             if openPort in usingPorts:
                 continue
@@ -133,8 +133,6 @@ def usePorts():
                 break
         if len(newPorts) < 6:
             sys.exit("Not enough ports available.")
-        listPorts.append(newPorts)
-        jsonData["used-ports"] = listPorts
         jsonFile.close()
     except IOError:
         createElec()
@@ -182,20 +180,25 @@ jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[0]
 jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[1]), 1, "URI")
 jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[2]), 2, "URI")
 
+elecTitle = "Coolest Thing Election"
+elecDescr = "This is the election for the coolest thing in the world"
+if(len(sys.argv) > 1):
+    elecTitle = sys.argv[1]
+    elecDescr = sys.argv[2]
+jwrite(srcdir[0] + manifest, "title", elecTitle)
+jwrite(srcdir[0] + manifest, "description", elecTitle)
+
 #get ID after modifying Manifest
 electionID = getID()
 dstroot = os.path.join(os.path.split(srcdir[0])[0], electionID + "_" + os.path.split(srcdir[0])[1])
-jAddList(srcdir[0] + electionConfig, "electionIDs", electionID)
-ports.insert(0, electionID)
-jAddList(srcdir[0] + electionConfig, "used-ports", ports)
 
 #modify Server ports
-jwrite(srcdir[0] + mix00Conf, "port", ports[1])
-jwrite(srcdir[0] + mix01Conf, "port", ports[2])
-jwrite(srcdir[0] + mix02Conf, "port", ports[3])
-jwrite(srcdir[0] + bulletinConf, "port", ports[4])
-jwrite(srcdir[0] + collectingConf, "port", ports[5])
-jwrite(srcdir[0] + votingConf, "port", ports[6])
+jwrite(srcdir[0] + mix00Conf, "port", ports[0])
+jwrite(srcdir[0] + mix01Conf, "port", ports[1])
+jwrite(srcdir[0] + mix02Conf, "port", ports[2])
+jwrite(srcdir[0] + bulletinConf, "port", ports[3])
+jwrite(srcdir[0] + collectingConf, "port", ports[4])
+jwrite(srcdir[0] + votingConf, "port", ports[5])
 
 #modify nginx File
 nginxFile = open(srcdir[0] + nginxConf, 'r+')
@@ -209,11 +212,11 @@ for line in nginxData:
 bracketIt = nginxData[lastBracket:]
 del nginxData[lastBracket:]
 comments = ["\n    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
-            "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass http://localhost:" + str(ports[5]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #1\n", "    location " + "/" + electionID + "/mix/00/ {\n", "        proxy_pass http://localhost:" + str(ports[1]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #2\n", "    location " + "/" + electionID + "/mix/01/ {\n", "        proxy_pass http://localhost:" + str(ports[2]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #3\n", "    location " + "/" + electionID + "/mix/03/ {\n", "        proxy_pass http://localhost:" + str(ports[3]) + "/;\n", "    }\n", "\n",
-            "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass http://localhost:" + str(ports[4]) + "/;\n", "    }\n"]
+            "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass http://localhost:" + str(ports[4]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #1\n", "    location " + "/" + electionID + "/mix/00/ {\n", "        proxy_pass http://localhost:" + str(ports[0]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #2\n", "    location " + "/" + electionID + "/mix/01/ {\n", "        proxy_pass http://localhost:" + str(ports[1]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #3\n", "    location " + "/" + electionID + "/mix/03/ {\n", "        proxy_pass http://localhost:" + str(ports[2]) + "/;\n", "    }\n", "\n",
+            "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass http://localhost:" + str(ports[3]) + "/;\n", "    }\n"]
 comments.extend(bracketIt)
 nginxData.extend(comments)
 nginxFile.seek(0)
@@ -228,8 +231,7 @@ link(dstroot)
 nodes = subprocess.check_output(["pgrep", "node"])
 oldPIDs = nodes.split()
 
-os.system("nginx -s reload")
-subprocess.call([srcdir[0] + "/ElectionHandler/refreshConfig2.sh"], cwd=(srcdir[0]+"/ElectionHandler"))
+#os.system("nginx -s reload")
 subprocess.call([dstroot + "/" + srcdir[1] + "/start.sh"], cwd=dstroot)
 #alternative maybe
 #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
@@ -239,11 +241,10 @@ subprocess.call([dstroot + "/" + srcdir[1] + "/start.sh"], cwd=dstroot)
 #m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
 #bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
 #procs = [electionID, vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
-#jAddList(srcdir[0] + electionConfig, "processIDs", procs)
 
 time.sleep(2)
 #get all PIDs with Node
-nodes = subprocess.check_output(["pgrep", "node"])
+nodes = subprocess.check_output(["pgrep", "node"])      #since ElectionHandler has to be running, this cannot have 0 length
 allPIDs = nodes.split()
 newPIDs = []
 for x in allPIDs:
@@ -266,10 +267,10 @@ while len(newPIDs) < 6 and timeout > 0:
 
 #add PIDs to config
 newPIDs = [int(i) for i in newPIDs]
-newPIDs.insert(0, electionID)
-jAddList(srcdir[0] + electionConfig, "processIDs", newPIDs)
-
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr}
+jAddList(srcdir[0] + electionConfig, "elections", newElection)
+subprocess.call([srcdir[0] + "/ElectionHandler/refreshConfig2.sh"], cwd=(srcdir[0]+"/ElectionHandler"))
 #should be 6 new processes, otherwise close and ERROR, this should not happen
-if len(newPIDs) != 7:
+if len(newPIDs) != 6:
     subprocess.call([srcdir[0] + "/ElectionSetup/CloseSession.py", electionID], cwd=(srcdir[0]+"/ElectionSetup"))
     sys.exit("multiple calls, try again")

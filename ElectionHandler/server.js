@@ -14,11 +14,35 @@ app.use(bodyParser.urlencoded({
 	extended : false
 }));
 
+//var basicAuth = require('basic-auth-connect');
+//app.use('/election/*', basicAuth('admin', '888')); // authentication for the admin panel only
+
 app.post('/election', function(req, res) {
 	var task = req.body.task;
 	var value = req.body.ID;
-	if (task === "create") {
+	var etitle = req.body.title;
+	var edesc = req.body.description;
+	if (task === "create" && etitle === "") {
 		child_process.exec('python ../ElectionSetup/NewSession.py', function(err, stdout, stderr) {
+			if (err) {
+				console.log(err.code);
+			}
+			console.log(stdout);
+			if(stdout === "done"){
+				res.end("created");
+			}
+			if (stderr) {
+				console.log(stderr);
+				res.end(stderr);
+			}
+			else{
+				console.log("created");
+				res.end("created");
+			}
+		});
+	}
+	else if (task === "create" && etitle !== "") {
+		child_process.exec('python ../ElectionSetup/NewSession.py '+'"'+etitle+'"'+' '+'"'+edesc+'"', function(err, stdout, stderr) {
 			if (err) {
 				console.log(err.code);
 			}
