@@ -14,6 +14,7 @@ prod:
 	cd CollectingServer ; make
 	cd MixServer ; make
 	cd BulletinBoard ; make
+	cd ElectionHandler ; make
 
 updateCryptoKeys: updatecryptokeys_cs updatecryptokeys_mix
 
@@ -88,10 +89,19 @@ libdownload:
 	cd BulletinBoard/public/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
 	-rm BulletinBoard/public/pure/grids-responsive-min.css
 	cd BulletinBoard/public/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
+	-rm ElectionHandler/webapp/js/jquery-1.11.1.min.js
+	cd ElectionHandler/webapp/js; wget http://code.jquery.com/jquery-1.11.1.min.js
+	-rm ElectionHandler/webapp/js/bluebird.min.js
+	cd ElectionHandler/webapp/js; wget https://cdn.jsdelivr.net/bluebird/latest/bluebird.min.js
+	-rm ElectionHandler/webapp/pure/pure-min.css
+	cd ElectionHandler/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/pure-min.css
+	-rm ElectionHandler/webapp/pure/grids-responsive-old-ie-min.css
+	cd ElectionHandler/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
+	-rm ElectionHandler/webapp/pure/grids-responsive-min.css
+	cd ElectionHandler/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
 
 
-
-devclean: cleanElection javaclean npmclean votingboothclean bbclean configsclean
+devclean: cleanElection javaclean npmclean votingboothclean bbclean configsclean electionhandlerclean
 
 
 javaclean:	
@@ -103,6 +113,7 @@ npmclean:
 	-rm -r MixServer/node_modules
 	-rm -r VotingBooth/node_modules
 	-rm -r node_modules/cryptofunc/node_modules
+	-rm -r ElectionHandler/node_modules
 
 votingboothclean:
 	-rm VotingBooth/ElectionManifest.json
@@ -114,6 +125,13 @@ votingboothclean:
 	-rm VotingBooth/webapp/pure/pure-min.css
 	-rm VotingBooth/webapp/pure/grids-responsive-old-ie-min.css
 	-rm VotingBooth/webapp/pure/grids-responsive-min.css
+
+electionhandlerclean:
+	-rm ElectionHandler/webapp/js/jquery-1.11.1.min.js
+	-rm ElectionHandler/webapp/js/bluebird.min.js
+	-rm ElectionHandler/webapp/pure/pure-min.css
+	-rm ElectionHandler/webapp/pure/grids-responsive-old-ie-min.css
+	-rm ElectionHandler/webapp/pure/grids-responsive-min.css
 
 bbclean:	
 	-rm BulletinBoard/public/js/jquery-1.11.1.min.js

@@ -172,6 +172,9 @@ ports = usePorts()
 #modify ElectionManifest
 currentTime = getTime().strftime("%Y.%m.%d %H:%M GMT+0100")
 endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
+if(len(sys.argv) > 3):
+    currentTime = sys.argv[3]
+    endingTime = sys.argv[4]
 jwrite(srcdir[0] + manifest, "startTime", currentTime)
 jwrite(srcdir[0] + manifest, "endTime", endingTime)
 jwriteAdv(srcdir[0] + manifest, "collectingServer", "http://localhost:" + str(ports[4]), "URI")
@@ -267,7 +270,7 @@ while len(newPIDs) < 6 and timeout > 0:
 
 #add PIDs to config
 newPIDs = [int(i) for i in newPIDs]
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr}
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime}
 jAddList(srcdir[0] + electionConfig, "elections", newElection)
 subprocess.call([srcdir[0] + "/ElectionHandler/refreshConfig2.sh"], cwd=(srcdir[0]+"/ElectionHandler"))
 #should be 6 new processes, otherwise close and ERROR, this should not happen

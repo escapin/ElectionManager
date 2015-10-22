@@ -10,7 +10,9 @@
 	 var head$ = $('<tr/>');
 	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Elections by ID &nbsp;"));
 	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Election Title &nbsp;"));
-	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Election Status &nbsp;"));
+	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Election State &nbsp;"));
+	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Starting Time &nbsp;"));
+	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Ending Time &nbsp;"));
      $("#elections").append(head$);
      
      for (var i = 0 ; i < elections.length ; i++) {
@@ -22,15 +24,15 @@
          row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+"&nbsp;&nbsp;&nbsp;"));
          row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionTitle+"&nbsp;&nbsp;&nbsp;"));
          row$.append($('<td style="text-align:center" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
+         row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].startTime.substring(0, elections[i].startTime.length-9)+"&nbsp;&nbsp;&nbsp;"));
+         row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].endTime.substring(0, elections[i].endTime.length-9)+"&nbsp;&nbsp;&nbsp;"));
+
          $("#elections").append(row$);
          
          getElectionStatus(elecID, function (eleID, stat){
     		 document.getElementById(eleID).innerHTML = stat;
     	 });
-     }
-     
-     $('#welcome').show();
-     
+     }     
      
      
      function getElectionStatus(eleID, callback) {
@@ -86,6 +88,22 @@
            });
      }
      
+     
+     ////////////////////////////////////////////////////////////////
+     ///////// Refresh State
+     
+ 	/* Refresh */
+     window.setInterval(function() {
+    	 for (var i = 0 ; i < elections.length ; i++) {
+        	 var elecID = elections[i].electionID;
+        	 getElectionStatus(elecID, function (eleID, stat){
+        		 document.getElementById(eleID).innerHTML = stat;
+        	 });
+    	 }
+     }, 1000);
+     
+     
+     $('#welcome').show();
      
  }
  

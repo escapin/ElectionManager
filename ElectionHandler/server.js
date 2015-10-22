@@ -22,6 +22,8 @@ app.post('/election', function(req, res) {
 	var value = req.body.ID;
 	var etitle = req.body.title;
 	var edesc = req.body.description;
+	var startingTime = req.body.startTime;
+	var endingTime = req.body.endTime;
 	if (task === "create" && etitle === "") {
 		child_process.exec('python ../ElectionSetup/NewSession.py', function(err, stdout, stderr) {
 			if (err) {
@@ -42,7 +44,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "create" && etitle !== "") {
-		child_process.exec('python ../ElectionSetup/NewSession.py '+'"'+etitle+'"'+' '+'"'+edesc+'"', function(err, stdout, stderr) {
+		child_process.exec('python ../ElectionSetup/NewSession.py '+'"'+etitle+'"'+' '+'"'+edesc+'"'+' '+'"'+startingTime+'"'+' '+'"'+endingTime+'"', function(err, stdout, stderr) {
 			if (err) {
 				console.log(err.code);
 			}
