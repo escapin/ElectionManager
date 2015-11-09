@@ -1,3 +1,4 @@
 {
-    "port": 3305
+    "port": 3305, 
+    "authentificate": "http://localhost/test/verify"
 }

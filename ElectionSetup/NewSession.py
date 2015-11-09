@@ -14,7 +14,7 @@ from signal import SIGKILL
 
 def copy(src, dest):
     try:
-        shutil.copytree(src, dest, symlinks=True, ignore=ignore_patterns("*.py", "00", "01", "02", "ElectionHandler"))
+        shutil.copytree(src, dest, symlinks=True, ignore=ignore_patterns("*.py", "00", "01", "02", "ElectionHandler", "nginx*"))
     except OSError as e:
         # source is a file, not a directory
         if e.errno == errno.ENOTDIR:
@@ -203,6 +203,53 @@ jwrite(srcdir[0] + bulletinConf, "port", ports[3])
 jwrite(srcdir[0] + collectingConf, "port", ports[4])
 jwrite(srcdir[0] + votingConf, "port", ports[5])
 
+try:
+    copy(srcdir[0], dstroot)
+    link(dstroot)
+except:
+    sys.exit("ElectionID already exists.")
+
+#get all PIDs with node
+nodes = subprocess.check_output(["pgrep", "node"])
+oldPIDs = nodes.split()
+
+#os.system("nginx -s reload")
+subprocess.call([dstroot + "/" + srcdir[1] + "/start.sh"], cwd=dstroot)
+#alternative maybe
+#vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
+#col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
+#m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
+#m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
+#m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
+#bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
+#procs = [electionID, vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
+
+time.sleep(2)
+#get all PIDs with Node
+allPIDs = []
+while len(allPIDs) < len(oldPIDs)+6:
+    nodes = subprocess.check_output(["pgrep", "node"])      #since ElectionHandler has to be running, this cannot have 0 length
+    allPIDs = nodes.split()
+    time.sleep(1)
+
+#get PIDs by port listening 
+timeout = 12
+newPIDs = []
+while len(newPIDs) < len(ports) and timeout > 0:
+    try:
+        nodes = subprocess.check_output(["fuser", str(ports[len(newPIDs)])+'/tcp'], stderr=open(os.devnull, 'w'))
+        newPIDs.append(nodes.strip())
+        count = count + 1
+    except:
+        timeout = timeout -1
+        continue
+
+#add PIDs to config
+newPIDs = [int(i) for i in newPIDs]
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime}
+jAddList(srcdir[0] + electionConfig, "elections", newElection)
+subprocess.call([srcdir[0] + "/ElectionHandler/refreshConfig2.sh"], cwd=(srcdir[0]+"/ElectionHandler"))
+
 #modify nginx File
 nginxFile = open(srcdir[0] + nginxConf, 'r+')
 nginxData = nginxFile.readlines()
@@ -226,54 +273,8 @@ nginxFile.seek(0)
 nginxFile.writelines(nginxData)
 nginxFile.close()
 
-
-copy(srcdir[0], dstroot)
-link(dstroot)
-
-#get all PIDs with node
-nodes = subprocess.check_output(["pgrep", "node"])
-oldPIDs = nodes.split()
-
-#os.system("nginx -s reload")
-subprocess.call([dstroot + "/" + srcdir[1] + "/start.sh"], cwd=dstroot)
-#alternative maybe
-#vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
-#col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
-#m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
-#m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
-#m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
-#bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-#procs = [electionID, vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
-
-time.sleep(2)
-#get all PIDs with Node
-nodes = subprocess.check_output(["pgrep", "node"])      #since ElectionHandler has to be running, this cannot have 0 length
-allPIDs = nodes.split()
-newPIDs = []
-for x in allPIDs:
-    if x not in oldPIDs:
-        newPIDs.append(x)
-        
-newPIDs = [int(i) for i in newPIDs]
-print(newPIDs)
-
-timeout = 10
-while len(newPIDs) < 6 and timeout > 0:
-    nodes = subprocess.check_output(["pgrep", "node"])
-    allPIDs = nodes.split()
-    newPIDs = []
-    for x in allPIDs:
-        if x not in oldPIDs:
-            newPIDs.append(x)
-    timeout = timeout - 1
-    time.sleep(1)
-
-#add PIDs to config
-newPIDs = [int(i) for i in newPIDs]
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime}
-jAddList(srcdir[0] + electionConfig, "elections", newElection)
-subprocess.call([srcdir[0] + "/ElectionHandler/refreshConfig2.sh"], cwd=(srcdir[0]+"/ElectionHandler"))
 #should be 6 new processes, otherwise close and ERROR, this should not happen
 if len(newPIDs) != 6:
     subprocess.call([srcdir[0] + "/ElectionSetup/CloseSession.py", electionID], cwd=(srcdir[0]+"/ElectionSetup"))
     sys.exit("multiple calls, try again")
+

@@ -17,26 +17,18 @@ function electionButtons() {
 	function simpleElection() {
 		disableButtons();
 		$('#processing').fadeIn(150);
-		$.post(address+":"+port+"/election", {task: "create", ID: "generated", title: "", description: ""})
-		 .done(function(data){
+		$.post(address+":"+port+"/election", {task: "create", ID: "generated", title: "", description: ""}, function(data) {
 			$('#processing').fadeOut(150);
 			if (data == "created") {
 				alert("Election created");
-				$('#processing').hide();
 				enableButtons();
 				window.location.reload(true);
 			}
 			else{
 				alert(data);
-				$('#processing').hide();
 				enableButtons();
 			}
-		  })
-		 .fail(function(){
-			 $('#processing').hide();
-			 enableButtons();
-			 alert('cannot connect to ElectionHandler');
-		 });
+		});
 	}
 	
 	function removeElection() {

@@ -99,9 +99,17 @@ libdownload:
 	cd ElectionHandler/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
 	-rm ElectionHandler/webapp/pure/grids-responsive-min.css
 	cd ElectionHandler/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
+	-rm AuthentificationBooth/webapp/js/jquery-1.11.1.min.js
+	cd AuthentificationBooth/webapp/js; wget http://code.jquery.com/jquery-1.11.1.min.js
+	-rm AuthentificationBooth/webapp/pure/pure-min.css
+	cd AuthentificationBooth/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/pure-min.css
+	-rm AuthentificationBooth/webapp/pure/grids-responsive-old-ie-min.css
+	cd AuthentificationBooth/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
+	-rm AuthentificationBooth/webapp/pure/grids-responsive-min.css
+	cd AuthentificationBooth/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
 
 
-devclean: cleanElection javaclean npmclean votingboothclean bbclean configsclean electionhandlerclean
+devclean: cleanElection javaclean npmclean votingboothclean bbclean configsclean electionhandlerclean authentificationclean
 
 
 javaclean:	
@@ -125,6 +133,12 @@ votingboothclean:
 	-rm VotingBooth/webapp/pure/pure-min.css
 	-rm VotingBooth/webapp/pure/grids-responsive-old-ie-min.css
 	-rm VotingBooth/webapp/pure/grids-responsive-min.css
+
+authentificationclean:
+	-rm AuthentificationBooth/webapp/js/jquery-1.11.1.min.js
+	-rm AuthentificationBooth/webapp/pure/pure-min.css
+	-rm AuthentificationBooth/webapp/pure/grids-responsive-old-ie-min.css
+	-rm AuthentificationBooth/webapp/pure/grids-responsive-min.css
 
 electionhandlerclean:
 	-rm ElectionHandler/webapp/js/jquery-1.11.1.min.js
