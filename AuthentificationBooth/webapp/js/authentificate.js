@@ -21,6 +21,7 @@ function authentificate(){
     var electionID = null;
     var printableElID = null; // electionID.slice(0,6) + '...';
 	
+    var votingBooth = null;
 	
     //////////////////////////////////////////////////////////////////////////////
     /// AUXILIARY FUNCTIONS
@@ -130,7 +131,7 @@ function authentificate(){
                 showError('Cannot connect with the server');
               })
              .done(function castRequestDone(result) {  // we have some response
-                parent.window.opener.postMessage(result, "*");
+                parent.window.opener.postMessage(result, votingBooth);
                 window.close();
               });
 
@@ -190,6 +191,7 @@ function authentificate(){
     		if (origConf){
     			console.log('message received from ' + event.origin +':  ' + event.data.ballot,event);
     			receipt = event.data;
+    			votingBooth = event.origin;
     		}
     		else{
     			alert('Wrong VotingBooth, window will close');

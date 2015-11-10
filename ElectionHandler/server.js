@@ -43,7 +43,26 @@ app.post('/election', function(req, res) {
 			}
 		});
 	}
-	else if (task === "create" && etitle !== "") {
+	else if (task === "create" && etitle !== "" && startingTime === "") {
+		child_process.exec('python ../ElectionSetup/NewSession.py '+'"'+etitle+'"'+' '+'"'+edesc+'"', function(err, stdout, stderr) {
+			if (err) {
+				console.log(err.code);
+			}
+			console.log(stdout);
+			if(stdout === "done"){
+				res.end("created");
+			}
+			if (stderr) {
+				console.log(stderr);
+				res.end(stderr);
+			}
+			else{
+				console.log("created");
+				res.end("created");
+			}
+		});
+	}
+	else if (task === "create" && etitle !== "" && startingTime !== "") {
 		child_process.exec('python ../ElectionSetup/NewSession.py '+'"'+etitle+'"'+' '+'"'+edesc+'"'+' '+'"'+startingTime+'"'+' '+'"'+endingTime+'"', function(err, stdout, stderr) {
 			if (err) {
 				console.log(err.code);
