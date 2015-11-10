@@ -1,1 +1,1 @@
-var electionConfigRaw = "{    \"available-ports\": [        3300,         3500    ],     \"elections\": []}";
+var electionConfigRaw = "{    \"server-address\": {        \"mix1\": \"http://localhost\",         \"mix2\": \"http://localhost\",         \"mix0\": \"http://localhost\",         \"authbooth\": \"http://localhost/test/verify\",         \"bulletinboard\": \"http://localhost\",         \"collectingserver\": \"http://localhost\",         \"votingbooth\": \"http://localhost\"    },     \"available-ports\": [        3300,         3500    ],     \"elections\": []}";

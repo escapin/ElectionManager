@@ -3,6 +3,7 @@ var bodyParser = require("body-parser");
 var app = express();
 var cors = require('cors');
 var child_process = require("child_process");
+var spawn = child_process.spawn;
 
 var config = require('./src/config');
 
@@ -24,61 +25,44 @@ app.post('/election', function(req, res) {
 	var edesc = req.body.description;
 	var startingTime = req.body.startTime;
 	var endingTime = req.body.endTime;
+	var session = null;
 	if (task === "create" && etitle === "") {
-		child_process.exec('python ../ElectionSetup/NewSession.py', function(err, stdout, stderr) {
-			if (err) {
-				console.log(err.code);
-			}
-			console.log(stdout);
-			if(stdout === "done"){
-				res.end("created");
-			}
-			if (stderr) {
-				console.log(stderr);
-				res.end(stderr);
-			}
-			else{
-				console.log("created");
-				res.end("created");
-			}
+		session = spawn('python', ['../ElectionSetup/NewSession.py']);
+		
+		session.stderr.on('data', function (data) {
+		  console.log('stderr: ' + data);
+		  res.end(data);
+		});
+
+		session.on('exit', function (code) {
+		  console.log('child process exited with code ' + code);
+		  res.end("created");
 		});
 	}
 	else if (task === "create" && etitle !== "" && startingTime === "") {
-		child_process.exec('python ../ElectionSetup/NewSession.py '+'"'+etitle+'"'+' '+'"'+edesc+'"', function(err, stdout, stderr) {
-			if (err) {
-				console.log(err.code);
-			}
-			console.log(stdout);
-			if(stdout === "done"){
-				res.end("created");
-			}
-			if (stderr) {
-				console.log(stderr);
-				res.end(stderr);
-			}
-			else{
-				console.log("created");
-				res.end("created");
-			}
+		session = spawn('python', ['../ElectionSetup/NewSession.py', etitle, edesc]);
+		
+		session.stderr.on('data', function (data) {
+		  console.log('stderr: ' + data);
+		  res.end(data);
+		});
+
+		session.on('exit', function (code) {
+		  console.log('child process exited with code ' + code);
+		  res.end("created");
 		});
 	}
 	else if (task === "create" && etitle !== "" && startingTime !== "") {
-		child_process.exec('python ../ElectionSetup/NewSession.py '+'"'+etitle+'"'+' '+'"'+edesc+'"'+' '+'"'+startingTime+'"'+' '+'"'+endingTime+'"', function(err, stdout, stderr) {
-			if (err) {
-				console.log(err.code);
-			}
-			console.log(stdout);
-			if(stdout === "done"){
-				res.end("created");
-			}
-			if (stderr) {
-				console.log(stderr);
-				res.end(stderr);
-			}
-			else{
-				console.log("created");
-				res.end("created");
-			}
+		session = spawn('python', ['../ElectionSetup/NewSession.py', etitle, edesc, startingTime, endingTime]);
+		
+		session.stderr.on('data', function (data) {
+		  console.log('stderr: ' + data);
+		  res.end(data);
+		});
+
+		session.on('exit', function (code) {
+		  console.log('child process exited with code ' + code);
+		  res.end("created");
 		});
 	}
 	else if (task === "remove") {
