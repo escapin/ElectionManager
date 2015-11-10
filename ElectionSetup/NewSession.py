@@ -111,7 +111,8 @@ def addSec(tm, secs):
 
 def createElec():
     jsonFile = open(srcdir[0] + electionConfig, 'w')
-    jsonData = {"available-ports": [3300, 3500], "elections": []}
+    saddress = { "bulletinboard": "http://localhost", "collectingserver": "http://localhost", "votingbooth": "http://localhost", "authbooth": "http://localhost", "mix0": "http://localhost", "mix1": "http://localhost", "mix2": "http://localhost",}
+    jsonData = {"available-ports": [3300, 3500], "elections": [], "server-address": saddress}
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.close()
 
@@ -138,6 +139,26 @@ def usePorts():
         createElec()
         newPorts = [3300, 3301, 3302, 3111, 3299, 3333]
     return newPorts
+
+def getsAddress():
+    sAddress = []
+    try:
+        jsonFile = open(srcdir[0] + electionConfig, 'r')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        addresses = jsonData["server-address"]
+        sAddress.append(addresses["mix0"])
+        sAddress.append(addresses["mix1"])
+        sAddress.append(addresses["mix2"])
+        sAddress.append(addresses["bulletinboard"])
+        sAddress.append(addresses["collectingserver"])
+        sAddress.append(addresses["votingbooth"])
+        sAddress.append(addresses["authbooth"])
+        jsonFile.close()
+    except IOError:
+        for x in range(6):
+            sAddress.append("http://localhost")
+        sAddress.append("http://localhost/test/verify")
+    return sAddress
 
 def getID():
     manifestHash = hashManifest()
@@ -169,6 +190,9 @@ srcdir = os.path.split(os.path.split(srcfile)[0])
 votingTime = 300    #sec
 ports = usePorts()
 
+#where the servers are placed
+serverAddress = getsAddress()
+
 #modify ElectionManifest
 currentTime = getTime().strftime("%Y.%m.%d %H:%M GMT+0100")
 endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
@@ -177,11 +201,11 @@ if(len(sys.argv) > 3):
     endingTime = sys.argv[4]
 jwrite(srcdir[0] + manifest, "startTime", currentTime)
 jwrite(srcdir[0] + manifest, "endTime", endingTime)
-jwriteAdv(srcdir[0] + manifest, "collectingServer", "http://localhost:" + str(ports[4]), "URI")
-jwriteAdv(srcdir[0] + manifest, "bulletinBoards", "http://localhost:" + str(ports[3]), 0, "URI")
-jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[0]), 0, "URI")
-jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[1]), 1, "URI")
-jwriteAdv(srcdir[0] + manifest, "mixServers", "http://localhost:" + str(ports[2]), 2, "URI")
+jwriteAdv(srcdir[0] + manifest, "collectingServer", serverAddress[4] + ":" + str(ports[4]), "URI")
+jwriteAdv(srcdir[0] + manifest, "bulletinBoards", serverAddress[3] + ":" + str(ports[3]), 0, "URI")
+jwriteAdv(srcdir[0] + manifest, "mixServers", serverAddress[0] + ":" + str(ports[0]), 0, "URI")
+jwriteAdv(srcdir[0] + manifest, "mixServers", serverAddress[1] + ":" + str(ports[1]), 1, "URI")
+jwriteAdv(srcdir[0] + manifest, "mixServers", serverAddress[2] + ":" + str(ports[2]), 2, "URI")
 
 elecTitle = "Coolest Thing Election"
 elecDescr = "This is the election for the coolest thing in the world"
@@ -202,6 +226,7 @@ jwrite(srcdir[0] + mix02Conf, "port", ports[2])
 jwrite(srcdir[0] + bulletinConf, "port", ports[3])
 jwrite(srcdir[0] + collectingConf, "port", ports[4])
 jwrite(srcdir[0] + votingConf, "port", ports[5])
+jwrite(srcdir[0] + votingConf, "authentificate", serverAddress[6])
 
 try:
     copy(srcdir[0], dstroot)
@@ -262,11 +287,11 @@ for line in nginxData:
 bracketIt = nginxData[lastBracket:]
 del nginxData[lastBracket:]
 comments = ["\n    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
-            "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass http://localhost:" + str(ports[4]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #1\n", "    location " + "/" + electionID + "/mix/00/ {\n", "        proxy_pass http://localhost:" + str(ports[0]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #2\n", "    location " + "/" + electionID + "/mix/01/ {\n", "        proxy_pass http://localhost:" + str(ports[1]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #3\n", "    location " + "/" + electionID + "/mix/03/ {\n", "        proxy_pass http://localhost:" + str(ports[2]) + "/;\n", "    }\n", "\n",
-            "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass http://localhost:" + str(ports[3]) + "/;\n", "    }\n"]
+            "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + serverAddress[4] + ":" + str(ports[4]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #1\n", "    location " + "/" + electionID + "/mix/00/ {\n", "        proxy_pass " + serverAddress[0] + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #2\n", "    location " + "/" + electionID + "/mix/01/ {\n", "        proxy_pass " + serverAddress[1] + ":" + str(ports[1]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #3\n", "    location " + "/" + electionID + "/mix/03/ {\n", "        proxy_pass " + serverAddress[2] + ":" + str(ports[2]) + "/;\n", "    }\n", "\n",
+            "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass " + serverAddress[3] + ":" + str(ports[3]) + "/;\n", "    }\n"]
 comments.extend(bracketIt)
 nginxData.extend(comments)
 nginxFile.seek(0)
