@@ -238,6 +238,7 @@ except:
 #os.system("nginx -s reload")
 #subprocess.call([dstroot + "/" + srcdir[1] + "/start.sh"], cwd=dstroot)
 #alternative maybe
+subprocess.call([dstroot + "/VotingBooth/refreshConfig.sh"], cwd=(dstroot+"/VotingBooth"))
 vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
 col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
 m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))

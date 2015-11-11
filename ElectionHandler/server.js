@@ -29,40 +29,58 @@ app.post('/election', function(req, res) {
 	if (task === "create" && etitle === "") {
 		session = spawn('python', ['../ElectionSetup/NewSession.py']);
 		
+		session.stdout.on('data', function (data) {
+			if(data.indexOf("OTP")){
+				console.log('stdout: ' + data);
+				res.end(data);
+			}
+		});
 		session.stderr.on('data', function (data) {
-		  console.log('stderr: ' + data);
-		  res.end(data);
+		    console.log('stderr: ' + data);
+		    res.end(data);
 		});
 
 		session.on('exit', function (code) {
-		  console.log('child process exited with code ' + code);
-		  res.end("created");
+		    console.log('child process exited with code ' + code);
+		    res.end("created");
 		});
 	}
 	else if (task === "create" && etitle !== "" && startingTime === "") {
 		session = spawn('python', ['../ElectionSetup/NewSession.py', etitle, edesc]);
 		
+		session.stdout.on('data', function (data) {
+			if(data.indexOf("OTP")){
+				console.log('stdout: ' + data);
+				res.end(data);
+			}
+		});
 		session.stderr.on('data', function (data) {
-		  console.log('stderr: ' + data);
-		  res.end(data);
+		    console.log('stderr: ' + data);
+		    res.end(data);
 		});
 
 		session.on('exit', function (code) {
-		  console.log('child process exited with code ' + code);
-		  res.end("created");
+		    console.log('child process exited with code ' + code);
+		    res.end("created");
 		});
 	}
 	else if (task === "create" && etitle !== "" && startingTime !== "") {
 		session = spawn('python', ['../ElectionSetup/NewSession.py', etitle, edesc, startingTime, endingTime]);
 		
+		session.stdout.on('data', function (data) {
+			if(data.indexOf("OTP")){
+				console.log('stdout: ' + data);
+				res.end(data);
+			}
+		});
 		session.stderr.on('data', function (data) {
-		  console.log('stderr: ' + data);
-		  res.end(data);
+		    console.log('stderr: ' + data);
+		    res.end(data);
 		});
 
 		session.on('exit', function (code) {
-		  console.log('child process exited with code ' + code);
-		  res.end("created");
+		    console.log('child process exited with code ' + code);
+		    res.end("created");
 		});
 	}
 	else if (task === "remove") {
