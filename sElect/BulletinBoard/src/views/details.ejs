@@ -1,0 +1,110 @@
+<% include header %>
+    <div class="menu-content">
+        <div class="pure-menu pure-menu-open pure-menu-horizontal">
+            <ul>
+            <% if (!ready) { %>
+                <li><a href="summary">Summary</a></li>
+                <li class="pure-menu-disabled"><a href="#">Verification Codes</a></li>
+                <% if (manifest.publishListOfVoters) { %>
+                    <li class="pure-menu-disabled"><a href="#">List of Voters</a></li>
+                <% } %>
+                <li class="pure-menu-selected"><a href="details">Additional Details</a></li>
+            <% } else { %>
+                <li><a href="summary">Summary</a></li>
+                <li><a href="votes">Verification Codes</a></li>
+                <% if (manifest.publishListOfVoters) { %>
+                    <li><a href="voters">List of Voters</a></li>
+                <% } %>
+                <li class="pure-menu-selected"><a href="details">Additional Details</a></li>
+            <% }  %>
+            </ul>
+        </div>
+        <div class="content center">
+
+            <table class="pure-table pure-table-horizontal">
+                <tbody>
+                    <tr>
+                        <td>Opening time:</td>
+                        <td> <%= openingTime %> </td>
+                    </tr>
+                    <tr>
+                        <td>Closing time:</td>
+                        <td> <%= closingTime %> </td>
+                    </tr>
+                    <tr>
+                        <td>Full election manifest:</td>
+                        <td> <a href="ElectionManifest.json">ElectionManifest.json</a> </td>
+                    </tr>
+                    <tr>
+                        <td>Collecting server:</td>
+                        <td><a href="<%= manifest.collectingServer.URI %>/status"><%= manifest.collectingServer.URI %></a> </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td> <span id="cs-status">?</span> </td>
+                    </tr>
+                    
+                    <% for(var j=0; j<manifest.mixServers.length; ++j) { %>
+                    <tr>
+                        <td> Mix server <%= j %> </td>
+                        <td><a href="<%= manifest.mixServers[j].URI %>/status"><%= manifest.mixServers[j].URI %></a> </td>
+                    </tr><tr>
+                        <td></td>
+                        <td> <span id="ms<%= j %>-status">?</span> </td>
+                    </tr>
+                    <% } %>
+
+                </tbody>
+            </table>
+            <div class="toright">
+                <a class="pure-button" href="details">Refresh</a> 
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var electionID = '<%= manifest.hash %>';
+            var csURI = '<%= manifest.collectingServer.URI %>';
+            var csStatusURI = csURI + '/status';
+            $.get(csStatusURI)
+             .fail(function otpRequestFailed() { 
+                $("#cs-status").addClass('error').text('does not respond');
+              })
+             .done(function castRequestDone(result) {  // we have some response
+                if (result.electionID.toUpperCase() === electionID) {
+                    var status = result.status;
+                    if (status==='closed')
+                        status += ' (<a href="' +csURI+ '/result.msg">signed result</a>)'
+                    $("#cs-status").html(status);
+                }
+                else {
+                    $("#cs-status").addClass('error').text('NOT MATCHING ELECTION ID');
+                }
+              });
+
+              <% for (var j=0; j<manifest.mixServers.length; ++j) { %>
+                var fsURI = '<%= manifest.mixServers[j].URI %>';
+                var fsStatusURI = fsURI+'/status';
+                $.get(fsStatusURI)
+                 .fail(function otpRequestFailed() { 
+                    var statusElemIdent = '#ms<%=j%>-status';
+                    $(statusElemIdent).addClass('error').text('does not respond');
+                  })
+                 .done(function castRequestDone(result) {  // we have some response
+                    var fsURI = '<%= manifest.mixServers[j].URI %>';
+                    var statusElemIdent = '#ms<%=j%>-status';
+                    if (result.electionID.toUpperCase() === electionID) {
+                        var status = result.status;
+                        if (status==='result ready')
+                            status += ' (<a href="' +fsURI+ '/result.msg">signed result</a>)'
+                        $(statusElemIdent).html(status);
+                    }
+                    else {
+                        $(statusElemIdent).addClass('error').text('NOT MATCHING ELECTION ID');
+                    }
+                  });
+              <% } %>
+        });
+    </script>
+<% include footer %>

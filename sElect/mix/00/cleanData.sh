@@ -1,0 +1,1 @@
+../../MixServer/cleanData.sh
