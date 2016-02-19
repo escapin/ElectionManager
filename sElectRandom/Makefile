@@ -48,7 +48,6 @@ npminstall:
 	cd node_modules/cryptofunc; npm install
 
 
-
 configs: filesconfigs mixconfigs
 
 
@@ -59,7 +58,6 @@ filesconfigs:
 	cp templates/config_bb.json BulletinBoard/config.json
 	cp templates/config_cs.json CollectingServer/config.json
 	cp templates/config_mix.json MixServer/config.json
-	ln -fs ../_sElectConfigFiles_/ElectionManifest.json VotingBooth/
 
 mixconfigs:
 	python configMixServers.py
@@ -68,7 +66,6 @@ mixconfigs:
 filescopy:
 	cp node_modules/voterClient.js VotingBooth/webapp/js/voterClient.js
 	cp node_modules/cryptofunc/index.js VotingBooth/webapp/js/cryptofunc.js
-	cp node_modules/strHexConversion.js VotingBooth/webapp/js/strHexConversion.js
 
 libdownload:
 	-rm VotingBooth/webapp/js/jquery-1.11.1.min.js
@@ -91,8 +88,7 @@ libdownload:
 	cd BulletinBoard/public/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
 
 
-
-devclean: cleanElection javaclean npmclean votingboothclean bbclean configsclean
+devclean: cleanElection javaclean npmclean votingboothclean bbclean configsclean electionhandlerclean 
 
 
 javaclean:	
@@ -104,6 +100,7 @@ npmclean:
 	-rm -r MixServer/node_modules
 	-rm -r VotingBooth/node_modules
 	-rm -r node_modules/cryptofunc/node_modules
+	-rm -r ElectionHandler/node_modules
 
 votingboothclean:
 	-rm VotingBooth/ElectionManifest.json
@@ -115,6 +112,13 @@ votingboothclean:
 	-rm VotingBooth/webapp/pure/pure-min.css
 	-rm VotingBooth/webapp/pure/grids-responsive-old-ie-min.css
 	-rm VotingBooth/webapp/pure/grids-responsive-min.css
+
+electionhandlerclean:
+	-rm ElectionHandler/webapp/js/jquery-1.11.1.min.js
+	-rm ElectionHandler/webapp/js/bluebird.min.js
+	-rm ElectionHandler/webapp/pure/pure-min.css
+	-rm ElectionHandler/webapp/pure/grids-responsive-old-ie-min.css
+	-rm ElectionHandler/webapp/pure/grids-responsive-min.css
 
 bbclean:	
 	-rm BulletinBoard/public/js/jquery-1.11.1.min.js

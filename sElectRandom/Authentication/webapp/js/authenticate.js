@@ -100,6 +100,8 @@ function authenticate(){
                     showError("Server's responce: " + result.descr);
                 }
                 else {
+                	console.log(result.otp);
+                	alert('This code would be usually be sent to your E-mail. Since this is a demo, please copy the following code: \n'+result.otp);
                     // Show the next window (OTP)
                     $('#inp-otp').val(''); // emtpy the otp input field
                     showTab('#otp');

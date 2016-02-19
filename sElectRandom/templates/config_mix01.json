@@ -1,5 +1,5 @@
 {
-    "port": 3301, 
+    "port": 3307, 
     "MANIFEST_FILE": "../../_sElectConfigFiles_/ElectionManifest.json", 
     "TLS_KEY_FILE": "../../_sElectConfigFiles_/select.key", 
     "TLS_CERT_FILE": "../../_sElectConfigFiles_/select.crt", 

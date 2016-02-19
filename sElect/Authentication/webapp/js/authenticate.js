@@ -100,8 +100,9 @@ function authenticate(){
                     showError("Server's responce: " + result.descr);
                 }
                 else {
-                	console.log(result.otp);
-                	alerting(result.otp);
+                    //if(result.otp != null){
+                    	//alerting(result.otp);
+                    //}
                     // Show the next window (OTP)
                     $('#inp-otp').val(''); // emtpy the otp input field
                     showTab('#otp');

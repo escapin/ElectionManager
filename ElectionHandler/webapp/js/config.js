@@ -1,1 +1,1 @@
-var configRaw = "{    \"address\": \"http://localhost\",    \"port\": 3000}";
+var configRaw = "{    \"address\": \"https://select.uni-trier.de\",    \"port\": 3000}";

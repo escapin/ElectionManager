@@ -141,14 +141,14 @@ function selectBooth() {
             }
             else {
                 console.log('Result not ready. Go to the voting.');
-                showTab('#welcome');
+                showTab('#choice');
             }
         })
         .catch(function (err) {
             console.log('Problem with the final server:', err)
             // TODO: what to do in this case (the final server is
             // down or it works for a different election ID)
-            showTab('#welcome'); // for now, we just go to voting
+            showTab('#choice'); // for now, we just go to voting
         });
 
     }
@@ -383,6 +383,13 @@ function selectBooth() {
     //////////////////////////////////////////////////////////////////////////////
     /// HANDLERS FOR SUMBITTING DATA 
 
+    function showError(errorMessage) {
+        $('#processing').hide();
+        $('#errorMsg').text(errorMessage);
+        activeTabId = '#error';
+        $(activeTabId).fadeIn(FADE_TIME);
+    }
+
     function showTab(tabId) {
         $('#processing').hide();
         activeTabId = tabId;
@@ -433,7 +440,7 @@ function selectBooth() {
         // make the active tab disappear
         $('#error').fadeOut(FADE_TIME, function() {
             // show the welcome tab
-            showTab('#welcome');
+            showTab('#choice');
         });
         return false; // prevents any further submit action
     }

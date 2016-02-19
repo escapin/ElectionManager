@@ -1,5 +1,6 @@
 var express = require("express");
 var bodyParser = require("body-parser");
+var bcrypt = require("bcryptjs");
 
 var fs = require('fs');
 var http = require('http');
@@ -22,7 +23,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({
 	extended : false
 }));
-//var httpsserver = https.createServer(credentials, app);
+var httpsserver = https.createServer(credentials, app);
 //var basicAuth = require('basic-auth-connect');
 //app.use('/election/*', basicAuth('admin', '888')); // authentication for the admin panel only
 
@@ -37,6 +38,7 @@ app.post('/election', function(req, res) {
 	var echoices = req.body["choices[]"];
 	var pass = req.body.password;
 	var rand = req.body.random;
+	var listVoters = req.body.publishVoters;
 	
 	var direc = "sElect/";
 	
@@ -46,7 +48,10 @@ app.post('/election', function(req, res) {
 	
 	var session = null;
 	if (task === "complete"){
-		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py', startingTime, endingTime, etitle, edesc, equestion, echoices, pass]);
+		var salt = bcrypt.genSaltSync(10);
+		var hash = bcrypt.hashSync(pass, salt);
+		
+		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters]);
 		
 		session.stdout.on('data', function (data) {
 			if(data.indexOf("OTP")>-1){
@@ -124,6 +129,20 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "remove") {
+		var passList = JSON.parse(fs.readFileSync("inf/pass.json"));
+		var match = passList[value];
+		var hash = match;
+		if(match !== ""){
+			var salt = bcrypt.getSalt(match);
+			hash = bcrypt.hashSync(pass, salt);
+			if(match !== hash){
+				match = passList["masterpass"];
+				salt = bcrypt.getSalt(match);
+				hash = bcrypt.hashSync(pass, salt);
+			}
+		}
+		pass = hash;
+		
 		session = spawn('python', ['../'+direc+'ElectionSetup/CloseSession.py', value, pass]);
 		session.stdout.on('data', function (data) {
 			console.log('stdout: ' + data);
@@ -164,4 +183,5 @@ app.post('/election', function(req, res) {
 var server = httpsserver.listen(port, function() {
     console.log('Serving %s on %s, port %d', path, server.address().address, server.address().port);
 });
+
 

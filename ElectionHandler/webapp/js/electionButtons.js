@@ -8,7 +8,7 @@ function electionButtons() {
 	var elections = electionConf.elections;
 	
 	/* Create 'click' event handler for rows */
-    var rows = $('tr').not(':first');
+    var rows = $('td').not(':first');
     var row;
     var value;
     
@@ -17,6 +17,8 @@ function electionButtons() {
 	var port = config.port;
 	var address = config.address;
 	
+	var elecType = "none";
+	var buttonEnable = null;
 	////////////////////////////////////////////////////////////////////////
 	
 	function reloading(){
@@ -34,7 +36,7 @@ function electionButtons() {
 		address = config.address;
 		
 		rows.on('click', function(e) {
-	        
+	        console.log('yay');
 	        row = $(this);
 	        
 	        rows.removeClass('highlight');
@@ -84,29 +86,29 @@ function electionButtons() {
 		$.post(address+":"+port+"/election", {task: "simple", ID: "generated", random: rand, title: "", description: ""})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
+			enableButtons();
 			if (data == "created") {
+				value = null;
 				reload_js("js/ElectionConfigFile.js");
 				buildElectionTable();
 				reloading();
 				$('#processing').hide();
-				enableButtons();
 			}
 			else{
 				alerting(data);
 				$('#processing').hide();
-				enableButtons();
 			}
 		  })
 		 .fail(function(){
-			 $('#processing').hide();
 			 enableButtons();
+			 $('#processing').hide();
 			 alerting('cannot connect to ElectionHandler at '+ address+":"+port+"/election");
 		 });
 	}
 	
 	function removeElection(pass) {
 		if(value == null){
-    		alert("no election selected");
+    		alerting("no election selected");
     	}
     	else{
     		disableButtons();
@@ -114,22 +116,22 @@ function electionButtons() {
     		$.post(address+":"+port+"/election", {task: "remove", ID: value, password: pass})
     		 .done(function(data){
     			$('#processing').fadeOut(150);
+    			enableButtons();
     			if (data == "removed") {
+    				value = null;
     				reload_js("js/ElectionConfigFile.js");
     				buildElectionTable();
     				reloading();
     				$('#processing').hide();
-    				enableButtons();
     			}
     			else{
     				alerting(data);
     				$('#processing').hide();
-    				enableButtons();
     			}
     		  })
     		 .fail(function(){
-    			 $('#processing').hide();
     			 enableButtons();
+    			 $('#processing').hide();
     			 alerting('cannot connect to ElectionHandler at '+ address+":"+port+"/election");
     		 });
     	}
@@ -143,17 +145,21 @@ function electionButtons() {
         return function() {
         	var ename = $('#e-name').val();
         	var description = $('#e-desc').val();
-            var stime = $('#start-time').val();
-            var etime = $('#end-time').val();
+        	var sdate = $('#s-date').val();
+        	var edate = $('#e-date').val();
+            var stime = $('#s-time').val();
+            var etime = $('#e-time').val();
+            var starttime = sdate + " " + stime + " GMT+0100";
+            var endtime = edate + " " + etime + " GMT+0100";
             if( ename==='' || description==='')
             	button.prop('disabled', true);            
             else {
-            	if( stime==='' && etime!=='')
+            	if( starttime==='' && endtime!=='')
                     button.prop('disabled', true);
-                else if( stime!=='' && etime==='')
+                else if( starttime!=='' && endtime==='')
                 	button.prop('disabled', true);
-                else if( stime!==''){
-                	if (validTime(stime) && validTime(etime))
+                else if( starttime!==''){
+                	if (validTime(starttime) && validTime(endtime))
                 		button.prop('disabled', null);
                 	else{
                 		button.prop('disabled', true);
@@ -177,24 +183,24 @@ function electionButtons() {
 		$.post(address+":"+port+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
+			enableButtons();
 			if (data == "created") {
+				value = null;
 				reload_js("js/ElectionConfigFile.js");
 				buildElectionTable();
 				reloading();
 				$('#processing').hide();
-				enableButtons();
 				$('#advanced').fadeOut(150);
 				$('welcome').show();
 			}
 			else{
 				alerting(data);
 				$('#processing').hide();
-				enableButtons();
 			}
 		  })
 		 .fail(function(){
-			 $('#processing').hide();
 			 enableButtons();
+			 $('#processing').hide();
 			 alerting('cannot connect to ElectionHandler at '+ address+":"+port+"/election");
 		 });
     }
@@ -207,14 +213,32 @@ function electionButtons() {
 		
 	function addChoice(){
 		nchoices = nchoices + 1;
-		document.getElementById("c-list").innerHTML+='<input id="choice'+nchoices+'" class="pure-input-1" type="text" size="50" placeholder="choice '+nchoices+'">';
-		document.getElementById("c-list").innerHTML+='<div class="extra-info"></div>';
+		console.log(nchoices);
+		
+		//save inputs
+		var str = "";
+		for(var i = 3; i < nchoices; i++){
+			str += $('#choice'+(i)).val() + " ";
+		}
+		
+		//add new question
+		if(nchoices === 3){
+			document.getElementById("c-list").innerHTML+='<input id="choice'+nchoices+'" class="pure-input-1" type="text" size="50" placeholder="choice '+nchoices+'">';		
+		}
+		else{
+			document.getElementById("c-list").innerHTML+='<input id="choice'+nchoices+'" class="pure-input-1" type="text" size="50" style="margin-top: 1.3em;" placeholder="choice '+nchoices+'">';		
+		}
+		//insert previous inputs
+		str = str.split(" ");
+		for(var i = 3; i < nchoices; i++){
+			document.getElementById("choice"+(i)).value = str[i-3];
+		}
 		if(nchoices > 2){
 			$("#remove-choice").prop('disabled', null);
 		}
 		document.getElementById('choice'+nchoices).focus();
-		document.getElementById('add-choice').setAttribute("style",
-                "margin-top:"+(48.8*(nchoices-1)).toString()+"px");
+		//document.getElementById('add-choice').setAttribute("style",
+        //        "margin-top:"+(19.2*(nchoices-1)).toString()+"%");
 	}
 	
 	function removeChoice(){
@@ -226,29 +250,49 @@ function electionButtons() {
 		if(nchoices <= 2){
 			$("#remove-choice").prop('disabled', true);
 		}
-		document.getElementById('add-choice').setAttribute("style",
-                "margin-top:"+(48.8*(nchoices-1)).toString()+"px");
+		//document.getElementById('add-choice').setAttribute("style",
+        //        "margin-top:"+(48.8*(nchoices-1)).toString()+"px");
 	}
 	
     function enableWhenNotEmptyChoices(button) {
         return function() {
         	var equestion = $('#e-question').val();
-        	var echoice1 = $('#choice1').val();
-            var echoice2 = $('#choice2').val();
-            if( equestion==='' || echoice1==='' || echoice2==='')
-            	button.prop('disabled', true);            
-            else {
-                button.prop('disabled', null);
+        	//var echoice1 = $('#choice1').val();
+            //var echoice2 = $('#choice2').val();
+            //if( equestion==='' || echoice1==='' || echoice2==='')
+            //	button.prop('disabled', true);            
+            //else {
+              //  button.prop('disabled', null);
+            //}
+            var filled = true;
+            for(var i = 1; i <= nchoices; i++){
+            	if($("#choice"+nchoices).val()===''){
+            		filled = false;
+            	}
+            }
+            if(filled && equestion!==''){
+            	button.prop('disabled', null);
+            }
+            else{
+            	button.prop('disabled', true);
             }
         };
     }
 	
-    function completeElection(pass) {
+    function completeElection(pass, rand) {
+    	window.clearInterval(buttonEnable);
     	disableButtons();
+    	var listVoters = document.getElementById("listVoters").checked;
+    	changeCulture("de-DE");
 		var ename = $('#e-name').val();
 		var edesc = $('#e-desc').val();
-		var startingTime = $('#start-time').val();
-		var endingTime = $('#end-time').val();
+    	var sdate = $('#s-date').val();
+    	var edate = $('#e-date').val();
+        var stime = $('#s-time').val();
+        var etime = $('#e-time').val();
+        changeCulture($( "#culture" ).val());
+        var startingTime = sdate + " " + stime + " GMT+0100";
+        var endingTime = edate + " " + etime + " GMT+0100";
 		var equestion = $('#e-question').val();
 		var electionCh = {};
 		var echoices = [];
@@ -257,28 +301,31 @@ function electionButtons() {
 		}
 		electionCh.choices = echoices;
 		$('#processing').fadeIn(150);
-		$.post(address+":"+port+"/election", {task: "complete", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass})
+		$.post(address+":"+port+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
+			enableButtons();
 			if (data == "created") {
+				value = null;
 				reload_js("js/ElectionConfigFile.js");
+				$('#complete').fadeOut(150);
 				buildElectionTable();
 				reloading();
 				$('#processing').hide();
-				enableButtons();
-				$('#complete').fadeOut(150);
-				$('welcome').show();
 			}
 			else{
 				alerting(data);
 				$('#processing').hide();
-				enableButtons();
+			    buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
 			}
 		  })
 		 .fail(function(){
-			 $('#processing').hide();
 			 enableButtons();
+			 $('#processing').hide();
 			 alerting('cannot connect to ElectionHandler at '+ address+":"+port+"/election");
+			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
+			 $('#complete').fadeOut(150);
+			 $('#welcome').show();
 		 });
     }
     
@@ -288,7 +335,7 @@ function electionButtons() {
     /* Vote Button */
     $("#vote").click(function() {
     	if(value == null){
-    		alert("no election selected");
+    		alerting("no election selected");
     	}
     	else{
 			window.location.href = address+"/"+value+"/votingBooth";
@@ -298,7 +345,7 @@ function electionButtons() {
 	/* Close Button */
     $("#close").click(function() {
     	if(value == null){
-    		alert("no election selected");
+    		alerting("no election selected");
     	}
     	else{
 			window.location.href = address+"/"+value+"/collectingServer/admin/close";
@@ -307,7 +354,8 @@ function electionButtons() {
     
 	/* Create Buttons */
 	$("#create").click(function() {
-		askRandom();
+		//askRandom("simple");
+		simpleElection(false);
 	});
 	
 	$("#adv-create").click(function() {
@@ -315,7 +363,8 @@ function electionButtons() {
 	});
 	
 	$("#compl-create").click(function() {
-		overlay("complete");
+		//askRandom("complete");
+		overlay(document.getElementById("urandom").checked);
 	});
 
 	/* Remove Button */
@@ -324,27 +373,32 @@ function electionButtons() {
 		verifylayer();
 	});
     
-	
     /* Advanced Button */
 	$("#advance").click(function() {
 		$('#welcome').hide(150);
 	    $('#advanced').show(150);
+	    buttonEnable = window.setInterval(enableWhenNotEmpty($('#next-adv')), 100);
 	});
 	
 	$("#next-adv").click(function() {
 		$('#advanced').hide(150);
 	    $('#complete').show(150);
+	    window.clearInterval(buttonEnable);
+	    buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
 	});
 
     /* Back Button */
 	$("#back").click(function() {
 		$('#advanced').hide(150);
 	    $('#welcome').show(150);
+	    window.clearInterval(buttonEnable);
 	});
 
 	$("#back2").click(function() {
 		$('#complete').hide(150);
 	    $('#advanced').show(150);
+	    window.clearInterval(buttonEnable);
+	    buttonEnable = window.setInterval(enableWhenNotEmpty($('#next-adv')), 100);
 	});
 	
 	/* Choice buttons */
@@ -366,13 +420,19 @@ function electionButtons() {
 	/* Validate Time */
 	var validTime = function(ttime){
 		var stime = ttime.split(" ");
-		if(stime.length != 3){
+		if(!(stime.length === 3 || stime.length === 4)){
 			//console.log("basically wrong");
 			return false;
 		}
 		var date = stime[0].split(".");
 		var time = stime[1].split(":");
-		var zone = stime[2].split("+");
+		var zone = stime[stime.length-1].split("+");
+		if(stime.length > 3){
+			var noon = stime[2];
+			if(!(noon === "AM" || noon === "PM")){
+				return false;
+			}
+		}
 		if(date.length !== 3 || time.length !== 2 || zone.length !== 2){
 			//console.log("wrong length");
 			return false;
@@ -396,7 +456,7 @@ function electionButtons() {
 			return false;
 		}
 		if(time[0] < 0 || time[0] > 23 || time[1] < 0 || time[1] > 59){
-			//console.log("wrong numbers2");
+			console.log("wrong numbers2");
 			return false;
 		}
 		//console.log("works so far3");
@@ -432,15 +492,16 @@ function electionButtons() {
 		$("#create").prop('disabled', null);
 		$("#remove").prop('disabled', null);
 		$("#advance").prop('disabled', null);
-		$("#next-adv").prop('disabled', true);
-		$("#back").prop('disabled', true);
-		$("#back2").prop('disabled', true)
+		$("#next-adv").prop('disabled', null);
+		$("#back").prop('disabled', null);
+		$("#back2").prop('disabled', null);
 		$("#adv-create").prop('disabled', null);
 		$("#compl-create").prop('disabled', null);
 	}
 	
 	
 	
+    /**
     $('#e-name').on('input', enableWhenNotEmpty($('#adv-create')));
     $('#e-desc').on('input', enableWhenNotEmpty($('#adv-create')));    
     $('#start-time').on('input', enableWhenNotEmpty($('#adv-create')));
@@ -448,14 +509,16 @@ function electionButtons() {
     
     $('#e-name').on('input', enableWhenNotEmpty($('#next-adv')));
     $('#e-desc').on('input', enableWhenNotEmpty($('#next-adv')));    
-    $('#start-time').on('input', enableWhenNotEmpty($('#next-adv')));
-    $('#end-time').on('input', enableWhenNotEmpty($('#next-adv')));
-    
+    $('#s-time').on('input', enableWhenNotEmpty($('#next-adv')));
+    $('#e-time').on('input', enableWhenNotEmpty($('#next-adv')));
+    $('#s-date').on('input', enableWhenNotEmpty($('#next-adv')));
+    $('#e-date').on('input', enableWhenNotEmpty($('#next-adv')));
+
     $('#e-question').on('input', enableWhenNotEmptyChoices($('#compl-create')));
     $('#choice1').on('input', enableWhenNotEmptyChoices($('#compl-create')));
     $('#choice2').on('input', enableWhenNotEmptyChoices($('#compl-create')));
-    
-    
+    **/
+    /**
     rows.on('click', function(e) {
         
         row = $(this);
@@ -469,20 +532,20 @@ function electionButtons() {
     $(document).bind('selectstart dragstart', function(e) { 
         e.preventDefault(); 
         return false; 
-    });
-    
+    });**/
+    reloading();
     ////////////////////////////////////////////////////////////////////////////
     // Password overlay
     
-    function overlay(etype) {
+    function overlay(rand) {
     	el = document.getElementById("newPass");
     	el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
-    	document.getElementById("mod").value = etype;
+    	document.getElementById("mod").value = rand;
     	document.getElementById("cr-pass1").focus();
     }
     
     $("#ok-ov").click(function() {
-    	createPass();
+    	createPass("complete", document.getElementById("mod").value);
 	});
     
     $("#cancel-ov").click(function() {
@@ -491,15 +554,15 @@ function electionButtons() {
 		document.getElementById("cr-pass2").value = "";
     });
     
-    function createPass(){
+    function createPass(type, rand){
     	if($("#cr-pass1").val()===$("#cr-pass2").val()){
     		var temp = document.getElementById("cr-pass1").value;
 			document.getElementById("cr-pass1").value = "";
 			document.getElementById("cr-pass2").value = "";
-			switch(document.getElementById("mod").value){
+			switch(type){
     		case "simple":
     			overlay("");
-    			simpleElection(false);
+    			simpleElection(rand);
     			break;
     		case "advanced":
     			overlay("");
@@ -507,20 +570,20 @@ function electionButtons() {
     			break;
     		case "complete":
     			overlay("");
-    			completeElection(temp);
+    			completeElection(temp, rand);
     			break;
     		case "remove":
     			overlay("");
     			removeElection(temp);
     			break;
     		default:
-    			alert("this shouldn't happen, mode is " + document.getElementById("mod").value);
+    			alerting("this shouldn't happen, mode is " + document.getElementById("mod").value);
     		}
     	}
     	else{
 			document.getElementById("cr-pass1").value = "";
 			document.getElementById("cr-pass2").value = "";
-    		alert("Passwords do not match");
+    		alerting("Passwords do not match");
     	}
     }
     
@@ -545,7 +608,7 @@ function electionButtons() {
     
     function verifylayer() {
     	if(value == null){
-    		alert("no election selected");
+    		alerting("no election selected");
     	}
     	else{
     		var i = 0;
@@ -568,24 +631,137 @@ function electionButtons() {
     ////////////////////////////////////////////////////////////////////////////
     // Random overlay
     
-    function askRandom() {
+    function askRandom(etype) {
+    	document.getElementById("mod").value = etype;
+    	elecType = etype;
 		el = document.getElementById("userRandom");
 		el.style.visibility = "visible";
 		document.getElementById("u-norm").focus();
     }
+    
+    function progressElection(rand){
+    	type = elecType;
+    	elecType = "none";
+    	if(type == "complete"){
+    		overlay(rand);
+    	}
+    	else{
+    		simpleElection(rand);
+    	}
+    }
 	
 	$("#u-rand").click(function() {
-		simpleElection(true);
 		el = document.getElementById("userRandom");
 		el.style.visibility = "hidden";
+		progressElection(true);
+
 	});
 	
 	$("#u-norm").click(function() {
-		simpleElection(false);
 		el = document.getElementById("userRandom");
 		el.style.visibility = "hidden";
+		progressElection(false);
+	});
+	
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////Date and Time
+	
+	$.widget( "ui.timespinner", $.ui.spinner, {
+		options: {
+			// seconds
+			step: 60 * 1000,
+			// hours
+			page: 60
+		},
+
+		_parse: function( value ) {
+			if ( typeof value === "string" ) {
+				// already a timestamp
+				if ( Number( value ) == value ) {
+					return Number( value );
+				}
+				return +Globalize.parseDate( value );
+			}
+			return value;
+		},
+
+		_format: function( value ) {
+			return Globalize.format( new Date(value), "t" );
+		}
+	});
+	
+	//$( "#culture" ).change(function() {
+	//	changeCulture($(this).val());
+	//});
+	
+	document.getElementById("cultDE").checked = true;
+	
+	$("#cultDE").click(function(){ 
+	    changeCulture("de-DE");
+	});
+	$("#cultEN").click(function(){ 
+	    changeCulture("en-EN");
+	});
+	
+	$(function() {
+		$( "#s-date" ).datepicker();
+	});
+	
+	$(function() {
+		$( "#e-date" ).datepicker();
+	});
+
+	$(function() {
+		$( "#s-time" ).timespinner();
 	});
     
+	$(function() {
+		$( "#e-time" ).timespinner();
+	});
+	
+	var serverTimezone = -60;
+	var clientDate = new Date();
+	var timeDifference = clientDate.getTimezoneOffset()-serverTimezone;
+	var currentDate = new Date(clientDate.setTime(clientDate.getTime()+timeDifference*60000));
+	var month = currentDate.getMonth()+1<10 ? "0"+(currentDate.getMonth()+1) : (currentDate.getMonth()+1);
+	var day = currentDate.getDate()+1<10 ? "0"+currentDate.getDate() : currentDate.getDate();
+	document.getElementById("s-date").value = currentDate.getFullYear()+"."+month+"."+day;
+	document.getElementById("s-time").value = currentDate.getHours()+":"+currentDate.getMinutes();
+
+	var endDate = new Date(currentDate.setTime(currentDate.getTime()+10*60000));
+	month = endDate.getMonth()+1<10 ? "0"+(endDate.getMonth()+1) : (endDate.getMonth()+1);
+	day = endDate.getDate()+1<10 ? "0"+endDate.getDate() : endDate.getDate();
+	document.getElementById("e-date").value = endDate.getFullYear()+"."+month+"."+day;
+	document.getElementById("e-time").value = endDate.getHours()+":"+endDate.getMinutes();
+	
+	var currentTime = function(){
+		var currentDate = new Date();
+		var month = currentDate.getMonth()+1<10 ? "0"+(currentDate.getMonth()+1) : (currentDate.getMonth()+1);
+		var day = currentDate.getDate()+1<10 ? "0"+currentDate.getDate() : currentDate.getDate();
+		nowDate = currentDate.getFullYear()+"."+month+"."+day;
+		nowTime = currentDate.getHours()+":"+currentDate.getMinutes();
+		
+		return nowDate + " " + nowTime;
+	}
+	
+	var endsTime = function(){
+		var endDate = new Date(currentDate.setTime(currentDate.getTime()+10*60000));
+		month = endDate.getMonth()+1<10 ? "0"+(endDate.getMonth()+1) : (endDate.getMonth()+1);
+		day = endDate.getDate()+1<10 ? "0"+endDate.getDate() : endDate.getDate();
+		endingDate = endDate.getFullYear()+"."+month+"."+day;
+		endingTime = endDate.getHours()+":"+endDate.getMinutes();
+		
+		return endingDate + " " + endingTime;
+	}
+	
+	function changeCulture(cult){
+		var current = $("#s-time").timespinner("value");
+		var current2 = $("#e-time").timespinner("value");
+		Globalize.culture(cult);
+		$( "#s-time" ).timespinner("value", current);
+		$( "#e-time" ).timespinner("value", current2);
+	}
+	
 	
 }
 
@@ -602,11 +778,11 @@ function buildElectionTable() {
 	 document.getElementById("elections").innerHTML = "";
 	 	 
 	 var head$ = $('<tr/>');
-	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Election IDs &nbsp;"));
-	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Election Title &nbsp;"));
-	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Election State &nbsp;"));
-	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Starting Time &nbsp;"));
-	 head$.append($('<td style="text-align:center"/>').html("&nbsp; Ending Time &nbsp;"));
+	 head$.append($('<th style="text-align:center"/>').html(" Election IDs "));
+	 head$.append($('<th style="text-align:center"/>').html(" Election Title "));
+	 head$.append($('<th style="text-align:center"/>').html(" Election State "));
+	 head$.append($('<th style="text-align:center"/>').html(" Starting Time "));
+	 head$.append($('<th style="text-align:center"/>').html(" Ending Time "));
   $("#elections").append(head$);
   
   for (var i = 0 ; i < elections.length ; i++) {
@@ -620,7 +796,6 @@ function buildElectionTable() {
       row$.append($('<td style="text-align:center" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
       row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].startTime.substring(0, elections[i].startTime.length-9)+"&nbsp;&nbsp;&nbsp;"));
       row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].endTime.substring(0, elections[i].endTime.length-9)+"&nbsp;&nbsp;&nbsp;"));
-
       $("#elections").append(row$);
       
       getElectionStatus(elecID, function (eleID, stat){
@@ -700,7 +875,4 @@ function buildElectionTable() {
   $('#welcome').show();
   
 }
-
-
-
 

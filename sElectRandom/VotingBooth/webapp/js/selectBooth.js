@@ -142,14 +142,14 @@ function selectBooth() {
             }
             else {
                 console.log('Result not ready. Go to the voting.');
-                showTab('#welcome');
+                showTab('#randomness');
             }
         })
         .catch(function (err) {
             console.log('Problem with the final server:', err)
             // TODO: what to do in this case (the final server is
             // down or it works for a different election ID)
-            showTab('#welcome'); // for now, we just go to voting
+            showTab('#randomness'); // for now, we just go to voting
         });
 
     }
@@ -468,7 +468,7 @@ function selectBooth() {
         // make the active tab disappear
         $('#error').fadeOut(FADE_TIME, function() {
             // show the welcome tab
-            showTab('#welcome');
+            showTab('#randomness');
         });
         return false; // prevents any further submit action
     }
@@ -526,7 +526,7 @@ function selectBooth() {
             if (receiptValid) {
                 storeReceipt(receipt);
                 // prepare and show the "ballot accepted" tab
-                var recid = receipt.receiptID.toUpperCase();
+                var recid = receipt.userCode + receipt.receiptID.toUpperCase();
                 var durl = verificationCode2DataURL(recid, printableElID);
                 $('#verCodeLink').attr('href', durl);
                 $('#receipt-id').text(recid);

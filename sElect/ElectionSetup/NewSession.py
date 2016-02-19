@@ -188,7 +188,7 @@ passList = "/../ElectionHandler/inf/pass.json"
 srcfile = os.path.realpath(__file__)
 srcdir = os.path.split(os.path.split(srcfile)[0])
 
-votingTime = 300    #sec
+votingTime = 600    #sec
 ports = usePorts()
 
 #where the servers are placed
@@ -208,26 +208,39 @@ jwriteAdv(srcdir[0] + manifest, "mixServers", serverAddress[0] + "/" + str(ports
 jwriteAdv(srcdir[0] + manifest, "mixServers", serverAddress[1] + "/" + str(ports[1]) + "/", 1, "URI")
 jwriteAdv(srcdir[0] + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
 
-elecTitle = "Coolest Thing Election"
-elecDescr = "This is the election for the coolest thing in the world"
+elecTitle = "Your Favorite Superhero Election"
+elecDescr = "This is the election of the Greatest Superhero Ever."
 if(len(sys.argv) > 1):
     elecTitle = sys.argv[3]
     elecDescr = sys.argv[4]
 jwrite(srcdir[0] + manifest, "title", elecTitle)
 jwrite(srcdir[0] + manifest, "description", elecDescr)
-elecQuestion = "Who is Your Favorite Candidate?"
+elecQuestion = "Who is Your Favorite Superhero?"
 eleChoices = [
-        "Candidate 1",
-        "Candidate 2",
-        "Candidate 3",
-        "Candidate 4",
-        "Candidate 5"
+	"Iron Man",
+	"Batman",
+	"Wonder Woman",
+	"Spider Man",
+	"Dr. Manhattan",
+	"Hulk",
+	"Superman",
+	"Bugs Bunny"
     ]
 if(len(sys.argv) > 5):
     elecQuestion = sys.argv[5]
     eleChoices = sys.argv[6].split(',')
 jwrite(srcdir[0] + manifest, "question", elecQuestion)
 jwrite(srcdir[0] + manifest, "choices", eleChoices)   
+
+publish = True
+if(len(sys.argv) > 8):
+    publish = sys.argv[8]
+    if publish == "true":
+        publish = True
+    else:
+        publish = False
+        
+jwrite(srcdir[0] + manifest, "publishListOfVoters", publish)
 
 #modify Server ports
 jwrite(srcdir[0] + mix00Conf, "port", ports[0])
@@ -237,6 +250,14 @@ jwrite(srcdir[0] + bulletinConf, "port", ports[3])
 jwrite(srcdir[0] + collectingConf, "port", ports[4])
 jwrite(srcdir[0] + votingConf, "port", ports[5])
 jwrite(srcdir[0] + votingConf, "authenticate", serverAddress[6])
+
+#add password
+protect = False
+password = "";
+if(len(sys.argv) > 7):
+    password = sys.argv[7]
+    protect = True;
+jwrite(srcdir[0] + collectingConf, "serverAdminPassword", password)
 
 #get ID after modifying Manifest
 iDlength = 5
@@ -252,13 +273,6 @@ while(iDlength < 40):
         iDlength = iDlength+1
         #sys.exit("ElectionID already exists.")
 
-
-protect = False;
-password = "";
-if(len(sys.argv) > 7):
-    password = sys.argv[7]
-    protect = True;
-jwrite(srcdir[0] + collectingConf, "serverAdminPassword", password)
 jwrite(srcdir[0] + passList, electionID, password)
 
 #os.system("nginx -s reload")
@@ -306,4 +320,5 @@ nginxData.extend(comments)
 nginxFile.seek(0)
 nginxFile.writelines(nginxData)
 nginxFile.close()
+
 

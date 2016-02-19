@@ -14,7 +14,6 @@ prod:
 	cd CollectingServer ; make
 	cd MixServer ; make
 	cd BulletinBoard ; make
-	cd ElectionHandler ; make
 
 updateCryptoKeys: updatecryptokeys_cs updatecryptokeys_mix
 
@@ -47,7 +46,6 @@ npminstall:
 	cd MixServer; npm install
 	cd VotingBooth; npm install
 	cd node_modules/cryptofunc; npm install
-	cd ElectionHandler; npm install
 
 
 
@@ -89,24 +87,14 @@ libdownload:
 	cd BulletinBoard/public/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
 	-rm BulletinBoard/public/pure/grids-responsive-min.css
 	cd BulletinBoard/public/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
-	-rm ElectionHandler/webapp/js/jquery-1.11.1.min.js
-	cd ElectionHandler/webapp/js; wget http://code.jquery.com/jquery-1.11.1.min.js
-	-rm ElectionHandler/webapp/js/bluebird.min.js
-	cd ElectionHandler/webapp/js; wget https://cdn.jsdelivr.net/bluebird/latest/bluebird.min.js
-	-rm ElectionHandler/webapp/pure/pure-min.css
-	cd ElectionHandler/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/pure-min.css
-	-rm ElectionHandler/webapp/pure/grids-responsive-old-ie-min.css
-	cd ElectionHandler/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
-	-rm ElectionHandler/webapp/pure/grids-responsive-min.css
-	cd ElectionHandler/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
-	-rm AuthentificationBooth/webapp/js/jquery-1.11.1.min.js
-	cd AuthentificationBooth/webapp/js; wget http://code.jquery.com/jquery-1.11.1.min.js
-	-rm AuthentificationBooth/webapp/pure/pure-min.css
-	cd AuthentificationBooth/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/pure-min.css
-	-rm AuthentificationBooth/webapp/pure/grids-responsive-old-ie-min.css
-	cd AuthentificationBooth/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
-	-rm AuthentificationBooth/webapp/pure/grids-responsive-min.css
-	cd AuthentificationBooth/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
+	-rm Authentication/webapp/js/jquery-1.11.1.min.js
+	cd Authentication/webapp/js; wget http://code.jquery.com/jquery-1.11.1.min.js
+	-rm Authentication/webapp/pure/pure-min.css
+	cd Authentication/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/pure-min.css
+	-rm Authentication/webapp/pure/grids-responsive-old-ie-min.css
+	cd Authentication/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
+	-rm Authentication/webapp/pure/grids-responsive-min.css
+	cd Authentication/webapp/pure; wget http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css 
 
 
 devclean: cleanElection javaclean npmclean votingboothclean bbclean configsclean electionhandlerclean authentificationclean

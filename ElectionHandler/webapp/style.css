@@ -160,25 +160,11 @@ div.info {
            color: white;
            background: #39f;           
         }
-
-tr { 
-	cursor: default; 
-	font-size: 13pt;
-	-border: solid 0px #ccc;
-	box-shadow: 0px 1px 12px 3px #ddd;
-	}
-.highlight { 
-	background: #035FD8; 
-	color: #fafcff
-	}
-
-#adv-create{
-	margin-left:175px;
+        
+div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
+	color: black !important;
 }
-#add-choice{
-	margin-top:48.8px;
-	margin-left:10px;
-}
+
 #welcome,
 #advanced,
 #complete,
@@ -202,7 +188,7 @@ tr {
 #alertfield,
 #infopage {
      visibility: hidden;
-     position: absolute;
+     position: fixed;
      left: 0px;
      top: 0px;
      width:100%;
@@ -210,64 +196,255 @@ tr {
      text-align:center;
      z-index: 1000;
      background:rgba(0, 0, 0, 0.3);
+     overflow: auto;
 }
 
 #newPass div,
 #askPass div,
 #alertfield div {
-     width:300px;
-     margin: 300px auto;
+     width:15%;
+     margin: 15% auto;
      background-color: #fff;
      border:1px solid #000;
-     padding:15px;
+     padding:1em;
      text-align:center;
 }
 
 #userRandom div {
-     width:520px;
-     margin: 300px auto;
+     width:27%;
+     margin: 15% auto;
      background-color: #fff;
      border:1px solid #000;
-     padding: 15px;
+     padding: 1em;
      text-align:center;
 }
 
 #infopage div {
-     width:620px;
-     height:700px;
+     width:33%;
+     height:80%;
      margin: 50px auto;
      background-color: #fff;
      border:1px solid #000;
-     padding: 15px;
+     padding: 1em;
      text-align:center;
 }
 
+#adv-create{
+	margin-left:27%;
+}
+
+#add-choice{
+	width: 6em;
+}
+#remove-choice{
+	width: 6em;
+	margin-left:25%;
+}
+
+#remove,
+#close,
+#e-desc,
+#s-date,
+#e-date,
+#back,
+#next-adv,
+#adv-create,
+#choice1,
+#choice2,
+#remove-choice,
+#add-choice{
+	margin-top: 1.3em;
+}
+
 #u-rand{
-	margin-right: 50px;
-	margin-top: 20px;
+	margin-right: 10%;
+	margin-top: 5%;
 }
 
 #u-norm{
-	margin-left: 50px;
-	margin-top: 20px;
+	margin-left: 10%;
+	margin-top: 5%;
 }
 
 #close,
 #vote{
-	width: 150px;
-	margin-right: 245px;
+	width: 10.5em;
+	margin-right: 30%;
 }
 #create,
-#remove{
-	width: 170px;
+#remove,
+#compl-create{
+	width: 10.5em;
 }
-
 
 #advance{
-	margin-left: 188px;
-	margin-top: 70px;
+	margin-left: 26%;
+	margin-top: 8%;
 }
 
-.stylish{margin-left: 700px;display:block;width:10px;height:10px;border-radius:66px;border:4px double #062ca5;font-size:14px;line-height:0px;color:#035FD8;text-align:center;text-decoration:none;text-shadow:0 1px 0 #fff;background:#035FD8}.stylish:hover{border:4px double #39f;color:#08e;text-decoration:none;background:#39f}
+#back{
+	margin-right: 45%;
+}
+
+#back2{
+	margin-right:35%;
+}
+
+#next-adv{
+	width: 6em;
+}
+
+#cultENlabel{
+	position: absolute;
+	margin-top: 2.5em;
+	margin-left: 1vw;
+	font-size: 0.9em;
+	z-index: 10;
+}
+
+#cultDElabel{
+	position: absolute;
+	margin-top: 1em;
+	margin-left: 1vw;
+	font-size: 0.9em;
+	z-index: 10;
+}
+#cultEN,
+#cultDE{
+	font-size: 0.9em;
+}
+
+tr { 
+	font-size: 0.9em;
+	box-shadow: 0px 1px 12px 3px #ddd;
+}
+
+th{
+	font-weight: 500;
+	    border-left: 1px solid #cbcbcb;/*  inner column border */
+    border-width: 0 0 0 1px;
+    font-size: inherit;
+    margin: 0;
+    overflow: visible; /*to make ths where the title is really long work*/
+    padding: 0.5em 1em; /* cell padding */
+        border-collapse: collapse;
+    border-spacing: 0;
+    empty-cells: show;
+    border: 1px solid #cbcbcb;
+    background: #e0e0e0;
+}
+td{
+	font-weight: 300;
+	border-left: 1px solid #cbcbcb;/*  inner column border */
+    border-width: 0 0 0 1px;
+    font-size: inherit;
+    margin: 0;
+    overflow: visible; /*to make ths where the title is really long work*/
+    padding: 0.5em 1em; /* cell padding */
+    border-bottom: 1px solid #cbcbcb;
+        border-collapse: collapse;
+    border-spacing: 0;
+    empty-cells: show;
+    border: 1px solid #cbcbcb;
+}
+	
+.highlight { 
+	background: #035FD8; 
+	color: #fafcff
+}
+
+
+
+
+
+span.testing{
+        background:#035FD8;
+        border: 2px solid #062ca5;
+        border-radius:3px;
+        color: #ffffff;
+        position:absolute;
+        display:none;
+        max-width:520px;
+        box-shadow: 0px 1px 12px 3px #ddd;
+}
+#hovering,
+#labelVoters{
+	cursor:pointer;
+	font-size: 0.7em;
+}
+        
+#hovering:hover span{
+            display:block;
+            z-index:11;
+}
+
+#labelVoters{
+	margin-top: 1.5em;
+	font-size: 0.8em;
+}
+
+
+.stylish{margin-left: 95%;display:block;width:10px;height:10px;border-radius:66px;border:4px double #062ca5;font-size:14px;line-height:0px;color:#035FD8;text-align:center;text-decoration:none;text-shadow:0 1px 0 #fff;background:#035FD8}.stylish:hover{border:4px double #39f;color:#08e;text-decoration:none;background:#39f}
 
 #buttontext {position: relative; top: -15px; position: relative; left: -6.75px;}
+
+
+@media all and (max-width: 820px) {
+
+#close,
+#vote,
+#create,
+#remove,
+#advance,
+#back,
+#back2,
+#u-rand,
+#u-norm,
+#adv-create,
+#add-choice,
+#remove-choice,
+#next-adv,
+#compl-create,
+#elections,
+#cultENlabel,
+#cultDElabel,
+#hovering,
+#listVoters,
+body,
+tr{
+	font-size: 2.2vw;
+}
+
+#newPass div,
+#askPass div,
+#alertfield div,
+#userRandom div,
+#infopage div{
+	width: 50%;
+	font-size:3.5vw;
+}
+#infopage div{
+	height: 100%;
+	width: 100%;
+}
+
+@media all and (max-width: 480px) {
+#cultENlabel{
+	position: absolute;
+	margin-top: -1.2em;
+	right: 20em;
+	font-size: 0.9em;
+	z-index: 10;
+}
+
+#cultDElabel{
+	position: absolute;
+	margin-top: -3.3em;
+	right: 21.4em;
+	font-size: 0.9em;
+	z-index: 10;
+}
+
+}
+
+

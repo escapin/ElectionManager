@@ -18,10 +18,10 @@
         "../lib/bcprov-jdk16-1.46.jar"
     ], 
     "ignore_fin_serv_cert": true, 
-    "sendEmail": false, 
+    "sendEmail": true, 
     "timespanEmail": 10, 
-    "smtp_host": "my.smtp.server.com", 
+    "smtp_host": "infsec.uni-trier.de", 
     "smtp_port": 25, 
-    "smtp_user": "username", 
-    "smtp_pass": "password"
+    "smtp_user": "evoting@infsec.uni-trier.de", 
+    "smtp_pass": "-EOIL7H128ae8ZmlshydVxz1"
 }

@@ -1,4 +1,4 @@
 {
     "port": 3305, 
-    "authenticate": "http://localhost/test/verify"
+    "authenticate": "https://select.uni-trier.de/verify"
 }
