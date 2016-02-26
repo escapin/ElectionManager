@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 <title>ElectionHandler</title>
-<script src="js/jquery-1.11.1.min.js"></script>
 <script src="js/ElectionConfigFile.js"></script>
+<script src="js/jquery-1.11.1.min.js"></script>
 <script src="js/electionButtons.js"></script>
+<script src="js/buildElectionTable.js"></script>
 <script src="js/config.js"></script>
 <script src="date/datePicker.js"></script>
 <!-- time and date-->
@@ -12,7 +13,6 @@
 <script src="date/globalize.js"></script>
 <script src="date/globalizeDE.js"></script>
 <script src="date/timespinner.js"></script>
-<script src="date/datePicker.js"></script>
 <link rel="stylesheet" href="date/smooth-ui.css">
 
 <link rel="stylesheet" href="pure/pure-min.css">
@@ -155,7 +155,7 @@
                 		    <label for="urandom" class="pure-checkbox">
         						<input id="urandom" type="checkbox" value="">
         						<span id="hovering" class="own">
-      							 User providing verification code<span class="testing">This allows the user to provide part of the verification code to check wether her vote has been properly counted.</span></span>
+      							 User providing verification code<span class="testing">The user will provide part of the verification code to check wether his vote has been properly counted.</span></span>
     						</label>
                 		</div>
                     </div>
@@ -212,14 +212,19 @@
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->
 	<div id="infopage">
-     <div class="body">
-          <p id='info'>Lotsa useful information about the buttons goes here.</p>       
-          <input id='closehelp' type="button" class="pure-button pure-button-primary" value="Ok"></input>
+     <div class="body" style="text-align: left;">
+          <p id='info'></p>
+          <p><b>Vote: </b>After selecting a running Election this will redirect you to the voting procedure.</p>  
+          <p><b>Create Election: </b>The button will create a simple election with predetermined properties to test the system.</p>  
+          <p><b>Close Election: </b>The selected election will be closed after confirming the set password (if any - leave blank if not; the username is <b><i>admin</i></b>).</p>   
+          <p><b>Remove Election: </b>Removes the selected election from the list. If the voting results should be saved, the election has to be closed first.</p>
+          <p><b>Advanced Election: </b>This will show an advanced settings page where a customized election can be created - such as title, description, starting-/ending time, questions and answers.</p>
+          <input id='closehelp' style="margin-left: 40%;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
      </div>
 	</div>
 </body>
 </html>
-<script type="text/javascript">
+<script type="text/javascript">	
     $(document).ready(buildElectionTable);
     $(document).ready(electionButtons);
     $(function() {
