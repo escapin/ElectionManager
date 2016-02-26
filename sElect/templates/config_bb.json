@@ -1,0 +1,9 @@
+{
+    "port" : 3111,
+    "MANIFEST_FILE" : "../_sElectConfigFiles_/ElectionManifest.json",
+    
+    "DATA_FOLDER": "./_data_",
+    "VOTERSLIST_FILE": "./_data_/votersList.msg",
+    "RESULTCS_FILE" : "./_data_/resultCS.msg",
+    "RESULTMIX_FILE": "./_data_/resultMIX%d.msg"
+}

@@ -1,0 +1,175 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic);
+
+body {
+    background: white;
+    font-family: 'Roboto', sans-serif;
+    font-size: 12pt;
+    font-weight: 300;
+}
+
+h1, h2 {
+    font-size:36pt;
+    font-weight: 100;
+    color: #666;
+}
+
+h2 {
+    font-size:24pt;
+    font-weight: 300;
+    color: #444;
+}
+h3 {
+    font-size:14pt;
+    font-weight: 300;
+    color: #444;
+    text-shadow: 0px 0px 1px #bbb;
+}
+
+h1 {
+    margin-top: .2ex;
+    text-shadow: 0px 0px 3px #bbb;
+}
+
+h3.lead {
+    color: #888;
+}
+
+.container {
+    margin: 0px auto;
+    max-width: 860px;
+}
+
+div.header {
+    margin: 0px auto;
+    margin-top: 4pt;
+    text-align: right;
+    padding: 10px;
+    font-size: 12pt;
+    color: #538;
+}
+
+div.banner {
+    padding-top: 1pt;
+    padding-bottom: 1pt;
+    background: #538;
+    margin-bottom: 26pt;
+}
+
+div.banner h1 {
+    color: white;
+    text-shadow: 0px 0px 3px #fff;
+}
+div.banner h3 {
+    color: white;
+    text-shadow: 0px 0px 2px #fff;
+    font-weight: 300;
+    font-variant: italic;
+}
+.election-id {
+    color: white;
+    margin-bottom:12pt;
+}
+
+
+div.header em {
+    font-weight: 500;
+}
+
+div.body {
+    background: white;
+    margin: 0 auto;
+    margin-bottom:2ex;
+    max-width: 860px;
+    -padding: 25px;
+    -border: solid 0px #ccc;
+    -border-radius: 6px;
+    -box-shadow: 0px 1px 12px 3px #ddd;
+}
+
+.toright {
+    text-align: right;
+}
+.toleft {
+    text-align: left;
+}
+.center {
+    text-align: center;
+}
+
+
+.description {
+    margin-bottom: 30pt;
+    font-size: 15pt;
+    color: #666;
+}
+
+.description b {
+    color: #649;
+}
+
+.menu-content {
+    border: solid 1px #eee;
+    -border-top: none;
+    border-radius: 6px;
+    box-shadow: 0px 2px 8px 0px #ddd;
+    margin:0;
+}
+
+.content {
+    padding: 14pt;
+}
+
+
+.pure-skin-mine .pure-menu li.pure-menu-selected a {
+    background: #538;
+}
+
+.pure-skin-mine .pure-menu  a:hover {
+    box-shadow: 0px 1px 12px 2px #cce;
+}
+/*
+.pure-skin-mine .pure-menu.pure-menu-open  {
+    background: #f0e0ff;
+}
+*/
+
+.pure-skin-mine table.pure-table  {
+    border:none;
+    background:white;
+}
+.pure-skin-mine table.pure-table td  {
+    background:white;
+    padding: 8pt;
+    text-align: left;
+}
+
+.pure-skin-mine table.pure-table th  {
+    background:white;
+    text-align: left;
+}
+
+.error {
+    color: #c00;
+}
+
+.extrainfobox {
+    margin-top: 20pt;
+    margin-bottom: 10pt;
+}
+
+.extrainfo {
+    margin: 0pt 10pt;
+    margin-top: 20pt;
+    padding: 10pt;
+    text-align: center;
+    vertical-align: text-bottom;
+    height: 102pt;
+    color: #444;
+    background: #eee;
+    border-radius: 6px;
+    box-shadow: 0px 1px 12px 3px #ddd;
+}
+
+h3.subtitle, td.verificationCode, td.vote, td.voters, td.choice, td.voters, td.details, span.descriptionBB {
+	color: black !important;
+}

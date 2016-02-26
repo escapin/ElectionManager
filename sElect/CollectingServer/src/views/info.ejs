@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Collecting Server</title>
+    <link rel='stylesheet' href='../css/style.css' />
+</head>
+<body>
+
+<h1> Collecting Server is up </h1>
+
+<h2> Election ID: <%= manifest.hash %> </h2>
+<h2> Election Title: <%= manifest.title %> </h2>
+<h2> Time to open: <%= openingTime %> </h2>
+<h2> Time to close: <%= closingTime %> </h2>
+<h2> Status: <%= status %>  </h2>
+
+<h3> <a href="/manifest"> Election manifest</a> </h3>
+
+<% if (resultReady) { %>
+    <h3><a href='/result.msg'>Partial result</a> is ready</h3>
+<% } %>
+
+<% if (active) { %>
+    <hr>
+    <h3><a href='close'>[close the election]</a></h3>
+<% } %>
+
+</body>
+</html>
