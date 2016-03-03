@@ -302,8 +302,8 @@ for line in nginxData:
     if line == "}\n":
         lastBracket = counter
     counter = counter + 1
-bracketIt = nginxData[lastBracket:]
-del nginxData[lastBracket:]
+bracketIt = nginxData[lastBracket-1:]
+del nginxData[lastBracket-1:]
 comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
             "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[4]) + "/;\n", "    }\n", "\n",
             "    # Mix server " + electionID + " #1\n", "    location " + "/" + electionID + "/mix/00/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
@@ -321,4 +321,5 @@ nginxFile.seek(0)
 nginxFile.writelines(nginxData)
 nginxFile.close()
 
-
+#refresh nginx
+subprocess.call(["/usr/sbin/nginx", "-c", srcdir[0] + nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))

@@ -144,6 +144,7 @@ nginxFile.writelines(nginxData)
 nginxFile.truncate()
 nginxFile.close()
 
-#os.system("nginx -s reload")
+#refresh nginx
+subprocess.call(["/usr/sbin/nginx", "-c", srcdir[0] + nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
 subprocess.call([srcdir[0] + "/../ElectionHandler/refreshConfig.sh"], cwd=(srcdir[0]+"/../ElectionHandler"))
 removePass(srcdir[0] + passList, electionID)
