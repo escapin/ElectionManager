@@ -1,5 +1,0 @@
-{
-    "port": 3311, 
-    "authentificate": "http://localhost/test/verify", 
-    "authenticate": "https://select.uni-trier.de/verify"
-}
