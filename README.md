@@ -21,12 +21,15 @@ Inside 'nginx_nosu.conf' file in this folder replace all occurances of '/home/us
 a valid directory path (in which the user has read and write permissions).
 
 Start nginx as root, this will bind port 80 and redirect to port 8080:
+
   $ sudo /usr/sbin/nginx 
 
 Now you can start nginx with a new configuration file which doesn't use access restricted ports:
+
   $ /usr/sbin/nginx -c 'PATH/TO/nginx_nosu.conf'
 
 To issure commands (such as reload and quit) to the secondary nginx processes, you also have to
 specify the configuration file being used:
+
   $ /usr/sbin/nginx -c 'PATH/TO/nginx_nosu.conf' -s reload
   $ /usr/sbin/nginx -c 'PATH/TO/nginx_nosu.conf' -s quit
