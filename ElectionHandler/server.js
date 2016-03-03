@@ -4,10 +4,10 @@ var bcrypt = require("bcryptjs");
 
 var fs = require('fs');
 var http = require('http');
-var https = require('https');
-var certificate = fs.readFileSync("../sElect/_sElectConfigFiles_/select.chained.crt", 'utf8');
-var certificate_key = fs.readFileSync("../sElect/_sElectConfigFiles_/select.key", 'utf8');
-var credentials = {key: certificate_key, cert: certificate};
+//var https = require('https');
+//var certificate = fs.readFileSync("../sElect/_sElectConfigFiles_/select.chained.crt", 'utf8');
+//var certificate_key = fs.readFileSync("../sElect/_sElectConfigFiles_/select.key", 'utf8');
+//var credentials = {key: certificate_key, cert: certificate};
 var app = express();
 
 var cors = require('cors');
@@ -23,7 +23,7 @@ app.use(cors());
 app.use(bodyParser.urlencoded({
 	extended : false
 }));
-var httpsserver = https.createServer(credentials, app);
+//var httpsserver = https.createServer(credentials, app);
 //var basicAuth = require('basic-auth-connect');
 //app.use('/election/*', basicAuth('admin', '888')); // authentication for the admin panel only
 
@@ -180,7 +180,7 @@ app.post('/election', function(req, res) {
 	}
 });
 
-var server = httpsserver.listen(port, function() {
+var server = app.listen(port, function() {
     console.log('Serving %s on %s, port %d', path, server.address().address, server.address().port);
 });
 
