@@ -220,8 +220,8 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 }
 
 #infopage div {
+	 overflow: auto;
      width:33%;
-     height:80%;
      margin: 50px auto;
      background-color: #fff;
      border:1px solid #000;
@@ -424,8 +424,7 @@ tr{
 	font-size:3.5vw;
 }
 #infopage div{
-	height: 100%;
-	width: 100%;
+	width: 90%;
 }
 
 @media all and (max-width: 480px) {
