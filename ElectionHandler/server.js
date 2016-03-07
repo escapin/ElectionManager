@@ -40,7 +40,7 @@ app.post('/election', function(req, res) {
 	var rand = req.body.random;
 	var listVoters = req.body.publishVoters;
 	
-	var direc = "sElect/";
+	var direc = "";
 	
 	if (rand === "true"){
 		direc = "sElectRandom/"
@@ -161,22 +161,6 @@ app.post('/election', function(req, res) {
 		    	res.end("error code" + code)
 		    }
 		});
-		/**
-		child_process.exec('python ../ElectionSetup/CloseSession.py '+value, function(err, stdout, stderr) {
-			if (err) {
-				console.log(err.code);
-			}
-			console.log(stdout);
-			if (stderr) {
-				console.log(stderr);
-				res.end(stderr);
-			}
-			else{
-				console.log("removed");
-				res.end("removed");
-			}
-		});
-		**/
 	}
 });
 
