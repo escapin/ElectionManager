@@ -8,4 +8,4 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-nginx -c $DIR/nginx/handler/nginx_select.conf
+sudo nginx -c $DIR/nginx/root/nginx.conf
