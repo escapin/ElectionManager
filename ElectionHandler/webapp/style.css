@@ -252,7 +252,9 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #choice1,
 #choice2,
 #remove-choice,
-#add-choice{
+#add-choice,
+#vote,
+#create{
 	margin-top: 1.3em;
 }
 
