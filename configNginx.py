@@ -2,13 +2,13 @@ import os
 import sys
 
 
-def writeDirec(src):
+def writeDirec(src, dest):
     nginxFile = open(src, 'r+')
     nginxData = nginxFile.readlines()
     counter = 0
     for line in nginxData:
         if "/PATH/TO/DIREC/" in line:
-            nginxData[counter] = line.replace("/PATH/TO/DIREC/", nginxRootLog)
+            nginxData[counter] = line.replace("/PATH/TO/DIREC/", dest)
         counter = counter + 1
     nginxFile.seek(0)
     nginxFile.writelines(nginxData)
@@ -25,5 +25,5 @@ nginxRootFile = srcdirec + "/nginx/root/nginx.conf"
 nginxFile = srcdirec + "/nginx/handler/nginx_select.conf"
 
 
-writeDirec(nginxRootFile)
-writeDirec(nginxFile)
+writeDirec(nginxRootFile, nginxRootLog)
+writeDirec(nginxFile, nginxLog)
