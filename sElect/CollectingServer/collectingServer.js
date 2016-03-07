@@ -74,7 +74,7 @@ if(config.serverAdminPassword != ""){
 	app.use('/admin/*', basicAuth(function(username,password){
 		var salt = bcrypt.getSalt(config.serverAdminPassword);
 		var hash = bcrypt.hashSync(password, salt);
-        return ((username === 'admin') && (hash === config.serverAdminPassword))
+        return ((username === config.serverAdminUser) && (hash === config.serverAdminPassword))
     }));
 }
 
