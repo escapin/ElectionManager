@@ -183,7 +183,7 @@ mix00Conf = "/templates/config_mix00.json"
 mix01Conf = "/templates/config_mix01.json"
 mix02Conf = "/templates/config_mix02.json"
 nginxConf = "/../nginx_select.conf"
-passList = "/../ElectionHandler/inf/pass.json"
+passList = "/../ElectionHandler/_data_/pass.json"
 
 srcfile = os.path.realpath(__file__)
 srcdirec = os.path.split(os.path.split(srcfile)[0])

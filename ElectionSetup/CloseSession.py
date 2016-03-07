@@ -89,7 +89,7 @@ def removePass(src, value):
                
 electionConfig = "/ElectionConfigFile.json"
 nginxConf = "/nginx_select.conf"
-passList = "/ElectionHandler/inf/pass.json"
+passList = "/ElectionHandler/_data_/pass.json"
 
 srcfile = os.path.realpath(__file__)
 srcdir = os.path.split(os.path.split(srcfile)[0])[0]

@@ -129,7 +129,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "remove") {
-		var passList = JSON.parse(fs.readFileSync("inf/pass.json"));
+		var passList = JSON.parse(fs.readFileSync("_data_/pass.json"));
 		var match = passList[value];
 		var hash = match;
 		if(match !== ""){
