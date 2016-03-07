@@ -88,7 +88,7 @@ def removePass(src, value):
         sys.exit("file missing")
                
 electionConfig = "/ElectionConfigFile.json"
-nginxConf = "/nginx_select.conf"
+nginxConf = "/nginx/handler/nginx_select.conf"
 passList = "/ElectionHandler/_data_/pass.json"
 
 srcfile = os.path.realpath(__file__)

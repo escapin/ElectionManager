@@ -182,7 +182,7 @@ votingConf = "/VotingBooth/config.json"
 mix00Conf = "/templates/config_mix00.json"
 mix01Conf = "/templates/config_mix01.json"
 mix02Conf = "/templates/config_mix02.json"
-nginxConf = "/../nginx_select.conf"
+nginxConf = "/../nginx/handler/nginx_select.conf"
 passList = "/../ElectionHandler/_data_/pass.json"
 
 srcfile = os.path.realpath(__file__)
