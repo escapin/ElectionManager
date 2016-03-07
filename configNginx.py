@@ -9,6 +9,8 @@ def writeDirec(src, dest):
     for line in nginxData:
         if "/PATH/TO/DIREC/" in line:
             nginxData[counter] = line.replace("/PATH/TO/DIREC/", dest)
+        if "/PATH/TO/DIREC/" in line:
+            nginxData[counter] = line.replace("/PATH/TO/MANAGER/", srcdirec)
         counter = counter + 1
     nginxFile.seek(0)
     nginxFile.writelines(nginxData)
