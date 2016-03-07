@@ -19,6 +19,7 @@ devclean:
 
 
 test:
+	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
 	mkdir -p nginx/handler/log
 	mkdir -p nginx/root/log
 	cp templates/nginx.conf nginx/root/nginx.conf
