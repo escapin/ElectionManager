@@ -54,10 +54,10 @@ app.post('/election', function(req, res) {
 		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters]);
 		
 		session.stdout.on('data', function (data) {
-			if(data.indexOf("OTP")>-1){
+			if(String(data).indexOf("OTP")>-1){
 				console.log('stdout: ' + data);
 			}
-			else if(data.indexOf("TLS")>-1){
+			else if(String(data).indexOf("TLS")>-1){
 				console.log('mix stdout: ' + data);
 			}
 		});
@@ -106,10 +106,10 @@ app.post('/election', function(req, res) {
 		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py']);
 		
 		session.stdout.on('data', function (data) {
-			if(data.indexOf("OTP")>-1){
+			if(String(data).indexOf("OTP")>-1){
 				console.log('stdout: ' + data);
 			}
-			else if(data.indexOf("TLS")>-1){
+			else if(String(data).indexOf("TLS")>-1){
 				console.log('mix stdout: ' + data);
 			}
 		});
