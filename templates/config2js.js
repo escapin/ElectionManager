@@ -1,9 +1,12 @@
+// Convert json files to java script objects
+
 var fs = require('fs');
 var selectUtils = require('selectUtils');
 
 if (process.argv.length !==  4) {
-    console.log('ERROR: Call the script with two arguments, a file name with an election manifest and name:');
-    console.log('node config2js <manifest-file-name.json> <var name for json>');
+    console.log('ERROR: Call the script with two arguments, the json file you want to convert and' + 
+    			' the target variable name: ');
+    console.log('node config2js <jsonFile.json> <targetVarName>');
     process.exit(1);
 }
 
