@@ -7,15 +7,16 @@ JUNIT_v=4.12
 HARMCRESTCORE_v=1.3
 
 default:
-	@echo Specify the goal: devenv OR devclean OR cleanElection OR updateCryptoKeys OR prod
+	@echo Specify the goal: devenv OR devclean
 
 devenv: test
+	git clone -b merging https://github.com/escapin/sElect.git
 	cd sElect ; make devenv
-	cd sElectRandom ; make devenv
+	cp templates/config2js.js sElect/tools/config2js.js
+	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
 
 devclean:
 	cd sElect ; make devclean
-	cd sElectRandom ; make devclean
 
 
 test:
