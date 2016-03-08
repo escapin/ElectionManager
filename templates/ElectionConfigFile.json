@@ -3,7 +3,7 @@
         "mix1": "http://localhost", 
         "mix2": "http://localhost", 
         "mix0": "http://localhost", 
-        "authbooth": "http://localhost", 
+        "authbooth": "http://localhost/auth", 
         "bulletinboard": "http://localhost", 
         "collectingserver": "http://localhost", 
         "votingbooth": "http://localhost"
