@@ -14,7 +14,7 @@ from signal import SIGKILL
 
 def copy(src, dest):
     try:
-        shutil.copytree(src, dest, symlinks=True, ignore=ignore_patterns("*.py", "00", "01", "02", "ElectionHandler", "nginx*"))
+        shutil.copytree(src, dest, symlinks=False, ignore=ignore_patterns("*.py", "00", "01", "02", "ElectionHandler", "nginx*"))
     except OSError as e:
         # source is a file, not a directory
         if e.errno == errno.ENOTDIR:
@@ -41,6 +41,7 @@ def link(dest):
     os.symlink(dstroot+"/MixServer/mixServer.js", dstroot+"/mix/02/mixServer.js")
     os.symlink(dstroot+"/templates/config_mix02.json", dstroot+"/mix/02/config.json")
     
+    os.remove(dstroot + votingManifest)
     os.symlink(dstroot + manifest, dstroot + votingManifest)
 
 def copyFast(src, dest):
@@ -278,14 +279,14 @@ jwrite(srcdir + passList, electionID, password)
 
 #start all node servers
 subprocess.call([dstroot + "/VotingBooth/refreshConfig.sh"], cwd=(dstroot+"/VotingBooth"))
-vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
+#vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
 col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
 m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
 m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
 m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
 bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-newPIDs = [vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
-
+#newPIDs = [vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
+newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
 
 #add PIDs to config
 newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime, "protect": protect}
