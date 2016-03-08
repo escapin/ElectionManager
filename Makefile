@@ -20,10 +20,10 @@ devclean:
 
 test:
 	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
-	mkdir -p nginx/handler/log
-	mkdir -p nginx/root/log
-	cp templates/nginx.conf nginx/root/nginx.conf
-	cp templates/nginx_select.conf nginx/handler/nginx_select.conf
+	mkdir -p nginx_config/handler/log
+	mkdir -p nginx_config/root/log
+	cp templates/nginx.conf nginx_config/root/nginx.conf
+	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
 	mkdir ElectionHandler/_data_
 	cp templates/pass.json ElectionHandler/_data_/pass.json
 	python configNginx.py

@@ -21,10 +21,10 @@ def writeDirec(src, dest):
 
 srcfile = os.path.realpath(__file__)
 srcdirec = os.path.split(srcfile)[0]
-nginxRootLog = srcdirec + "/nginx/root/log"
-nginxLog = srcdirec + "/nginx/handler/log"
-nginxRootFile = srcdirec + "/nginx/root/nginx.conf"
-nginxFile = srcdirec + "/nginx/handler/nginx_select.conf"
+nginxRootLog = srcdirec + "/nginx_config/root/log"
+nginxLog = srcdirec + "/nginx_config/handler/log"
+nginxRootFile = srcdirec + "/nginx_config/root/nginx.conf"
+nginxFile = srcdirec + "/nginx_config/handler/nginx_select.conf"
 
 
 writeDirec(nginxRootFile, nginxRootLog)
