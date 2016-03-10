@@ -1,3 +1,13 @@
 #Ignore all created elections
+elections/
 
-elections/*
+ElectionHandler/node_modules/
+ElectionHandler/_data_
+ElectionConfigFile.json
+ElectionHandler/webapp/js/ElectionConfigFile.js
+ElectionHandler/webapp/js/config.js
+nginx_config/
+sElect/
+.project
+.pydevproject
+.settings/
