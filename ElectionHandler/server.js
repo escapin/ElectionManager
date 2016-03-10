@@ -201,8 +201,8 @@ catch(e){	//if not, remove (if existing but broken json file) and ask for an adm
 	}
 	catch(e){
 	}
-	read({ prompt: 'Enter an administrator password to remove any election:', silent: true }, function(er, password) {
-	    console.log('You entered: %s', password);
+	read({ prompt: 'Enter the administrator password (to manage any election):', silent: true }, function(er, password) {
+	    //console.log('You entered: %s', password);
 	    verify(password);
 	 })
 }
