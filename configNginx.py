@@ -23,7 +23,7 @@ srcfile = os.path.realpath(__file__)
 srcdirec = os.path.split(srcfile)[0]
 nginxRootLog = srcdirec + "/nginx_config/root/log"
 nginxLog = srcdirec + "/nginx_config/handler/log"
-nginxRootFile = srcdirec + "/nginx_config/root/nginx.conf"
+nginxRootFile = srcdirec + "/nginx_config/root/nginx_root.conf"
 nginxFile = srcdirec + "/nginx_config/handler/nginx_select.conf"
 
 
