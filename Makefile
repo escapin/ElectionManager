@@ -20,6 +20,8 @@ devclean:
 	cd sElect ; make devclean
 	rm -r ElectionHandler/node_modules
 	rm -r ElectionHandler/_data_
+	rm -r nginx_config
+	rm ElectionConfigFile.json
 	rm ElectionHandler/webapp/js/ElectionConfigFile.js
 	rm ElectionHandler/webapp/js/config.js
 	
