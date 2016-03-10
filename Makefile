@@ -14,18 +14,22 @@ devenv: test
 	cd sElect ; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
+	cd ElectionHandler ; npm install
 
 devclean:
 	cd sElect ; make devclean
-
+	rm -r ElectionHandler/node_modules
+	rm -r ElectionHandler/_data_
+	rm ElectionHandler/webapp/js/ElectionConfigFile.js
+	rm ElectionHandler/webapp/js/config.js
+	
 
 test:
 	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
 	mkdir -p nginx_config/handler/log
 	mkdir -p nginx_config/root/log
-	cp templates/nginx.conf nginx_config/root/nginx.conf
+	cp templates/nginx_root.conf nginx_config/root/nginx_root.conf
 	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
 	mkdir ElectionHandler/_data_
-	cp templates/pass.json ElectionHandler/_data_/pass.json
 	python configNginx.py
 
