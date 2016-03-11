@@ -6,6 +6,7 @@ ElectionHandler/_data_
 ElectionConfigFile.json
 ElectionHandler/webapp/js/ElectionConfigFile.js
 ElectionHandler/webapp/js/config.js
+ElectionHandler/webapp/ref/
 nginx_config/
 sElect/
 .project
