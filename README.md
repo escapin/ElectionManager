@@ -1,65 +1,72 @@
 # ElectionManager
-An Election Manager for sElect.
+
+An Election Manager for sElect.  It allows to create, customize, and
+delete **secure** and **verifiable** elections powered by sElect.
+
 
 ## Dependencies
 
-* node.js and npm. (tested on v4.3.1 and 1.4.21 respectively)
+* node.js and npm (tested on v4.3.1 and 1.4.21, respectively)
 * python (tested on v.2.7)
 * nginx (tested on v1.9.10)
-* wget (used in the makefiles for getting the proper libraries).
+* superuser privileges on the operative system
+* git and wget
 * further dependencies needed for the sElect system:
   * Java JDK (tested with both openjdk-7 and oraclejdk-8).
   * Java Cryptography Extension (only for oraclejdk).
 
 The system has been developed and deployed on Ubuntu Server 14.04.2 LTS.
 
+
 ## The Design
 
-The project provides a web interface, which allows easy creations 
-and management of customized elections, using the sElect system
-(https://github.com/escapin/sElect.git) on a single server instance.
+The Election Manager provides a web interface allowing easy
+creations and management of customized elections powered by the sElect
+system (https://github.com/escapin/sElect.git) on a single server
+instance.
 
-**Web Interface:** The web page will display all elections in a table,
-which have been set up. The table will show a unique ID to identify 
-the election, the title given, when the election will start and end,
-and the status of the election:  
-*ready* - the election is currently 
-running and eligible voters can cast their votes,  
-*closed* - the election has ended and the results can be viewed,  
-*not responding* - there is an error communicating with the server.  
-The buttons to interact with the elections are described below.
+The **Web Interface** displays a list of elections. Each election has an
+unique ID, a given title, and a starting/ending time. Moreover, each
+election is either *open* - the election is currently running and
+eligible voters can cast their votes -
+or *closed* - the election is over and the final result is ready and available
+(*not responding* indicates a problem communicating with the server).
 
-**Create Election:** This button will create a simple election with 
-predetermined properties (such as title, and description), which will 
-start immediately and end after 10 minutes.
 
-**Vote:** After selecting an election (click on the election displayed 
-in the table) this button will redirect you to another web page to start 
-the voting procedure (VotingBooth in the sElect system).
+## Usage 
 
-**Close:** The selected election will be closed, which requires password 
-confirmation if one has been set.
+The web interface contains the following options to manage elections:
 
-**Remove Election:** Removes the selected election from the table. If 
-the voting results should be saved on the server, the election has to 
-be closed first.
+**Create Election** creates a mock election with predetermined settings
+(such as title, description, and so on), which will start immediately
+and end after 3 days.
 
-**Advanced Election:** This will show an advanced settings page where a 
-customized election can be created - such as title, description, 
-starting-/ending time, questions and answers.
+**Vote** redirects to the voting booth of the sElect system to start
+the voting procedure (if the election is open).
 
-* **Publish list of voters:** Enabling this checkbox will show the all
-  the e-mail addresses that have voted in this election (not what they
-  have voted for), once the election is closed.
+**Close** closes the selected election. It requires password 
+confirmation, if set.
+
+**Remove Election** removes the selected election. If the voting results
+should be saved on the server, the election has to be closed first.
+
+**Advanced Election** shows the advanced settings to create customized
+elections.  Elements such as title, description, starting/ending time,
+questions and answers can be set. In particular:
+
+* **Publish list of voters:** This option shows the e-mail addresses of
+  the voters who have voted in this election (not what they have voted
+  for), once the election is closed.
  
 * **User providing verification code:** The user will provide part of 
   the verification code to check whether his vote has been properly 
-  counted.
+  counted. This option allows not 
  
-## Security Properties
+## Security Issues
 
-The system is designed to be run on https, therefore running the system 
-online on http would allow the interception of transmitted passwords.
+Since the system is designed to run on https, running the system 
+on http allows the transmission of passwords as plaintext.
+
 
 ## Development Environment
 
@@ -68,42 +75,40 @@ The development environment can be created with
 ```
 make devenv
 ```
-This creates a locally runnable configuration for the web interface as
-well as download the sElect project from https://github.com/escapin/sElect.git
-and create the development environment for it. The created files can be 
-removed by `make devclean`. 
 
-Once the development environment is created, nginx will have to be
-configured before the server can be started.
+It creates a locally runnable configuration for the
+web interface, it downloads the sElect system and creates the
+development environment for it. This operation can be reverted by
+`make devclean`.
 
-In order to minimize the requirement for root privileges, the default 
-configuration is having nginx listen on port 8443 instead of port 80
-or 443 (http or ssl respectively). Therefore, to run the system locally,
-port 80 has to be redirected to port 8443.  
-A suitable nginx configuration has been created along with the 
-development environment, which can be started with  
+
+The *nginx* HTTP server is configured to redirect the traffic from ports
+80 and 433 to port 8443:
+
 ```
 ./setup_nginx.sh
 ```
-Non-root user might be prompted for [sudo] password. Since 
-listening to ports below 1024 requires root privileges, this cannot 
-be avoided.  
 
-Both the server and the necessary nginx session, which listens to 
-port 8443 and serves the system, can now be started without root
-privileges:  
+Since, by UNIX standard, listening to ports below 1024 (privilege ports)
+requires *superuser privileges*, this command requires [sudo] password.
+
+
+The nginx sessions and the election manager server can be started by
+
 ```
 ./run.sh
 ```
-When starting the server for the first time, after creating the 
-development environment, or the file holding passwords has been
-corrupted/removed, the user will be prompted to enter a password
-and confirm it. This password can be used to remove any election, 
-even if it has been secured with a different password.
+
+When starting the server for the first time, the user will be prompted to enter
+the administrator password which can be used to manage any election, even if
+protected by a different password.
 
 The nginx process created above can be stopped by
+
 ```
 ./stop_nginx.sh
 ```
-and the user will be prompted for [sudo] password again, in order to
-end the instance created by the [sudo] user.
+
+(The user will be prompted for [sudo] password again, in order to
+end the instance created by the superuser).
+
