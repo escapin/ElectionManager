@@ -105,5 +105,5 @@ The nginx process created above can be stopped by
 ```
 ./stop_nginx.sh
 ```
-and the user will be prompted for [sudo] password again in order to
-end the the instance created via [sudo].
+and the user will be prompted for [sudo] password again, in order to
+end the instance created by the [sudo] user.
