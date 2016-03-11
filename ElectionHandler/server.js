@@ -201,22 +201,24 @@ catch(e){	//if not, remove (if existing but broken json file) and ask for an adm
 	}
 	catch(e){
 	}
-	console.log('...\n...');
-	read({ prompt: 'Enter an administrator password (to manage any election):', silent: true }, function(er, password) {
+	console.log();
+	console.log('Administrator password not set.');
+	console.log('Setting up an administrator password to manage the elections...');
+	read({ prompt: 'Enter a password:', silent: true }, function(er, password) {
 	    verify(password);
 	 })
 }
 
 // call when user couldn't confirm the password
 function askPw(){
-	read({ prompt: 'passwords do not match, try again:', silent: true }, function(er, password) {
+	read({ prompt: 'Passwords do not match, try again:', silent: true }, function(er, password) {
 	    verify(password);
 	  })
 }
  
 // confirm the entered password
 function verify(passwd){
-    read({ prompt: 'confirm password: ', silent: true }, function(er, password) {
+    read({ prompt: 'Retype the password:', silent: true }, function(er, password) {
         if (password !== passwd){
         	askPw();
         }
@@ -225,7 +227,8 @@ function verify(passwd){
       	  var adminpw = bcrypt.hashSync(password, salt);
       	  var obj = {adminpassword: adminpw}
       	  fs.writeFileSync('_data_/pass.json', JSON.stringify(obj, null, 4), {spaces:4});
-      	  console.log('password stored\n...');
+      	  console.log('Password stored');
+      	  console.log();
       	  start();
         }
       })
