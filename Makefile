@@ -1,7 +1,7 @@
 default:
 	@echo Specify the goal: devenv OR devclean
 
-devenv: nginxConf electionHandler sElect
+devenv: nginxConf electionHandler refDownload sElect
 
 nginxConf:
 	mkdir -p nginx_config/handler/log
@@ -23,6 +23,7 @@ sElect:
 	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
 
 devclean:
+	-rm -rf ElectionHandler/webapp/ref
 	-rm -rf nginx_config/
 	-rm -r ElectionHandler/node_modules
 	-rm -r ElectionHandler/_data_
@@ -37,3 +38,12 @@ restart:
 	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
 	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
 	python configNginx.py
+
+refDownload:
+	mkdir -p ElectionHandler/webapp/ref
+	-rm ElectionHandler/webapp/ref/KuestersMuellerScapinTruderung-TR-sElect-2016.bib
+	cd ElectionHandler/webapp/ref; wget http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-TR-sElect-2016.bib
+	-rm ElectionHandler/webapp/ref/KuestersMuellerScapinTruderung-TR-sElect-2016.abstract
+	cd ElectionHandler/webapp/ref; wget http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-TR-sElect-2016.abstract
+	-rm ElectionHandler/webapp/ref/KuestersMuellerScapinTruderung-TR-sElect-2016.pdf
+	cd ElectionHandler/webapp/ref; wget http://infsec.uni-trier.de/people/publications/paper/KuestersMuellerScapinTruderung-TR-sElect-2016.pdf
