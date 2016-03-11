@@ -63,8 +63,6 @@ online on http would allow the interception of transmitted passwords.
 
 ## Developent Environment
 
-## Development Environment
-
 The development environment can be created with
 
 ```
