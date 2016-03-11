@@ -17,13 +17,13 @@ electionHandler:
 	mkdir -p elections
 
 sElect:
-	if [ ! -d sElect]; then git clone -b merging https://github.com/escapin/sElect.git; fi
+	git clone -b merging https://github.com/escapin/sElect.git
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
 
 devclean:
-	-rm -r nginx_config
+	-rm -rf nginx_config/
 	-rm -r ElectionHandler/node_modules
 	-rm -r ElectionHandler/_data_
 	-rm ElectionConfigFile.json
