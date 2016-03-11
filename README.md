@@ -89,8 +89,9 @@ The *nginx* HTTP server is configured to redirect the traffic from ports
 ./setup_nginx.sh
 ```
 
-Since, by UNIX standard, listening to ports below 1024 (privilege ports)
-requires *superuser privileges*, this command requires [sudo] password.
+This command requires [sudo] password since, by UNIX standard, only with
+*superuser* privileges is it possible to listen to privilege ports
+(i.e., ports below 1024).
 
 
 The nginx sessions and the election manager server can be started by
