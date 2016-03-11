@@ -1,5 +1,5 @@
 # ElectionManager
-An Election Manager for sElect
+An Election Manager for sElect.
 
 ## Dependencies
 
@@ -47,3 +47,30 @@ be closed first.
 **Advanced Election:** This will show an advanced settings page where a 
 customized election can be created - such as title, description, 
 starting-/ending time, questions and answers.
+
+* **Publish list of voters:** Enabling this checkbox will show the all
+  the e-mail addresses that have voted in this election (not what they
+  have voted for), once the election is closed.
+ 
+* **User providing verification code:** The user will provide part of 
+  the verification code to check wether his vote has been properly 
+  counted.
+ 
+## Security Properties
+
+The system is designed to be run on https, therefore running the system 
+online on http would allow the interception of transmitted passwords.
+
+## Developent Environment
+
+## Development Environment
+
+The development environment can be created with
+
+```
+make devenv
+```
+This creates a locally runnable configuration for the webinterface as
+well as download the sElect project from https://github.com/escapin/sElect.git
+and create the development environment for it. The created files can be removed 
+by `make devclean`. 
