@@ -3,9 +3,9 @@ An Election Manager for sElect.
 
 ## Dependencies
 
-* node.js and npm.
-* python
-* nginx
+* node.js and npm. (tested on v4.3.1 and 1.4.21 respectively)
+* python (tested on v.2.7)
+* nginx (tested on v1.9.10)
 * wget (used in the makefiles for getting the proper libraries).
 * further dependencies needed for the sElect system:
   * Java JDK (tested with both openjdk-7 and oraclejdk-8).
@@ -19,7 +19,7 @@ The project provides a web interface, which allows easy creations
 and management of customized elections, using the sElect system
 (https://github.com/escapin/sElect.git) on a single server instance.
 
-**Web Interface:** The webpage will display all elections in a table,
+**Web Interface:** The web page will display all elections in a table,
 which have been set up. The table will show a unique ID to identify 
 the election, the title given, when the election will start and end,
 and the status of the election:  
@@ -31,10 +31,10 @@ The buttons to interact with the elections are described below.
 
 **Create Election:** This button will create a simple election with 
 predetermined properties (such as title, and description), which will 
-start immediatly and end after 10 minutes.
+start immediately and end after 10 minutes.
 
 **Vote:** After selecting an election (click on the election displayed 
-in the table) this button will redirect you to another webpage to start 
+in the table) this button will redirect you to another web page to start 
 the voting procedure (VotingBooth in the sElect system).
 
 **Close:** The selected election will be closed, which requires password 
@@ -53,7 +53,7 @@ starting-/ending time, questions and answers.
   have voted for), once the election is closed.
  
 * **User providing verification code:** The user will provide part of 
-  the verification code to check wether his vote has been properly 
+  the verification code to check whether his vote has been properly 
   counted.
  
 ## Security Properties
@@ -61,14 +61,14 @@ starting-/ending time, questions and answers.
 The system is designed to be run on https, therefore running the system 
 online on http would allow the interception of transmitted passwords.
 
-## Developent Environment
+## Development Environment
 
 The development environment can be created with
 
 ```
 make devenv
 ```
-This creates a locally runnable configuration for the webinterface as
+This creates a locally runnable configuration for the web interface as
 well as download the sElect project from https://github.com/escapin/sElect.git
 and create the development environment for it. The created files can be 
 removed by `make devclean`. 
@@ -76,7 +76,7 @@ removed by `make devclean`.
 Once the development environment is created, nginx will have to be
 configured before the server can be started.
 
-In order to minimize the requirement for root priveleges, the default 
+In order to minimize the requirement for root privileges, the default 
 configuration is having nginx listen on port 8443 instead of port 80
 or 443 (http or ssl respectively). Therefore, to run the system locally,
 port 80 has to be redirected to port 8443.  
@@ -96,7 +96,7 @@ privileges:
 ./run.sh
 ```
 When starting the server for the first time, after creating the 
-developement environment, or the file holding passwords hasa been
+development environment, or the file holding passwords has been
 corrupted/removed, the user will be prompted to enter a password
 and confirm it. This password can be used to remove any election, 
 even if it has been secured with a different password.
