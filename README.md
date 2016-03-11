@@ -15,11 +15,11 @@ The system has been developed and deployed on Ubuntu Server 14.04.2 LTS.
 
 ## The Design
 
-The project provides a webinterface, which allows easy creations 
+The project provides a web interface, which allows easy creations 
 and management of customized elections, using the sElect system
 (https://github.com/escapin/sElect.git) on a single server instance.
 
-**Webinterface:** The webpage will display all elections in a table,
+**Web Interface:** The webpage will display all elections in a table,
 which have been set up. The table will show a unique ID to identify 
 the election, the title given, when the election will start and end,
 and the status of the election:  
