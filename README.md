@@ -95,5 +95,8 @@ privileges:
 ```
 ./run.sh
 ```
-
-
+If you start the server for the first time after creating the 
+developement environment, or the file holding passwords hasa been
+corrupted/removed, you will be prompted to enter a password
+and confirm your choice. This password can be used to remove
+any election, even if it has been secured with a different password.
