@@ -85,7 +85,7 @@ development environment, which can be started with
 ```
 ./setup_nginx.sh
 ```
-A non-root user might be prompted to authenticate as root. Since 
+A non-root user might be prompted for [sudo] password. Since 
 listening to ports below 1024 requires root privileges, this cannot 
 be avoided.  
 
