@@ -202,7 +202,6 @@ catch(e){	//if not, remove (if existing but broken json file) and ask for an adm
 	catch(e){
 	}
 	read({ prompt: 'Enter the administrator password (to manage any election):', silent: true }, function(er, password) {
-	    //console.log('You entered: %s', password);
 	    verify(password);
 	 })
 }
@@ -221,7 +220,6 @@ function verify(passwd){
         	askPw();
         }
         else {
-      	  console.log('successfully entered password');
       	  var salt = bcrypt.genSaltSync();
       	  var adminpw = bcrypt.hashSync(password, salt);
       	  var obj = {adminpassword: adminpw}

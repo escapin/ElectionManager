@@ -1,7 +1,7 @@
 default:
 	@echo Specify the goal: devenv OR devclean
 
-devenv: nginxConf electionHandler sElect
+devenv: nginxConf electionHandler refDownload sElect
 
 nginxConf:
 	mkdir -p nginx_config/handler/log
@@ -17,13 +17,14 @@ electionHandler:
 	mkdir -p elections
 
 sElect:
-	git clone https://github.com/escapin/sElect.git
+	git clone -b merging https://github.com/escapin/sElect.git
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
 
 devclean:
-	-rm -r nginx_config
+	-rm -rf ElectionHandler/webapp/ref
+	-rm -rf nginx_config/
 	-rm -r ElectionHandler/node_modules
 	-rm -r ElectionHandler/_data_
 	-rm ElectionConfigFile.json
@@ -31,4 +32,18 @@ devclean:
 	-rm ElectionHandler/webapp/js/config.js
 	-rm -rf sElect/
 
+restart:
+	-rm nginx_config/handler/nginx_select.conf
+	-rm ElectionConfigFile.json
+	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
+	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
+	python configNginx.py
 
+refDownload:
+	mkdir -p ElectionHandler/webapp/ref
+	-rm ElectionHandler/webapp/ref/KuestersMuellerScapinTruderung-TR-sElect-2016.bib
+	cd ElectionHandler/webapp/ref; wget http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-TR-sElect-2016.bib
+	-rm ElectionHandler/webapp/ref/KuestersMuellerScapinTruderung-TR-sElect-2016.abstract
+	cd ElectionHandler/webapp/ref; wget http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-TR-sElect-2016.abstract
+	-rm ElectionHandler/webapp/ref/KuestersMuellerScapinTruderung-TR-sElect-2016.pdf
+	cd ElectionHandler/webapp/ref; wget http://infsec.uni-trier.de/people/publications/paper/KuestersMuellerScapinTruderung-TR-sElect-2016.pdf

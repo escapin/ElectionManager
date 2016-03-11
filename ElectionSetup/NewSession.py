@@ -190,7 +190,7 @@ srcfile = os.path.realpath(__file__)
 srcdirec = os.path.split(os.path.split(srcfile)[0])
 srcdir = srcdirec[0]+"/sElect"
 
-votingTime = 600    #sec
+votingTime = 259200    #seconds, 3 days
 ports = usePorts()
 
 #where the servers are placed

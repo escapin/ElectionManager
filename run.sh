@@ -8,6 +8,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+make restart
 echo starting nginx...
 cd templates/ ; ./nginx_start.sh
 cd $DIR
