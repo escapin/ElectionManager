@@ -60,7 +60,7 @@ questions and answers can be set. In particular:
  
 * _User providing verification code_: The user will provide part of 
   the verification code to check whether his vote has been properly 
-  counted. This option allows not 
+  counted. In this way, not even the voting booth has to be trusted. 
  
 ### Security Issues
 
