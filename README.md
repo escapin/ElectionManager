@@ -72,5 +72,30 @@ make devenv
 ```
 This creates a locally runnable configuration for the webinterface as
 well as download the sElect project from https://github.com/escapin/sElect.git
-and create the development environment for it. The created files can be removed 
-by `make devclean`. 
+and create the development environment for it. The created files can be 
+removed by `make devclean`. 
+
+Once the development environment is created, nginx will have to be
+configured before the server can be started.
+
+In order to minimize the requirement for root priveleges, the default 
+configuration is having nginx listen on port 8443 instead of port 80
+or 443 (http or ssl respectively). Therefore, to run the system locally,
+port 80 has to be redirected to port 8443.  
+A suitable nginx configuration has been created along with the 
+development environment, which can be started with  
+```
+./setup_nginx.sh
+```
+A non-root user might be prompted to authenticate as root. Since 
+listening to ports below 1024 requires root privileges, this cannot 
+be avoided.  
+
+Both the server and the necessary nginx session, which listens to 
+port 8443 and serves the system, can now be started without root
+privileges:  
+```
+./run.sh
+```
+
+
