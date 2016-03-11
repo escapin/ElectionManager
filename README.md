@@ -54,11 +54,11 @@ should be saved on the server, the election has to be closed first.
 elections.  Elements such as title, description, starting/ending time,
 questions and answers can be set. In particular:
 
-* **Publish list of voters:** This option shows the e-mail addresses of
+* _Publish list of voters_: This option shows the e-mail addresses of
   the voters who have voted in this election (not what they have voted
   for), once the election is closed.
  
-* **User providing verification code:** The user will provide part of 
+* _User providing verification code_: The user will provide part of 
   the verification code to check whether his vote has been properly 
   counted. This option allows not 
  
