@@ -101,8 +101,7 @@ The nginx sessions and the election manager server can be started by
 ```
 
 When starting the server for the first time, the user will be prompted to enter
-the administrator password which can be used to manage any election, even if
-protected by a different password.
+the administrator password which can be used to manage any election, even those one protected by a different password.
 
 The nginx process created above can be stopped by
 
