@@ -25,7 +25,7 @@ creations and management of customized elections powered by the sElect
 system (https://github.com/escapin/sElect.git) on a single server
 instance.
 
-The **web interface** displays a list of elections. Each election has an
+The web interface displays a list of elections. Each election has an
 unique ID, a given title, and a starting/ending time. Moreover, each
 election is either *open* - the election is currently running and
 eligible voters can cast their votes -
