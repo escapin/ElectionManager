@@ -201,7 +201,8 @@ catch(e){	//if not, remove (if existing but broken json file) and ask for an adm
 	}
 	catch(e){
 	}
-	read({ prompt: 'Enter the administrator password (to manage any election):', silent: true }, function(er, password) {
+	console.log('...\n...');
+	read({ prompt: 'Enter an administrator password (to manage any election):', silent: true }, function(er, password) {
 	    verify(password);
 	 })
 }
@@ -224,6 +225,7 @@ function verify(passwd){
       	  var adminpw = bcrypt.hashSync(password, salt);
       	  var obj = {adminpassword: adminpw}
       	  fs.writeFileSync('_data_/pass.json', JSON.stringify(obj, null, 4), {spaces:4});
+      	  console.log('password stored\n...');
       	  start();
         }
       })
