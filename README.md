@@ -1,7 +1,7 @@
 # ElectionManager
 
 An Election Manager for sElect.  It allows to create, customize, and
-delete **secure** and **verifiable** elections powered by sElect.
+remove **secure** and **verifiable** elections powered by sElect.
 
 
 ## Dependencies
