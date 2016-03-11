@@ -5,10 +5,11 @@ An Election Manager for sElect
 
 * node.js and npm.
 * python
+* nginx
 * wget (used in the makefiles for getting the proper libraries).
 * further dependencies needed for the sElect system:
-* Java JDK (tested with both openjdk-7 and oraclejdk-8).
-* Java Cryptography Extension (only for oraclejdk).
+  * Java JDK (tested with both openjdk-7 and oraclejdk-8).
+  * Java Cryptography Extension (only for oraclejdk).
 
 The system has been developed and deployed on Ubuntu Server 14.04.2 LTS.
 
