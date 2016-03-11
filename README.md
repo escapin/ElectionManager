@@ -18,7 +18,7 @@ remove **secure** and **verifiable** elections powered by sElect.
 The system has been developed and deployed on Ubuntu Server 14.04.2 LTS.
 
 
-## The Design
+## Design
 
 The election manager provides a web interface allowing easy
 creations and management of customized elections powered by the sElect
