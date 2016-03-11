@@ -20,12 +20,12 @@ The system has been developed and deployed on Ubuntu Server 14.04.2 LTS.
 
 ## The Design
 
-The Election Manager provides a web interface allowing easy
+The election manager provides a web interface allowing easy
 creations and management of customized elections powered by the sElect
 system (https://github.com/escapin/sElect.git) on a single server
 instance.
 
-The **Web Interface** displays a list of elections. Each election has an
+The **web interface** displays a list of elections. Each election has an
 unique ID, a given title, and a starting/ending time. Moreover, each
 election is either *open* - the election is currently running and
 eligible voters can cast their votes -
@@ -62,7 +62,7 @@ questions and answers can be set. In particular:
   the verification code to check whether his vote has been properly 
   counted. This option allows not 
  
-## Security Issues
+### Security Issues
 
 Since the system is designed to run on https, running the system 
 on http allows the transmission of passwords as plaintext.
