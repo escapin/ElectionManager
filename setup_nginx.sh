@@ -8,6 +8,6 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-echo Starting nginx session to redirect ports...
+echo \* Redirecting the traffic from ports 80 and 433 to port 8433 \(requires *superuser* privileges\)...
 sudo /usr/sbin/nginx -c $DIR/nginx_config/root/nginx_root.conf
 
