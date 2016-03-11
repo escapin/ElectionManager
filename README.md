@@ -38,8 +38,8 @@ or *closed* - the election is over and the final result is ready and available
 The web interface contains the following options to manage elections:
 
 **Create Election** creates a mock election with predetermined settings
-(such as title, description, and so on), which will start immediately
-and end after 3 days.
+(such as title, description, and so on), which starts immediately
+and ends after 3 days.
 
 **Vote** redirects to the voting booth of the sElect system to start
 the voting procedure (if the election is open).
