@@ -31,7 +31,7 @@ The buttons to interact with the elections are described below.
 
 **Create Election:** This button will create a simple election with 
 predetermined properties (such as title, and description), which will 
-start immediately and end after 10 minutes.
+start immediately and end after 3 days.
 
 **Vote:** After selecting an election (click on the election displayed 
 in the table) this button will redirect you to another web page to start 
