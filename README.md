@@ -100,3 +100,10 @@ developement environment, or the file holding passwords hasa been
 corrupted/removed, you will be prompted to enter a password
 and confirm your choice. This password can be used to remove
 any election, even if it has been secured with a different password.
+
+The nginx process created above can be stopped by
+```
+./stop_nginx.sh
+```
+and the user will be prompted for [sudo] password again in order to
+end the the instance created via [sudo].
