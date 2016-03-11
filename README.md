@@ -1,4 +1,4 @@
-# ElectionManager
+# Election Manager
 
 An Election Manager for sElect.  It allows to create, customize, and
 remove **secure** and **verifiable** elections powered by sElect.
