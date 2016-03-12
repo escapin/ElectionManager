@@ -106,7 +106,7 @@ the administrator password which can be used to manage any election, even those 
 
 To access the election manager, it is now enough to open a browser and type  
 
-``localhost``` 
+``localhost``
 
 in the URL.
 
