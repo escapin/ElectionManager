@@ -1,14 +1,15 @@
-#Ignore all created elections
-elections/
-
-ElectionHandler/node_modules/
-ElectionHandler/_data_
-ElectionConfigFile.json
-ElectionHandler/webapp/js/ElectionConfigFile.js
-ElectionHandler/webapp/js/config.js
-ElectionHandler/webapp/ref/
-nginx_config/
-sElect/
+.classpath
 .project
 .pydevproject
 .settings/
+sElect/
+nginx_config/
+#Ignore all created elections
+elections/
+# all 'node_modules' directories except for that in the root dir
+**/*/node_modules/
+_data_*
+ElectionConfigFile.json
+ElectionHandler/webapp/js/ElectionConfigFile.js
+ElectionHandler/webapp/js/config.js
+
