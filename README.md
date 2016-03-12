@@ -104,7 +104,7 @@ When starting the server for the first time, the user will be prompted to enter
 the administrator password which can be used to manage any election, even those one protected by a different password.
 
 
-##### It is now possible to access the election manager via a browser with ``localhost`` as URL.
+##### It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.
 
 
 The nginx process created above can be stopped by
