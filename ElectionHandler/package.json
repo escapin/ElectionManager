@@ -1,6 +1,8 @@
 {
   "name": "ElectionHandler",
-  "version": "0.0.1",
+  "description": "Election Handler app for the sElect voting system",
+  "version": "0.2.0",
+  "private": true,
   "dependencies": {
     "body-parser": ">= 1.9.0",
     "cors": "^2.5.2",
