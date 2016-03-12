@@ -1,9 +1,9 @@
 default:
 	@echo Specify the goal: devenv OR devclean
 
-devenv: sElect nginxConf handler 
+devenv: nginx handler select
 
-nginxConf:
+nginx:
 	mkdir -p nginx_config/handler/log
 	mkdir -p nginx_config/root/log
 	cp templates/nginx_root.conf nginx_config/root/nginx_root.conf
@@ -15,7 +15,7 @@ handler:
 	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
 	mkdir -p elections
 
-sElect:
+select:
 	git clone -b merging https://github.com/escapin/sElect.git
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
