@@ -9,5 +9,5 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 echo \* Redirecting the traffic from ports 80 and 433 to port 8433 \(requires *superuser* privileges\)...
-sudo /usr/sbin/nginx -c $DIR/nginx_config/root/nginx_root.conf
+sudo nginx -c $DIR/nginx_config/root/nginx_root.conf
 
