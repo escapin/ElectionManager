@@ -90,7 +90,7 @@ The *nginx* HTTP server is configured to redirect the traffic from ports
 ```
 
 This command requires [sudo] password since, by UNIX standard, only with
-*superuser* privileges it is possible to listen to privilege ports
+*superuser* privileges it is allowed to listen to privilege ports
 (i.e., ports below 1024).
 
 
