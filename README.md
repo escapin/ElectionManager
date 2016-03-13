@@ -1,10 +1,11 @@
-# ElectionManager
+# nnginx configuration
+
 These files are used as a demonstration to show how to run nginx as a non-root user.
 
 After a default nginx installation, the root directory is located at '/etc/nginx/', 
-with the default configuration file '/etc/nginx/nginx.conf'. Either replace the default 
-configuration file with the 'nginx.conf' file in this folder, or add the following lines
-at the end of the 'http' section:
+with the default configuration file '/etc/nginx/nginx.conf'. 
+There are two options: Either replace the default configuration file with the 'nginx.conf' 
+file in this folder, or add the following lines at the end of the 'http' section:
 
     server {
         listen  80;
