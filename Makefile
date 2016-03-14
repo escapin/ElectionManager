@@ -31,7 +31,7 @@ handlerclean:
 
 configclean:
 	-rm ElectionConfigFile.json
-	-rm nginx_config/
+	-rm -rf nginx_config/
 
 selectclean:
 	-rm -rf sElect/
