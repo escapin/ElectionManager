@@ -1,5 +1,6 @@
 {
-    "server-address": {
+	"electionHandler": "http://localhost",
+	"server-address": {
         "mix1": "http://localhost", 
         "mix2": "http://localhost", 
         "mix0": "http://localhost", 

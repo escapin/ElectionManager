@@ -1,5 +1,6 @@
 {    
-    "root-addr": "localhost:8433",
+    "deployment": false,
+	"root-port": 8433,
     "available-ports": [
         3300, 
         3900
