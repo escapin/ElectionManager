@@ -19,25 +19,25 @@ select:
 	git clone -b merging https://github.com/escapin/sElect.git
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
-	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
+	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
 
 
-devclean: configclean selectclean elclean
+
+devclean: handlerclean configclean selectclean elclean
+
+
+handlerclean:
+	cd ElectionHandler; make clean
 
 configclean:
-	cd ElectionHandler; make clean
 	-rm ElectionConfigFile.json
-	-rm -rf nginx_config/
+	-rm nginx_config/
 
 selectclean:
 	-rm -rf sElect/
+	
 elclean:
 	-rm -rf elections/
 
 
-restart:
-	-rm nginx_config/handler/nginx_select.conf
-	-rm ElectionConfigFile.json
-	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
-	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
-	python configNginx.py
+	
