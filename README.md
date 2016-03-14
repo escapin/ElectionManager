@@ -86,7 +86,7 @@ The *nginx* HTTP server is configured to redirect the traffic from ports
 80 and 433 to port 8443:
 
 ```
-./setup_nginx.sh
+./start_nginx.sh
 ```
 
 This command requires [sudo] password since, by UNIX standard, only with
