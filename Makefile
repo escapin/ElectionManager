@@ -21,12 +21,19 @@ select:
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
 
-devclean:
+
+devclean: configclean selectclean elclean
+
+configclean:
 	cd ElectionHandler; make clean
 	-rm ElectionConfigFile.json
-	-rm -r nginx_config/
-	-rm -rf sElect
-	-rm -r elections
+	-rm -rf nginx_config/
+
+selectclean:
+	-rm -rf sElect/
+elclean:
+	-rm -rf elections/
+
 
 restart:
 	-rm nginx_config/handler/nginx_select.conf
