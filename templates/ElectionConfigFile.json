@@ -7,10 +7,12 @@
         "bulletinboard": "http://localhost", 
         "collectingserver": "http://localhost", 
         "votingbooth": "http://localhost"
-    }, 
+    },
+    "root-port": 8433,
     "available-ports": [
         3300, 
         3900
-    ], 
+    ],
+    "electionDurationInHours": 72,
     "elections": []
 }
