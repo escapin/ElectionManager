@@ -86,21 +86,26 @@ def removePass(src, value):
         jsonFile.close()
     except IOError:
         sys.exit("file missing")
-               
-electionConfig = "/ElectionConfigFile.json"
-nginxConf = "/nginx_config/handler/nginx_select.conf"
-passList = "/ElectionHandler/_data_/pass.json"
 
-srcfile = os.path.realpath(__file__)
-srcdir = os.path.split(os.path.split(srcfile)[0])[0]
+
+
+# the root dir is three folders back
+rootDirProject = os.path.realpath(__file__)
+for i in range(3):
+    rootDirProject=os.path.split(rootDirProject)[0]
+             
+electionConfig = rootDirProject + "/ElectionConfigFile.json"
+nginxConf = rootDirProject + "/nginx_config/handler/nginx_select.conf"
+passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
+
 
 #get ElectionID
 electionID = sys.argv[1]
 password = sys.argv[2]
 
-matchPass(srcdir + passList, password, electionID)
+matchPass(passList, password, electionID)
 #kill processes
-nPIDs = getProcIDs(srcdir + electionConfig, "processIDs", electionID)
+nPIDs = getProcIDs(electionConfig, "processIDs", electionID)
 for x in nPIDs:
     try:
         os.kill(x, SIGKILL)
@@ -117,10 +122,10 @@ for x in nPIDs:
 #                continue
 
 #modify electionconfig File
-jRemElec(srcdir + electionConfig, electionID)
+jRemElec(electionConfig, electionID)
 
 #modify nginx File
-nginxFile = open(srcdir + nginxConf, 'r+')
+nginxFile = open(nginxConf, 'r+')
 nginxData = nginxFile.readlines()
 lineStart = []
 votingBooth = 0
@@ -145,6 +150,6 @@ nginxFile.truncate()
 nginxFile.close()
 
 #refresh nginx
-subprocess.call(["/usr/sbin/nginx", "-c", srcdir + nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
-subprocess.call([srcdir + "/ElectionHandler/refreshConfig.sh"], cwd=(srcdir+"/ElectionHandler"))
-removePass(srcdir + passList, electionID)
+subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
+subprocess.call([rootDirProject + "/ElectionHandler/refreshConfig.sh"], cwd=(rootDirProject + "/ElectionHandler"))
+removePass(passList, electionID)

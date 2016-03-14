@@ -111,7 +111,7 @@ def addSec(tm, secs):
     return fulldate
 
 def createElec():
-    jsonFile = open(srcdir + electionConfig, 'w')
+    jsonFile = open(electionConfig, 'w')
     saddress = { "bulletinboard": "http://localhost", "collectingserver": "http://localhost", "votingbooth": "http://localhost", "authbooth": "http://localhost", "mix0": "http://localhost", "mix1": "http://localhost", "mix2": "http://localhost",}
     jsonData = {"available-ports": [3300, 3500], "elections": [], "server-address": saddress}
     json.dump(jsonData, jsonFile, indent = 4)
@@ -120,7 +120,7 @@ def createElec():
 def usePorts():
     newPorts = []
     try:
-        jsonFile = open(srcdir + electionConfig, 'r')
+        jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         rangePorts = jsonData["available-ports"]
         elecs = jsonData["elections"]
@@ -144,7 +144,7 @@ def usePorts():
 def getsAddress():
     sAddress = []
     try:
-        jsonFile = open(srcdir + electionConfig, 'r')
+        jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         addresses = jsonData["server-address"]
         sAddress.append(addresses["mix0"])
@@ -168,13 +168,14 @@ def getID(num):
     return elecID
 
 def hashManifest():
-    manifest_raw = codecs.open(srcdir + manifest, 'r', encoding='utf8').read()
+    manifest_raw = codecs.open(sElectDir + manifest, 'r', encoding='utf8').read()
     manifest_raw = manifest_raw.replace("\n", '').replace("\r", '').strip()
     m = hashlib.sha1()
     m.update(manifest_raw)
     return m.hexdigest()
 
-electionConfig = "/../ElectionConfigFile.json"
+
+# sElect (partial) files path
 manifest = "/_sElectConfigFiles_/ElectionManifest.json"
 collectingConf = "/CollectingServer/config.json"
 bulletinConf = "/BulletinBoard/config.json"
@@ -183,12 +184,25 @@ votingConf = "/VotingBooth/config.json"
 mix00Conf = "/templates/config_mix00.json"
 mix01Conf = "/templates/config_mix01.json"
 mix02Conf = "/templates/config_mix02.json"
-nginxConf = "/../nginx_config/handler/nginx_select.conf"
-passList = "/../ElectionHandler/_data_/pass.json"
 
-srcfile = os.path.realpath(__file__)
-srcdirec = os.path.split(os.path.split(srcfile)[0])
-srcdir = srcdirec[0]+"/sElect"
+
+
+
+# the root dir is three folders back
+rootDirProject = os.path.realpath(__file__)
+for i in range(3):
+    rootDirProject=os.path.split(rootDirProject)[0]
+#print rootDirProject
+
+# absolute paths
+sElectDir = rootDirProject + "/sElect"
+electionConfig = rootDirProject + "/ElectionConfigFile.json"
+nginxConf =  rootDirProject + "/nginx_config/handler/nginx_select.conf"
+passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
+
+
+
+
 
 votingTime = 259200    #seconds, 3 days
 ports = usePorts()
@@ -202,21 +216,23 @@ endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
 if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
     currentTime = sys.argv[1]
     endingTime = sys.argv[2]
-jwrite(srcdir + manifest, "startTime", currentTime)
-jwrite(srcdir + manifest, "endTime", endingTime)
-jwriteAdv(srcdir + manifest, "collectingServer", serverAddress[4] + "/" + str(ports[4]) + "/", "URI")
-jwriteAdv(srcdir + manifest, "bulletinBoards", serverAddress[3] + "/" + str(ports[3]) + "/", 0, "URI")
-jwriteAdv(srcdir + manifest, "mixServers", serverAddress[0] + "/" + str(ports[0]) + "/", 0, "URI")
-jwriteAdv(srcdir + manifest, "mixServers", serverAddress[1] + "/" + str(ports[1]) + "/", 1, "URI")
-jwriteAdv(srcdir + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
+jwrite(sElectDir + manifest, "startTime", currentTime)
+jwrite(sElectDir + manifest, "endTime", endingTime)
+jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[4] + "/" + str(ports[4]) + "/", "URI")
+jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[3] + "/" + str(ports[3]) + "/", 0, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[0] + "/" + str(ports[0]) + "/", 0, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[1] + "/" + str(ports[1]) + "/", 1, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
 
+
+# hardcoded if the election manifest is not present
 elecTitle = "Your Favorite Superhero Election"
 elecDescr = "This is the election of the Greatest Superhero Ever."
 if(len(sys.argv) > 1):
     elecTitle = sys.argv[3]
     elecDescr = sys.argv[4]
-jwrite(srcdir + manifest, "title", elecTitle)
-jwrite(srcdir + manifest, "description", elecDescr)
+jwrite(sElectDir + manifest, "title", elecTitle)
+jwrite(sElectDir + manifest, "description", elecDescr)
 elecQuestion = "Who is Your Favorite Superhero?"
 eleChoices = [
 	"Iron Man",
@@ -231,8 +247,8 @@ eleChoices = [
 if(len(sys.argv) > 5):
     elecQuestion = sys.argv[5]
     eleChoices = sys.argv[6].split(',')
-jwrite(srcdir + manifest, "question", elecQuestion)
-jwrite(srcdir + manifest, "choices", eleChoices)   
+jwrite(sElectDir + manifest, "question", elecQuestion)
+jwrite(sElectDir + manifest, "choices", eleChoices)   
 
 publish = True
 if(len(sys.argv) > 8):
@@ -242,16 +258,16 @@ if(len(sys.argv) > 8):
     else:
         publish = False
         
-jwrite(srcdir + manifest, "publishListOfVoters", publish)
+jwrite(sElectDir + manifest, "publishListOfVoters", publish)
 
 #modify Server ports
-jwrite(srcdir + mix00Conf, "port", ports[0])
-jwrite(srcdir + mix01Conf, "port", ports[1])
-jwrite(srcdir + mix02Conf, "port", ports[2])
-jwrite(srcdir + bulletinConf, "port", ports[3])
-jwrite(srcdir + collectingConf, "port", ports[4])
-jwrite(srcdir + votingConf, "port", ports[5])
-jwrite(srcdir + votingConf, "authenticate", serverAddress[6])
+jwrite(sElectDir + mix00Conf, "port", ports[0])
+jwrite(sElectDir + mix01Conf, "port", ports[1])
+jwrite(sElectDir + mix02Conf, "port", ports[2])
+jwrite(sElectDir + bulletinConf, "port", ports[3])
+jwrite(sElectDir + collectingConf, "port", ports[4])
+jwrite(sElectDir + votingConf, "port", ports[5])
+jwrite(sElectDir + votingConf, "authenticate", serverAddress[6])
 
 #add password
 protect = False
@@ -259,26 +275,26 @@ password = "";
 if(len(sys.argv) > 7):
     password = sys.argv[7]
     protect = True;
-jwrite(srcdir + collectingConf, "serverAdminPassword", password)
+jwrite(sElectDir + collectingConf, "serverAdminPassword", password)
 
 #get ID after modifying Manifest
 iDlength = 5
 while(iDlength < 40):
     electionID = getID(iDlength)
-    dstroot = os.path.join(os.path.split(srcdir)[0], "elections/"+electionID + "_" + os.path.split(srcdir)[1])
+    dstroot = os.path.join(rootDirProject, "elections/" + electionID + "_" + os.path.split(sElectDir)[1])
 
     try:
-        copy(srcdir, dstroot)
+        copy(sElectDir, dstroot)
         link(dstroot)
         break
     except:
         iDlength = iDlength+1
         #sys.exit("ElectionID already exists.")
 
-jwrite(srcdir + passList, electionID, password)
+jwrite(passList, electionID, password)
 
 #start all node servers
-subprocess.call([dstroot + "/VotingBooth/refreshConfig.sh"], cwd=(dstroot+"/VotingBooth"))
+subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
 #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
 col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
 m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
@@ -290,11 +306,11 @@ newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
 
 #add PIDs to config
 newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime, "protect": protect}
-jAddList(srcdir + electionConfig, "elections", newElection)
-subprocess.call([srcdir + "/../ElectionHandler/refreshConfig.sh"], cwd=(srcdir+"/../ElectionHandler"))
+jAddList(electionConfig, "elections", newElection)
+subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
 #modify nginx File
-nginxFile = open(srcdir + nginxConf, 'r+')
+nginxFile = open(nginxConf, 'r+')
 nginxData = nginxFile.readlines()
 lastBracket = 0
 counter = 0
@@ -321,5 +337,6 @@ nginxFile.seek(0)
 nginxFile.writelines(nginxData)
 nginxFile.close()
 
-#refresh nginx
-subprocess.call(["/usr/sbin/nginx", "-c", srcdir + nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
+#refresh nginx 
+#TODO: fix /usr/sbin nginx issue
+subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
