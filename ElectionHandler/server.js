@@ -76,7 +76,7 @@ app.post('/election', function(req, res) {
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		
-		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters]);
+		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters]);
 		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
@@ -102,7 +102,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "advanced") {
-		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py', startingTime, endingTime, etitle, edesc]);
+		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc]);
 		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
@@ -128,7 +128,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "simple") {
-		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py']);
+		session = spawn('python', ['src/createElection.py']);
 		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
@@ -154,7 +154,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "remove") {
-		var passList = JSON.parse(fs.readFileSync("_data_/pass.json"));
+		var passList = JSON.parse(fs.readFileSync("_data_/pwd.json"));
 		var match = passList[value];
 		var hash = match;
 		if(match !== ""){
@@ -168,7 +168,7 @@ app.post('/election', function(req, res) {
 		}
 		pass = hash;
 		
-		session = spawn('python', ['../'+direc+'ElectionSetup/CloseSession.py', value, pass]);
+		session = spawn('python', ['src/removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
 			console.log('stdout: ' + data);
 		});
@@ -192,12 +192,12 @@ app.post('/election', function(req, res) {
 
 // Test if the file with stored passwords exists and is a valid json file
 try{
-	var passFile = JSON.parse(fs.readFileSync("_data_/pass.json"));
+	var passFile = JSON.parse(fs.readFileSync("_data_/pwd.json"));
 	start();
 }
 catch(e){	//if not, remove (if existing but broken json file) and ask for an admin password
 	try{
-		fs.unlinkSync('_data_/pass.json');
+		fs.unlinkSync('_data_/pwd.json');
 	}
 	catch(e){
 	}
@@ -226,7 +226,7 @@ function verify(passwd){
       	  var salt = bcrypt.genSaltSync();
       	  var adminpw = bcrypt.hashSync(password, salt);
       	  var obj = {adminpassword: adminpw}
-      	  fs.writeFileSync('_data_/pass.json', JSON.stringify(obj, null, 4), {spaces:4});
+      	  fs.writeFileSync('_data_/pwd.json', JSON.stringify(obj, null, 4), {spaces:4});
       	  console.log('Password stored');
       	  console.log();
       	  start();
