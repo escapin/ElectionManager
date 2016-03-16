@@ -146,14 +146,15 @@ def getsAddress():
     try:
         jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        addresses = jsonData["server-address"]
-        sAddress.append(addresses["mix0"])
-        sAddress.append(addresses["mix1"])
-        sAddress.append(addresses["mix2"])
-        sAddress.append(addresses["bulletinboard"])
-        sAddress.append(addresses["collectingserver"])
-        sAddress.append(addresses["votingbooth"])
-        sAddress.append(addresses["authbooth"])
+        if jsonData["deplyment"] is False:
+            addresses = jsonData["server-address"]
+            sAddress.append(addresses["mix0"])
+            sAddress.append(addresses["mix1"])
+            sAddress.append(addresses["mix2"])
+            sAddress.append(addresses["bulletinboard"])
+            sAddress.append(addresses["collectingserver"])
+            sAddress.append(addresses["votingbooth"])
+            sAddress.append(addresses["authbooth"])
         jsonFile.close()
     except IOError:
         for x in range(6):
@@ -196,10 +197,10 @@ for i in range(3):
 
 # absolute paths
 sElectDir = rootDirProject + "/sElect"
-electionConfig = rootDirProject + "/ElectionConfigFile.json"
+electionConfig = rootDirProject + "/handlerConfigFile.json"
+sAddresses = rootDirProject + "/handlerConfigFile.json"
 nginxConf =  rootDirProject + "/nginx_config/handler/nginx_select.conf"
 passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
-
 
 
 
@@ -294,7 +295,7 @@ while(iDlength < 40):
 jwrite(passList, electionID, password)
 
 #start all node servers
-subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
+subprocess.call([dstroot + "/VotingBooth/refreshFilesVotingBooth.sh"], cwd=(dstroot+"/VotingBooth"))
 #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
 col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
 m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))

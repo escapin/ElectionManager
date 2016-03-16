@@ -12,7 +12,9 @@ nginx:
 
 handler:
 	cd ElectionHandler; make
-	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
+	mkdir _handlerConfigFiles_
+	cp templates/handlerConfigFile.json _handlerConfigFiles/handlerConfigFile.json
+	cp templates/serverAddresses.json _handlerConfigFiles/serverAddresses.json
 	mkdir -p elections
 
 select:
@@ -30,7 +32,7 @@ handlerclean:
 	cd ElectionHandler; make clean
 
 configclean:
-	-rm ElectionConfigFile.json
+	-rm -rf _handlerConfigFiles_
 	-rm -rf nginx_config/
 
 selectclean:
