@@ -10,7 +10,6 @@ import hashlib
 import codecs
 import subprocess
 import time
-from signal import SIGKILL
 
 def copy(src, dest):
     try:
