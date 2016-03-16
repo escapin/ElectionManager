@@ -9,7 +9,7 @@ elections/
 # all 'node_modules' directories except for that in the root dir
 **/*/node_modules/
 _data_*
-ElectionConfigFile.json
+_handlerConfigFiles_*
 ElectionHandler/webapp/js/ElectionConfigFile.js
 ElectionHandler/webapp/js/config.js
 ElectionHandler/webapp/pure/
