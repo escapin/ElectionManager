@@ -56,11 +56,13 @@ sElectDir = rootDirProject + "/sElect"
 
 electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 
-#get ElectionID
+#get elections
 jsonFile = open(electionConfig, 'r')
 jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
 elecs = jsonData["elections"]
 jsonFile.close()
+
+#resume elections which haven't been removed and update PIDs
 for x in range (len(elecs)):
     
     electionID = elecs[x]["electionID"]
