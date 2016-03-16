@@ -1,14 +1,8 @@
 default:
 	@echo Specify the goal: devenv OR devclean
 
-devenv: nginx handler select
+devenv: handler nginx select
 
-nginx:
-	mkdir -p nginx_config/handler/log
-	mkdir -p nginx_config/root/log
-	cp templates/nginx_root.conf nginx_config/root/nginx_root.conf
-	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
-	python configNginx.py
 
 handler:
 	cd ElectionHandler; make
@@ -16,6 +10,13 @@ handler:
 	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
 	cp templates/serverAddresses.json _handlerConfigFiles_/serverAddresses.json
 	mkdir -p elections
+
+nginx:
+	mkdir -p nginx_config/handler/log
+	mkdir -p nginx_config/root/log
+	cp templates/nginx_root.conf nginx_config/root/nginx_root.conf
+	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
+	python configNginx.py
 
 select:
 	git clone -b merging https://github.com/escapin/sElect.git
