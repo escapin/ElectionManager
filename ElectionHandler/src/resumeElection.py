@@ -1,15 +1,14 @@
 import os
+import os.path
 import json
 import shutil
 from shutil import ignore_patterns
 import collections
 import errno
-import datetime
 import sys
-import hashlib
 import codecs
 import subprocess
-import time
+
 
 def jwrite(src, key, value):
     try:
@@ -70,14 +69,28 @@ for x in range (len(elecs)):
     dstroot = os.path.join(rootDirProject, "elections/" + electionID + "_" + os.path.split(sElectDir)[1])
 
     #restart all node servers
-    #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
-    col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
-    m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
-    m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
-    m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
+    if os.path.exists(dstroot+"/CollectingServer/_data_/partialResult.msg"):
+        col = subprocess.Popen(["node", "collectingServer.js", "--serveResult"], cwd=(dstroot+"/CollectingServer"))
+    else:
+        col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
+        
+    if os.path.exists(dstroot+"/mix/00/_data_/ballots00_output.msg"):
+        m1 = subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/00"))
+    else:
+        m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
+        
+    if os.path.exists(dstroot+"/mix/01/_data_/ballots01_output.msg"):
+        m2 = subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/01"))
+    else:
+        m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
+        
+    if os.path.exists(dstroot+"/mix/02/_data_/ballots02_output.msg"):
+        m3 = subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/02"))
+    else:
+        m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
+        
     bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-    #newPIDs = [vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
     newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
-
+        
     jwriteAdv(electionConfig, "elections", newPIDs, 0, "processIDs")
 
