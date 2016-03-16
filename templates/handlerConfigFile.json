@@ -1,7 +1,7 @@
 {    
     "deployment": false,
-    "handler-port":8432,
-	"nginx-port": 8433,
+    "handler-port":8442,
+	"nginx-port": 8443,
     "available-ports": [
         3300, 
         3900
