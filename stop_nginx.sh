@@ -9,6 +9,6 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 echo \* Stopping nginx services managing the sElect servers...
-nginx -c $DIR/nginx_config/handler/nginx_select.conf -s quit 2>/dev/null
+/usr/sbin/nginx -c $DIR/nginx_config/handler/nginx_select.conf -s quit 2>/dev/null
 echo \* Stopping nginx services redirecting ports 80 and 433 \(requires *superuser* privileges\)...
 sudo nginx -c $DIR/nginx_config/root/nginx_root.conf -s quit 2>/dev/null
