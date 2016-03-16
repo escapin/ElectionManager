@@ -190,6 +190,7 @@ def hashManifest():
 
 # sElect (partial) files path
 manifest = "/_sElectConfigFiles_/ElectionManifest.json"
+defaultManifest = "/templates/ElectionManifest.json"
 collectingConf = "/CollectingServer/config.json"
 bulletinConf = "/BulletinBoard/config.json"
 votingManifest = "/VotingBooth/ElectionManifest.json"     
@@ -238,30 +239,28 @@ jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[1] + "/" + str(ports
 jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
 
 
-# hardcoded if the election manifest is not present
-elecTitle = "Your Favorite Superhero Election"
-elecDescr = "This is the election of the Greatest Superhero Ever."
+#read default data from sElect/templates/ElectionManifest.json
+try:
+    jsonFile = open(sElectDir + defaultManifest, 'r')
+    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+    elecTitle = jsonData["title"]
+    elecDescr = jsonData["description"]
+    elecQuestion = jsonData["question"]
+    eleChoices = jsonData["choices"]
+except IOError:
+    sys.exit("ElectionManifest missing")
+
 if(len(sys.argv) > 1):
     elecTitle = sys.argv[3]
     elecDescr = sys.argv[4]
-jwrite(sElectDir + manifest, "title", elecTitle)
-jwrite(sElectDir + manifest, "description", elecDescr)
-elecQuestion = "Who is Your Favorite Superhero?"
-eleChoices = [
-	"Iron Man",
-	"Batman",
-	"Wonder Woman",
-	"Spider Man",
-	"Dr. Manhattan",
-	"Hulk",
-	"Superman",
-	"Bugs Bunny"
-    ]
+    jwrite(sElectDir + manifest, "title", elecTitle)
+    jwrite(sElectDir + manifest, "description", elecDescr)
+
 if(len(sys.argv) > 5):
     elecQuestion = sys.argv[5]
     eleChoices = sys.argv[6].split(',')
-jwrite(sElectDir + manifest, "question", elecQuestion)
-jwrite(sElectDir + manifest, "choices", eleChoices)   
+    jwrite(sElectDir + manifest, "question", elecQuestion)
+    jwrite(sElectDir + manifest, "choices", eleChoices)   
 
 publish = True
 if(len(sys.argv) > 8):
