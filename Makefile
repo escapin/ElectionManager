@@ -13,8 +13,8 @@ nginx:
 handler:
 	cd ElectionHandler; make
 	mkdir _handlerConfigFiles_
-	cp templates/handlerConfigFile.json _handlerConfigFiles/handlerConfigFile.json
-	cp templates/serverAddresses.json _handlerConfigFiles/serverAddresses.json
+	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
+	cp templates/serverAddresses.json _handlerConfigFiles_/serverAddresses.json
 	mkdir -p elections
 
 select:
