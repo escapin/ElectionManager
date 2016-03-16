@@ -94,7 +94,7 @@ rootDirProject = os.path.realpath(__file__)
 for i in range(3):
     rootDirProject=os.path.split(rootDirProject)[0]
              
-electionConfig = rootDirProject + "/ElectionConfigFile.json"
+electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 nginxConf = rootDirProject + "/nginx_config/handler/nginx_select.conf"
 passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
 

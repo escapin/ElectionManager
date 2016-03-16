@@ -6,6 +6,7 @@ function electionButtons() {
 	var config;
 	var port;
 	var address;
+	var host;
 	
 	/* Create 'click' event handler for rows */
     var rows;
@@ -24,7 +25,7 @@ function electionButtons() {
 	function simpleElection(rand) {
 		disableButtons();
 		$('#processing').fadeIn(150);
-		$.post(address+":"+port+"/election", {task: "simple", ID: "generated", random: rand, title: "", description: ""})
+		$.post(host+":"+port+"/election", {task: "simple", ID: "generated", random: rand, title: "", description: ""})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -41,7 +42,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ address+":"+port+"/election");
+			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
 		 });
 	}
 	
@@ -52,7 +53,7 @@ function electionButtons() {
     	else{
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		$.post(address+":"+port+"/election", {task: "remove", ID: value, password: pass})
+    		$.post(host+":"+port+"/election", {task: "remove", ID: value, password: pass})
     		 .done(function(data){
     			$('#processing').fadeOut(150);
     			enableButtons();
@@ -69,7 +70,7 @@ function electionButtons() {
     		 .fail(function(){
     			 enableButtons();
     			 $('#processing').hide();
-    			 alerting('cannot connect to ElectionHandler at '+ address+":"+port+"/election");
+    			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
     		 });
     	}
 	}
@@ -117,7 +118,7 @@ function electionButtons() {
 		var startingTime = $('#start-time').val();
 		var endingTime = $('#end-time').val();
 		$('#processing').fadeIn(150);
-		$.post(address+":"+port+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
+		$.post(host+":"+port+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -136,7 +137,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ address+":"+port+"/election");
+			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
 		 });
     }
 	
@@ -235,7 +236,7 @@ function electionButtons() {
 		}
 		electionCh.choices = echoices;
 		$('#processing').fadeIn(150);
-		$.post(address+":"+port+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
+		$.post(host+":"+port+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -254,7 +255,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ address+":"+port+"/election");
+			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
 			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
 			 $('#complete').hide(150);
 			 $('#welcome').show();
@@ -270,7 +271,7 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-			window.location.href = address+"/"+value+"/votingBooth";
+    		window.location.href = address+"/"+value+"/votingBooth";
 		}
 	});
 	
@@ -465,7 +466,13 @@ function electionButtons() {
 	    
 		config = JSON.parse(configRaw);
 		port = config.port;
+		host = config.address;
 		address = config.address;
+		
+		//don't use port 80 if it's not deployed
+		 if(electionConf.deployment === false){
+			 address = address+":"+electionConf["nginx-port"];
+		 }
 		
 		/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');

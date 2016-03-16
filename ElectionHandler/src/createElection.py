@@ -131,14 +131,14 @@ def usePorts():
             if openPort in usingPorts:
                 continue
             newPorts.append(openPort)
-            if len(newPorts) >= 6:
+            if len(newPorts) >= 5:
                 break
-        if len(newPorts) < 6:
+        if len(newPorts) < 5:
             sys.exit("Not enough ports available.")
         jsonFile.close()
     except IOError:
         createElec()
-        newPorts = [3300, 3301, 3302, 3111, 3299, 3333]
+        newPorts = [3300, 3301, 3302, 3111, 3299]
     return newPorts
 
 def getsAddress():
@@ -146,7 +146,19 @@ def getsAddress():
     try:
         jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        if jsonData["deplyment"] is False:
+        if jsonData["deployment"] is False:
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            jsonFile.close()
+        else:
+            jsonFile.close()
+            jsonFile = open(serverAddr, 'r')
+            jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
             addresses = jsonData["server-address"]
             sAddress.append(addresses["mix0"])
             sAddress.append(addresses["mix1"])
@@ -197,8 +209,8 @@ for i in range(3):
 
 # absolute paths
 sElectDir = rootDirProject + "/sElect"
-electionConfig = rootDirProject + "/handlerConfigFile.json"
-sAddresses = rootDirProject + "/handlerConfigFile.json"
+electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
+serverAddr = rootDirProject + "/_handlerConfigFiles_/serverAddresses.json"
 nginxConf =  rootDirProject + "/nginx_config/handler/nginx_select.conf"
 passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
@@ -267,7 +279,7 @@ jwrite(sElectDir + mix01Conf, "port", ports[1])
 jwrite(sElectDir + mix02Conf, "port", ports[2])
 jwrite(sElectDir + bulletinConf, "port", ports[3])
 jwrite(sElectDir + collectingConf, "port", ports[4])
-jwrite(sElectDir + votingConf, "port", ports[5])
+#jwrite(sElectDir + votingConf, "port", ports[5])        #not using the VotingBooth server, static path instead
 jwrite(sElectDir + votingConf, "authenticate", serverAddress[6])
 
 #add password
@@ -295,7 +307,7 @@ while(iDlength < 40):
 jwrite(passList, electionID, password)
 
 #start all node servers
-subprocess.call([dstroot + "/VotingBooth/refreshFilesVotingBooth.sh"], cwd=(dstroot+"/VotingBooth"))
+subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
 #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
 col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
 m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))

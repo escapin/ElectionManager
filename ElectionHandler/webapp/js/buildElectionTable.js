@@ -4,10 +4,15 @@
 function buildElectionTable() {
 	 
 	 var configs = JSON.parse(configRaw);
-	 var host = configs.address;
+	 var address = configs.address;
 	 var electionConf = JSON.parse(electionConfigRaw);	 
 	 var elections = electionConf.elections;
-	 	 
+	 
+	 //don't use port 80 if it's not deployed
+	 if(electionConf.deployment === false){
+		 address = address+":"+electionConf["nginx-port"];
+	 }
+	 
 	 document.getElementById("elections").innerHTML = "";
 	 	 
 	 var head$ = $('<tr/>');
@@ -47,7 +52,7 @@ function buildElectionTable() {
       // checking if the final server has ready result.
       //
  	 var stat = 'what';
- 	 var url = host+'/'+eleID+'/mix/03/status';
+ 	 var url = address+'/'+eleID+'/mix/03/status';
       $.get(url)
        .fail(function () { 
           var stat = 'no response';
@@ -74,7 +79,7 @@ function buildElectionTable() {
   // works for a different election.
   //
   function resultOfFinalServerReady(eleID) {
- 	 var url = host+'/'+eleID+'/mix/03/status';
+ 	 var url = address+'/'+eleID+'/mix/03/status';
       $.get(url)
        .fail(function () { 
           return 'pending';
