@@ -28,29 +28,19 @@ app.use(bodyParser.urlencoded({
 //var basicAuth = require('basic-auth-connect');
 //app.use('/election/*', basicAuth('admin', '888')); // authentication for the admin panel only
 
-/**process.stdin.resume();
-process.stdin.setEncoding('utf8');
-var util = require('util');
-var adminpw = "";
-var verify = 0;
-process.stdin.on('data', function (text) {
-	if (text == ""){
-		console.log('password cannot be empty, try again:');
+/**Resume previous elections **/
+var oldSession = spawn('python', ['src/resumeElection.py']);
+oldSession.stdout.on('data', function (data) {
+	if(String(data).indexOf("OTP")>-1){
+		console.log('stdout: ' + data);
 	}
-	else if (verify == 0){
-		verify = 1;
-		adminpw = text;
-		console.log('reenter password:');
+	else if(String(data).indexOf("TLS")>-1){
+		console.log('mix stdout: ' + data);
 	}
-	else if (text == adminpw){
-		console.log('successfully entered password');
-	}
-	else {
-		verify = 0;
-		adminpw = "";
-		console.log('passwords do not match, try again:');
-	}
-});**/
+});
+oldSession.stderr.on('data', function (data) {
+    console.log('stderr: ' + data);
+});
 
 app.post('/election', function(req, res) {
 	var task = req.body.task;
