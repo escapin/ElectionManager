@@ -45,8 +45,9 @@ try:
     jsonFile = open(electionConfig, 'r')
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
     nginxPort = jsonData["nginx-port"]
+    jsonFile.close()
 except IOError:
-    print 'Handler configuration file missing or corrupted ("nginx-port" field not found)'
+    print('Handler configuration file missing or corrupted ("nginx-port" field not found)')
 
 
 writeDirec(nginxFile, nginxLog)
