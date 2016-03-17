@@ -457,6 +457,10 @@ function electionButtons() {
 	
 	/* Load configs and enable selecting rows */
 	function reloading(){
+		$("#vote").prop('disabled', true);
+		$("#close").prop('disabled', true);
+		$("#remove").prop('disabled', true);
+		
 		
 		reload_js("js/ElectionConfigFile.js");
 		buildElectionTable();
@@ -483,7 +487,12 @@ function electionButtons() {
 	        rows.removeClass('highlight');
 	        row.addClass('highlight');
 	        
-	        value = $(this).text().trim().split(" ")[0];  
+	        value = $(this).text().trim().split(" ")[0]; 
+	        
+	        $("#vote").prop('disabled', null);
+			$("#close").prop('disabled', null);
+			$("#remove").prop('disabled', null);
+	        
 	    });
 	    
 	    $(document).bind('selectstart dragstart', function(e) { 
