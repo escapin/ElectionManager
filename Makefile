@@ -8,14 +8,11 @@ handler:
 	cd ElectionHandler; make
 	mkdir _handlerConfigFiles_
 	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
-	cp templates/serverAddresses.json _handlerConfigFiles_/serverAddresses.json
 	mkdir -p elections
 
 nginx:
-	mkdir -p nginx_config/handler/log
-	mkdir -p nginx_config/root/log
-	cp templates/nginx_root.conf nginx_config/root/nginx_root.conf
-	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
+	mkdir -p nginx_config/log
+	cp templates/nginx_select.conf nginx_config/nginx_select.conf
 	python configNginx.py
 
 select:
@@ -26,14 +23,14 @@ select:
 
 
 
-devclean: handlerclean configclean selectclean elclean
+devclean: handlerclean nginxclean selectclean elclean
 
 
 handlerclean:
 	cd ElectionHandler; make clean
-
-configclean:
 	-rm -rf _handlerConfigFiles_
+
+nginxclean:	
 	-rm -rf nginx_config/
 
 selectclean:

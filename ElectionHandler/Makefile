@@ -2,7 +2,6 @@ build: 	devenv references
 
 devenv:
 	npm install
-	cp ../node_modules/cryptofunc/index.js webapp/js/cryptofunc.js
 	mkdir -p webapp/pure
 	cd webapp/pure; wget -N http://yui.yahooapis.com/pure/0.5.0/pure-min.css
 	cd webapp/pure; wget -N http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
