@@ -271,7 +271,7 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-    		window.location.href = address+"/"+value+"/votingBooth";
+    		window.location.href = address+"/"+value+"/votingBooth/";
 		}
 	});
 	
