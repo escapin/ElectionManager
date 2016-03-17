@@ -13,7 +13,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
 echo Starting nginx services managing the sElect servers...
-/usr/sbin/nginx -c $DIR/nginx_config/handler/nginx_select.conf 2>/dev/null
+/usr/sbin/nginx -c $DIR/nginx_config/nginx_select.conf 2>/dev/null
 
 
 echo Starting the ElectionHandler...

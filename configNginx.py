@@ -35,24 +35,20 @@ def writePort(src, port):
 
 srcfile = os.path.realpath(__file__)
 rootDirProject = os.path.split(srcfile)[0]
-nginxRootLog = rootDirProject + "/nginx_config/root/log"
-nginxLog = rootDirProject + "/nginx_config/handler/log"
-nginxRootFile = rootDirProject + "/nginx_config/root/nginx_root.conf"
-nginxFile = rootDirProject + "/nginx_config/handler/nginx_select.conf"
+nginxLog = rootDirProject + "/nginx_config/log"
+nginxFile = rootDirProject + "/nginx_config/nginx_select.conf"
 
 electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 
-nginxPort = 0
+nginxPort = -1
 try:
     jsonFile = open(electionConfig, 'r')
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
     nginxPort = jsonData["nginx-port"]
 except IOError:
-    nginxPort = 8443
+    print 'Handler configuration file missing or corrupted ("nginx-port" field not found)'
 
-writeDirec(nginxRootFile, nginxRootLog)
+
 writeDirec(nginxFile, nginxLog)
-
-writePort(nginxRootFile, nginxPort)
 writePort(nginxFile, nginxPort)
 
