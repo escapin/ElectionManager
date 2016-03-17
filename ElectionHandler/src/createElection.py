@@ -109,13 +109,6 @@ def addSec(tm, secs):
     fulldate = tm + datetime.timedelta(seconds=secs)
     return fulldate
 
-def createElec():
-    jsonFile = open(electionConfig, 'w')
-    saddress = { "bulletinboard": "http://localhost", "collectingserver": "http://localhost", "votingbooth": "http://localhost", "authbooth": "http://localhost", "mix0": "http://localhost", "mix1": "http://localhost", "mix2": "http://localhost",}
-    jsonData = {"available-ports": [3300, 3500], "elections": [], "server-address": saddress}
-    json.dump(jsonData, jsonFile, indent = 4)
-    jsonFile.close()
-
 def usePorts():
     newPorts = []
     try:
@@ -136,8 +129,7 @@ def usePorts():
             sys.exit("Not enough ports available.")
         jsonFile.close()
     except IOError:
-        createElec()
-        newPorts = [3300, 3301, 3302, 3111, 3299]
+        sys.exit("handlerConfigFile.json missing or corrupt")
     return newPorts
 
 def getsAddress():
@@ -169,8 +161,7 @@ def getsAddress():
         jsonFile.close()
     except IOError:
         for x in range(6):
-            sAddress.append("http://localhost")
-        sAddress.append("http://localhost/test/verify")
+            sys.exit("serverAddresses.json missing or corrupt")
     return sAddress
 
 def getID(num):
@@ -216,8 +207,14 @@ passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
 
 
+#get duration from handlerConfigFile
+try:
+    jsonFile = open(electionConfig, 'r')
+    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+    votingTime = jsonData["electionDurationInHours"]*60*60    #hours to seconds
+except IOError:
+    sys.exit("handlerConfigFile.json missing or corrupt (electionDurationInHours)")
 
-votingTime = 259200    #seconds, 3 days
 ports = usePorts()
 
 #where the servers are placed
@@ -246,8 +243,10 @@ try:
     elecDescr = jsonData["description"]
     elecQuestion = jsonData["question"]
     eleChoices = jsonData["choices"]
+    publish = jsonData["publishListOfVoters"]
+    jsonFile.close()
 except IOError:
-    sys.exit("ElectionManifest missing")
+    sys.exit("ElectionManifest missing or corrupt")
 
 if(len(sys.argv) > 1):
     elecTitle = sys.argv[3]
@@ -261,15 +260,13 @@ if(len(sys.argv) > 5):
     jwrite(sElectDir + manifest, "question", elecQuestion)
     jwrite(sElectDir + manifest, "choices", eleChoices)   
 
-publish = True
 if(len(sys.argv) > 8):
     publish = sys.argv[8]
     if publish == "true":
         publish = True
     else:
         publish = False
-        
-jwrite(sElectDir + manifest, "publishListOfVoters", publish)
+    jwrite(sElectDir + manifest, "publishListOfVoters", publish)
 
 #modify Server ports
 jwrite(sElectDir + mix00Conf, "port", ports[0])
