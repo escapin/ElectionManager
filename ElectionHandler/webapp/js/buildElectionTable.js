@@ -18,9 +18,9 @@ function buildElectionTable() {
 	 var head$ = $('<tr/>');
 	 head$.append($('<th style="text-align:center"/>').html(" Election IDs "));
 	 head$.append($('<th style="text-align:center"/>').html(" Election Title "));
-	 head$.append($('<th style="text-align:center"/>').html(" Election State "));
 	 head$.append($('<th style="text-align:center"/>').html(" Starting Time "));
 	 head$.append($('<th style="text-align:center"/>').html(" Ending Time "));
+	 head$.append($('<th style="text-align:center"/>').html(" Election State "));
   $("#elections").append(head$);
   
   for (var i = 0 ; i < elections.length ; i++) {
@@ -31,9 +31,9 @@ function buildElectionTable() {
       
       row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+" &nbsp;&nbsp;&nbsp;"));
       row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionTitle+"&nbsp;&nbsp;&nbsp;"));
-      row$.append($('<td style="text-align:center" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
       row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].startTime.substring(0, elections[i].startTime.length-9)+"&nbsp;&nbsp;&nbsp;"));
       row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].endTime.substring(0, elections[i].endTime.length-9)+"&nbsp;&nbsp;&nbsp;"));
+      row$.append($('<td style="text-align:center" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
       $("#elections").append(row$);
       
       getElectionStatus(elecID, function (eleID, stat){
