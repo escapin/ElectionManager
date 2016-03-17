@@ -201,7 +201,7 @@ for i in range(3):
 # absolute paths
 sElectDir = rootDirProject + "/sElect"
 electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
-serverAddr = rootDirProject + "/_handlerConfigFiles_/serverAddresses.json"
+serverAddr = rootDirProject + "/deployment/serverAddresses.json"
 nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
 passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
