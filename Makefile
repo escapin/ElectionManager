@@ -16,7 +16,7 @@ handler:
 	mkdir -p elections
 
 select:
-	git clone -b merging https://github.com/escapin/sElect.git
+	git clone https://github.com/escapin/sElect.git
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
