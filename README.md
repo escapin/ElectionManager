@@ -9,7 +9,6 @@ remove **secure** and **verifiable** elections powered by sElect.
 * node.js and npm (tested on v4.3.1 and 1.4.21, respectively)
 * python (tested on v.2.7)
 * nginx (tested on v1.9.10)
-* superuser privileges on the operative system
 * git and wget
 * further dependencies needed for the sElect system:
   * Java JDK (tested with both openjdk-7 and oraclejdk-8).
@@ -33,11 +32,11 @@ or *closed* - the election is over and the final result is ready and available
 (*not responding* indicates a problem communicating with the server).
 
 
-## Usage 
+## Usage
 
 The web interface contains the following options to manage elections:
 
-**Create Election** creates a mock election with predetermined settings
+**Set up Mock Election** creates a mock election with predetermined settings
 (such as title, description, and so on), which starts immediately
 and ends after 72 hours.
 
@@ -50,9 +49,9 @@ confirmation, if set.
 **Remove Election** removes the selected election. If the voting results
 should be saved on the server, the election has to be closed first.
 
-**Advanced Election** shows the advanced settings to create customized
-elections.  Elements such as title, description, starting/ending time,
-questions and answers can be set. In particular:
+**Create Election** allows to create customized elections.  Elements
+such as title, description, starting/ending time, questions and answers
+can be set. In particular:
 
 * _Publish list of voters_: This option shows the e-mail addresses of
   the voters who have voted in this election (not what they have voted
@@ -82,37 +81,23 @@ development environment for it. This operation can be reverted by
 `make devclean`.
 
 
-The *nginx* HTTP server is configured to redirect the traffic from ports
-80 and 433 to port 8443:
-
-```
-./start_nginx.sh
-```
-
-This command requires [sudo] password since, by UNIX standard, only with
-*superuser* privileges it is allowed to listen to privilege ports
-(i.e., ports below 1024).
-
-
-The nginx sessions and the election manager server can be started by
+The election manager and the nginx sessions used to handle the election created can be started by:
 
 ```
 ./run.sh
 ```
 
-When starting the server for the first time, the user will be prompted to enter
-the administrator password which can be used to manage any election, even those one protected by a different password.
+When starting the server for the first time, the user will be prompted
+to enter the administrator password used to manage any election (even
+those one protected by a different password).
 
 
-##### It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.
+##### It is now possible to access the election manager via a browser typing ``localhost:8443`` in the address bar.
 
 
-The nginx process created above can be stopped by
+The nginx sessions created can be stopped by
 
 ```
-./stop_nginx.sh
+./stopNginx.sh
 ```
-
-The user will be prompted for [sudo] password again, in order to
-end the instance created by the superuser.
 
