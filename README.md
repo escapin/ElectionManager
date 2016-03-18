@@ -92,7 +92,7 @@ to enter the administrator password used to manage any election (even
 those one protected by a different password).
 
 
-##### It is now possible to access the election manager via a browser typing ``localhost:8443`` in the address bar.
+##### It is now possible to access the election manager by typing ``localhost:8443`` in the address bar of a browser.
 
 
 The nginx sessions created can be stopped by
