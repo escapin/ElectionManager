@@ -1,12 +1,14 @@
 function electionButtons() {
 	
-	var electionConf;	 
+	var electionConf;
+	var sAddresses;
+	var votingBooth;
+	var collectingServer;
 	var elections;
     
-	var config;
-	var port;
-	var address;
 	var host;
+	var port;
+
 	
 	/* Create 'click' event handler for rows */
     var rows;
@@ -271,7 +273,7 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-    		window.location.href = address+"/"+value+"/votingBooth/";
+    		window.location.href = votingBooth+"/"+value+"/votingBooth/";
 		}
 	});
 	
@@ -281,7 +283,7 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-			window.location.href = address+"/"+value+"/collectingServer/admin/close";
+			window.location.href = collectingServer+"/"+value+"/collectingServer/admin/close";
 		}
 	});
     
@@ -465,17 +467,20 @@ function electionButtons() {
 		reload_js("js/ElectionConfigFile.js");
 		buildElectionTable();
 		
-		electionConf = JSON.parse(electionConfigRaw);	 
+		electionConf = JSON.parse(electionConfigRaw);
+		sAddresses = JSON.parse(sAddressesRaw);
 		elections = electionConf.elections;
 	    
-		config = JSON.parse(configRaw);
-		port = config.port;
-		host = config.address;
-		address = config.address;
+		host = "http://localhost";
+		port = electionConf["handler-port"];
+		votingBooth = "http://localhost:"+electionConf["nginx-port"];
+		collectingServer = "http://localhost:"+electionConf["nginx-port"];
 		
 		//don't use port 80 if it's not deployed
-		 if(electionConf.deployment === false){
-			 address = address+":"+electionConf["nginx-port"];
+		 if(electionConf.deployment === true){
+			 host = sAddresses.electionHandler;
+			 votingBooth = sAddresses["server-address"].votingbooth;
+			 collectingServer = sAddresses["server-address"].collectingserver;
 		 }
 		
 		/* Create 'click' event handler for rows */
