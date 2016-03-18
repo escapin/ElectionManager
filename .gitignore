@@ -11,6 +11,7 @@ elections/
 _data_*
 _handlerConfigFiles_*
 ElectionHandler/webapp/js/ElectionConfigFile.js
+ElecionHandler/webapp/js/serverAddresses.js
 ElectionHandler/webapp/js/config.js
 ElectionHandler/webapp/pure/
 ElectionHandler/webapp/ref/
