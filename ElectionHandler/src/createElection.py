@@ -138,13 +138,9 @@ def getsAddress():
         jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         if jsonData["deployment"] is False:
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            for x in range(6):
+                sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]+"/auth"))
             jsonFile.close()
         else:
             jsonFile.close()
@@ -160,8 +156,7 @@ def getsAddress():
             sAddress.append(addresses["authbooth"])
         jsonFile.close()
     except IOError:
-        for x in range(6):
-            sys.exit("serverAddresses.json missing or corrupt")
+        sys.exit("serverAddresses.json missing or corrupt")
     return sAddress
 
 def getID(num):
