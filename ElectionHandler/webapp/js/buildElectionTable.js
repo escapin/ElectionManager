@@ -3,7 +3,6 @@
 
 function buildElectionTable() {
 	 
-	 var configs = JSON.parse(configRaw);
 	 var electionConf = JSON.parse(electionConfigRaw);	
 	 var sAddresses = JSON.parse(sAddressesRaw);
 	 var elections = electionConf.elections;
