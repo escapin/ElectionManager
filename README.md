@@ -37,7 +37,7 @@ or *closed* - the election is over and the final result is ready and available
 The web interface contains the following options to manage elections:
 
 **Set up Mock Election** creates a mock election with predetermined settings
-(such as title, question, list of choices and so on), which starts immediately
+(such as title, question, list of choices, and so on), which starts immediately
 and ends after 72 hours.
 
 **Vote** redirects to the voting booth of the sElect system to start
@@ -61,7 +61,7 @@ can be set. In particular:
   the verification code to check whether his vote has been properly 
   counted. In this way, not even the voting booth needs to be trusted. 
  
-### Security Issues
+##### Security Issues
 
 Since the system is designed to run on https, running the system 
 on http allows the transmission of passwords as plaintext.
