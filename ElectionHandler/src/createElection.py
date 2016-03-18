@@ -140,7 +140,7 @@ def getsAddress():
         if jsonData["deployment"] is False:
             for x in range(6):
                 sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"]+"/auth"))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"])+"/auth")
             jsonFile.close()
         else:
             jsonFile.close()
