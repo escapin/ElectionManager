@@ -66,7 +66,7 @@ def matchPass(src, key, value):
         try:
             if(key == match):
                 return True;
-            elif(key == jsonData["masterpass"]):    #if no masterpass been chosen, this will throw an error
+            elif(key == jsonData["adminpassword"]):    #if no masterpass been chosen, this will throw an error
                 return True;
             else:
                 sys.exit("wrong password")
