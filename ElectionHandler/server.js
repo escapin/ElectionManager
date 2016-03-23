@@ -54,7 +54,8 @@ app.post('/election', function(req, res) {
 	var pass = req.body.password;
 	var rand = req.body.random;
 	var listVoters = req.body.publishVoters;
-	
+	var displayOtp = req.body.showOtp;
+	console.log(displayOtp);
 	var direc = "";
 	
 	if (rand === "true"){
@@ -66,7 +67,7 @@ app.post('/election', function(req, res) {
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		
-		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters]);
+		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters, rand, displayOtp]);
 		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
@@ -151,7 +152,7 @@ app.post('/election', function(req, res) {
 			var salt = bcrypt.getSalt(match);
 			hash = bcrypt.hashSync(pass, salt);
 			if(match !== hash){
-				match = passList["masterpass"];
+				match = passList["adminpassword"];
 				salt = bcrypt.getSalt(match);
 				hash = bcrypt.hashSync(pass, salt);
 			}

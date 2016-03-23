@@ -264,6 +264,7 @@ if(len(sys.argv) > 8):
         publish = False
     jwrite(sElectDir + manifest, "publishListOfVoters", publish)
 
+
 #modify Server ports
 jwrite(sElectDir + mix00Conf, "port", ports[0])
 jwrite(sElectDir + mix01Conf, "port", ports[1])
@@ -296,6 +297,21 @@ while(iDlength < 40):
         #sys.exit("ElectionID already exists.")
 
 jwrite(passList, electionID, password)
+
+if(len(sys.argv) > 9):
+    random = sys.argv[9]
+    showOtp = sys.argv[10]
+    if random == "true":
+        random = True
+    else:
+        random = False
+    if showOtp == "true":
+        showOtp = True
+    else:
+        showOtp = False
+    jwrite(dstroot + votingConf, "userChosenRandomness", random)
+    jwrite(dstroot + votingConf, "showOtp", showOtp)
+    jwrite(dstroot + collectingConf, "sendOtpBack", showOtp)
 
 #start all node servers
 subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))

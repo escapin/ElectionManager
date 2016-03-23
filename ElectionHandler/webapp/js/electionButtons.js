@@ -220,6 +220,7 @@ function electionButtons() {
     	window.clearInterval(buttonEnable);
     	disableButtons();
     	var listVoters = document.getElementById("listVoters").checked;
+    	var visibleOtp = document.getElementById("displayOtp").checked;
     	changeCulture("de-DE");
 		var ename = $('#e-name').val();
 		var edesc = $('#e-desc').val();
@@ -238,7 +239,7 @@ function electionButtons() {
 		}
 		electionCh.choices = echoices;
 		$('#processing').fadeIn(150);
-		$.post(host+":"+port+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
+		$.post(host+":"+port+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters, showOtp: visibleOtp})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
