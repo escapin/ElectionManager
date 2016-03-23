@@ -88,8 +88,10 @@ for x in range (len(elecs)):
         m3 = subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/02"))
     else:
         m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
-        
-    bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
+    if os.path.exists(dstroot+"/BulletinBoard/_data_/resultMIX2.msg"):
+        bb = subprocess.Popen(["node", "bb.js", "--serveResult"], cwd=(dstroot+"/BulletinBoard"))
+    else:
+        bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
     newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
         
     jwriteAdv(electionConfig, "elections", newPIDs, 0, "processIDs")
