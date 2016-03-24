@@ -54,20 +54,13 @@ app.post('/election', function(req, res) {
 	var pass = req.body.password;
 	var rand = req.body.random;
 	var listVoters = req.body.publishVoters;
-	var displayOtp = req.body.showOtp;
-	console.log(displayOtp);
-	var direc = "";
-	
-	if (rand === "true"){
-		direc = "sElectRandom/"
-	}
 	
 	var session = null;
 	if (task === "complete"){
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		
-		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters, rand, displayOtp]);
+		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters, rand]);
 		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
