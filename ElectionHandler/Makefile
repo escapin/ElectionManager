@@ -8,6 +8,7 @@ devenv:
 	cd webapp/pure; wget -N http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css
 	cd webapp/js; wget -N http://code.jquery.com/jquery-1.11.1.min.js
 	cd webapp/js; wget -N https://cdn.jsdelivr.net/bluebird/latest/bluebird.min.js
+	cd webapp/pic; wget -N https://fonts.gstatic.com/s/roboto/v15/2tsd397wLxj96qwHyNIkxPesZW2xOQ-xsNqO47m55DA.woff2
 	mkdir -p _data_
 
 references:
