@@ -64,7 +64,7 @@ function buildElectionTable() {
          	 stat = 'closed';
           }
           else {
-         	 stat = 'ready';
+         	 stat = 'open';
           }
           callback(eleID, stat)
         });
