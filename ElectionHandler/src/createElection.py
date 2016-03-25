@@ -247,22 +247,24 @@ except IOError:
 if(len(sys.argv) > 1):
     elecTitle = sys.argv[3]
     elecDescr = sys.argv[4]
-    jwrite(sElectDir + manifest, "title", elecTitle)
-    jwrite(sElectDir + manifest, "description", elecDescr)
 
 if(len(sys.argv) > 5):
     elecQuestion = sys.argv[5]
     eleChoices = sys.argv[6].split(',')
-    jwrite(sElectDir + manifest, "question", elecQuestion)
-    jwrite(sElectDir + manifest, "choices", eleChoices)   
-
+ 
 if(len(sys.argv) > 8):
     publish = sys.argv[8]
     if publish == "true":
         publish = True
     else:
         publish = False
-    jwrite(sElectDir + manifest, "publishListOfVoters", publish)
+
+#write to manifest
+jwrite(sElectDir + manifest, "title", elecTitle)
+jwrite(sElectDir + manifest, "description", elecDescr)
+jwrite(sElectDir + manifest, "question", elecQuestion)
+jwrite(sElectDir + manifest, "choices", eleChoices)  
+jwrite(sElectDir + manifest, "publishListOfVoters", publish)
 
 
 #modify Server ports
@@ -300,18 +302,12 @@ jwrite(passList, electionID, password)
 
 if(len(sys.argv) > 9):
     random = sys.argv[9]
-    showOtp = sys.argv[10]
     if random == "true":
         random = True
     else:
         random = False
-    if showOtp == "true":
-        showOtp = True
-    else:
-        showOtp = False
     jwrite(dstroot + votingConf, "userChosenRandomness", random)
-    jwrite(dstroot + votingConf, "showOtp", showOtp)
-    jwrite(dstroot + collectingConf, "sendOtpBack", showOtp)
+
 
 #start all node servers
 subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
