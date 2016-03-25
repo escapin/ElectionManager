@@ -54,39 +54,13 @@ app.post('/election', function(req, res) {
 	var pass = req.body.password;
 	var rand = req.body.random;
 	var listVoters = req.body.publishVoters;
-	
+
 	var session = null;
 	if (task === "complete"){
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		
 		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters, rand]);
-		
-		session.stdout.on('data', function (data) {
-			if(String(data).indexOf("OTP")>-1){
-				console.log('stdout: ' + data);
-			}
-			else if(String(data).indexOf("TLS")>-1){
-				console.log('mix stdout: ' + data);
-			}
-		});
-		session.stderr.on('data', function (data) {
-		    console.log('stderr: ' + data);
-		    res.end(data);
-		});
-
-		session.on('exit', function (code) {
-		    console.log('child process exited with code ' + code);
-		    if(code === 0){
-		    	res.end("created");
-		    }
-		    else{
-		    	res.end("error code" + code)
-		    }
-		});
-	}
-	else if (task === "advanced") {
-		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc]);
 		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
