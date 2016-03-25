@@ -370,8 +370,7 @@ span.testing{
         box-shadow: 0px 1px 12px 3px #ddd;
 }
 #hovering,
-#labelVoters,
-#labelOtp{
+#labelVoters{
 	cursor:pointer;
 	font-size: 0.8em;
 }
