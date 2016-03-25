@@ -662,18 +662,7 @@ function electionButtons() {
 		}
 	});
 	
-	//$( "#culture" ).change(function() {
-	//	changeCulture($(this).val());
-	//});
 	
-	document.getElementById("cultDE").checked = true;
-	
-	$("#cultDE").click(function(){ 
-	    changeCulture("de-DE");
-	});
-	$("#cultEN").click(function(){ 
-	    changeCulture("en-EN");
-	});
 	
 	$(function() {
 		$( "#s-date" ).datepicker();
@@ -697,14 +686,26 @@ function electionButtons() {
 	var currentDate = new Date(clientDate.setTime(clientDate.getTime()+timeDifference*60000));
 	var month = currentDate.getMonth()+1<10 ? "0"+(currentDate.getMonth()+1) : (currentDate.getMonth()+1);
 	var day = currentDate.getDate()+1<10 ? "0"+currentDate.getDate() : currentDate.getDate();
+	
+	var hours = currentDate.getHours()	
+	var dt = (hours>=12)?"PM":"AM";
+	hours = (hours%12==0)?12:(hours%12);
+			
 	document.getElementById("s-date").value = currentDate.getFullYear()+"."+month+"."+day;
-	document.getElementById("s-time").value = currentDate.getHours()+":"+currentDate.getMinutes();
+	document.getElementById("s-time").value = hours+":"+currentDate.getMinutes()+" "+dt;
 
 	var endDate = new Date(currentDate.setTime(currentDate.getTime()+10*60000));
 	month = endDate.getMonth()+1<10 ? "0"+(endDate.getMonth()+1) : (endDate.getMonth()+1);
 	day = endDate.getDate()+1<10 ? "0"+endDate.getDate() : endDate.getDate();
+	
+	hours = endDate.getHours()
+	dt = (hours>=12)?"PM":"AM";
+	hours = (hours%12==0)?12:(hours%12);
+	
 	document.getElementById("e-date").value = endDate.getFullYear()+"."+month+"."+day;
-	document.getElementById("e-time").value = endDate.getHours()+":"+endDate.getMinutes();
+	document.getElementById("e-time").value = hours+":"+endDate.getMinutes()+" "+dt;
+
+	
 	
 	var currentTime = function(){
 		var currentDate = new Date();
