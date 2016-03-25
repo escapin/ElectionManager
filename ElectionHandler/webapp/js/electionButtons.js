@@ -4,6 +4,7 @@ function electionButtons() {
 	var sAddresses;
 	var votingBooth;
 	var collectingServer;
+	var lastMix;
 	var elections;
     
 	var host;
@@ -267,13 +268,47 @@ function electionButtons() {
     ////////////////////////////////////////////////////////////////
     /// Button Handlers
 	
+    $('#welcome').click(function(event) { 
+        if(!$(event.target).closest('tr').length &&
+           !$(event.target).is('tr')&&
+           !$(event.target).is('#vote')&&
+           !$(event.target).is('#close')&&
+           !$(event.target).is('#remove')&&
+           !$(event.target).is('#help')){
+        	
+        	row = null;
+        	value = null;
+        	rows.removeClass('highlight');
+        	$("#vote").prop('disabled', true);
+    		$("#close").prop('disabled', true);
+    		$("#remove").prop('disabled', true);
+    		document.getElementById("vote").style.visibility = "hidden";
+    		
+        }        
+    })
+    
     /* Vote Button */
     $("#vote").click(function() {
     	if(value == null){
     		alerting("no election selected");
     	}
     	else{
-    		window.location.href = votingBooth+"/"+value+"/votingBooth/";
+    		//window.location.href = votingBooth+"/"+value+"/votingBooth/";
+    		getElectionStatus(value, function (eleID, stat){
+    			if(stat === "open"){
+    				document.getElementById("inviteVoters").style.visibility = "visible";
+    	    		document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    			}
+    			else if(stat === "closed"){
+    				document.getElementById("checkResult").style.visibility = "visible";
+    	    		document.getElementById("resultPage").href = votingBooth+"/"+value+"/votingBooth/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    			}
+    			else{
+    				alerting("Server is not responding");
+    			}
+    	 	 });
 		}
 	});
 	
@@ -283,12 +318,13 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-			window.location.href = collectingServer+"/"+value+"/collectingServer/admin/close";
+			//window.location.href = collectingServer+"/"+value+"/collectingServer/admin/close";
+			document.getElementById("electionClose").style.visibility = "visible";
 		}
 	});
     
 	/* Create Buttons */
-	$("#create").click(function() {
+	$("#mock").click(function() {
 		//askRandom("simple");
 		simpleElection(false);
 	});
@@ -305,7 +341,8 @@ function electionButtons() {
 	/* Remove Button */
 	$("#remove").click(function() {
     	//overlay("remove");
-		verifylayer();
+		//verifylayer();
+		document.getElementById("electionDelete").style.visibility = "visible";
 	});
     
     /* Advanced Button */
@@ -365,6 +402,35 @@ function electionButtons() {
 		reloading();
 	});
 
+	/* Close VotingBooth link */
+	$("#closeInvite").click(function() {
+		document.getElementById("inviteVoters").style.visibility = "hidden";
+	});
+	$("#closeCheck").click(function() {
+		document.getElementById("checkResult").style.visibility = "hidden";
+	});
+	
+	/* Confirm page for closing election */
+	$("#cancelClose").click(function() {
+		document.getElementById("electionClose").style.visibility = "hidden";
+	});
+	//$("#confirmClose").click(function() {
+	//	document.getElementById("electionClose").style.visibility = "hidden";
+	//});
+	
+	/* Confirm page for deleting election */
+	$("#cancelDelete").click(function() {
+		document.getElementById("electionDelete").style.visibility = "hidden";
+	});
+	$("#confirmDelete").click(function() {
+		document.getElementById("electionDelete").style.visibility = "hidden";
+		verifylayer();
+	});
+	
+	this.winOpen = function(){
+        window.open(collectingServer+"/"+value+"/collectingServer/admin/close");
+    	document.getElementById("electionClose").style.visibility = "hidden";
+    }
 	
     ////////////////////////////////////////////////////////////////
     /// Other Handlers
@@ -433,7 +499,7 @@ function electionButtons() {
 	function disableButtons(){
 		$("#vote").prop('disabled', true);
 		$("#close").prop('disabled', true);
-		$("#create").prop('disabled', true);
+		$("#mock").prop('disabled', true);
 		$("#remove").prop('disabled', true);
 		$("#advance").prop('disabled', true);
 		$("#next-adv").prop('disabled', true);
@@ -447,7 +513,7 @@ function electionButtons() {
 	function enableButtons(){
 		$("#vote").prop('disabled', null);
 		$("#close").prop('disabled', null);
-		$("#create").prop('disabled', null);
+		$("#mock").prop('disabled', null);
 		$("#remove").prop('disabled', null);
 		$("#advance").prop('disabled', null);
 		$("#next-adv").prop('disabled', null);
@@ -475,14 +541,14 @@ function electionButtons() {
 		port = electionConf["handler-port"];
 		votingBooth = "http://localhost:"+electionConf["nginx-port"];
 		collectingServer = "http://localhost:"+electionConf["nginx-port"];
-		
+		lastMix = "http://localhost:"+electionConf["nginx-port"];
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
 			 host = sAddresses.electionHandler;
 			 votingBooth = sAddresses["server-address"].votingbooth;
 			 collectingServer = sAddresses["server-address"].collectingserver;
+			 astMix = sAddresses["server-address"].mix2;
 		 }
-		
 		/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');
 		
@@ -497,6 +563,8 @@ function electionButtons() {
 	        $("#vote").prop('disabled', null);
 			$("#close").prop('disabled', null);
 			$("#remove").prop('disabled', null);
+			
+    		document.getElementById("vote").style.visibility = "visible";
 	        
 	    });
 	    
@@ -734,5 +802,35 @@ function electionButtons() {
 		$( "#s-time" ).timespinner("value", current);
 		$( "#e-time" ).timespinner("value", current2);
 	}
+	
+	
+	function getElectionStatus(eleID, callback) {
+	      // Detemine the status of the system: (not-yet) open/closed, 
+	      // by quering the final mix server.
+	      // Depending on the state, either the voting tab or the
+	      // verification tab will be opened.
+	      //
+	      // The state is detemined in a (too?) simple way, by
+	      // checking if the final server has ready result.
+	      //
+	 	 var stat = 'what';
+	 	 var url = lastMix+'/'+eleID+'/mix/03/status';
+	      $.get(url)
+	       .fail(function () { 
+	          var stat = 'no response';
+	          callback(eleID, stat)
+	        })
+	       .done(function (result) {  // we have some response
+	          var stat = 'pending';
+	     	 if (result.status==='result ready'){
+	         	 stat = 'closed';
+	          }
+	          else {
+	         	 stat = 'open';
+	          }
+	          callback(eleID, stat)
+	        });
+
+	  }
 	
 }

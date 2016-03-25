@@ -70,30 +70,6 @@ function buildElectionTable() {
         });
 
   }
-
-
-  // Returns a promise of the state of the final mix server
-  // The promise resolves to true if the result is ready and
-  // to false otherwise.
-  // The promise is rejected if the final server is down of
-  // works for a different election.
-  //
-  function resultOfFinalServerReady(eleID) {
- 	 var url = lastMix+'/'+eleID+'/mix/03/status';
-      $.get(url)
-       .fail(function () { 
-          return 'pending';
-        })
-       .done(function (result) {  // we have some response
-          if (result.electionID.substring(0, 5).toUpperCase() !== electionID.toUpperCase()) {
-              reject('wrong election ID')
-          }
-          else if (result.status==='result ready'){
-         		 return 'closed';
-          }
-          else {return 'ready';}
-        });
-  }
   
   
   ////////////////////////////////////////////////////////////////

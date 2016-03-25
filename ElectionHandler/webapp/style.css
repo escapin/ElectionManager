@@ -186,7 +186,11 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #askPass,
 #userRandom,
 #alertfield,
-#infopage {
+#infopage,
+#inviteVoters,
+#checkResult,
+#electionClose,
+#electionDelete {
      visibility: hidden;
      position: fixed;
      left: 0px;
@@ -219,7 +223,11 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
      text-align:center;
 }
 
-#infopage div {
+#infopage div,
+#inviteVoters div,
+#checkResult div,
+#electionClose div,
+#electionDelete div{
 	 overflow: auto;
      width:33%;
      margin: 50px auto;
@@ -253,8 +261,8 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #choice2,
 #remove-choice,
 #add-choice,
-#vote,
-#create{
+#advance,
+#mock{
 	margin-top: 1.3em;
 }
 
@@ -269,19 +277,21 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 }
 
 #close,
-#vote{
-	width: 10.5em;
-	margin-right: 30%;
-}
-#create,
-#remove,
-#compl-create{
-	width: 10.5em;
+#advance{
+	width: 12.5em;
+	margin-right: 21%;
 }
 
-#advance{
-	margin-left: 28%;
+#mock,
+#remove,
+#compl-create{
+	width: 12.5em;
+}
+
+#vote{
+	margin-left: 29%;
 	margin-top: 8%;
+	visibility: hidden;
 }
 
 #back{
@@ -395,7 +405,7 @@ span.testing{
 
 #close,
 #vote,
-#create,
+#mock,
 #remove,
 #advance,
 #back,
@@ -421,11 +431,19 @@ tr{
 #askPass div,
 #alertfield div,
 #userRandom div,
-#infopage div{
+#infopage div,
+#inviteVoters div,
+#checkResult div,
+#electionClose div,
+#electionDelete div{
 	width: 50%;
 	font-size:3.5vw;
 }
-#infopage div{
+#infopage div,
+#inviteVoters div,
+#checkResult div,
+#electionClose div,
+#electionDelete div{
 	width: 90%;
 }
 
