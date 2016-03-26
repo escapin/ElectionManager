@@ -574,9 +574,6 @@ function electionButtons() {
     	    		document.getElementById("vote").value = "Check Election Result";
     	    		document.getElementById("vote").style.visibility = "visible";
     			}
-    			else{
-    				alerting("Server is not responding");
-    			}
     	 	 });
 	        
 	    });
