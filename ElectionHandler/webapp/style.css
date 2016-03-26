@@ -400,6 +400,26 @@ span.testing{
 
 #buttontext {position: relative; top: -15px; position: relative; left: -6.75px;}
 
+@media all and (max-width: 1520px) {
+	#newPass div,
+	#askPass div,
+	#alertfield div,
+	#userRandom div,
+	#infopage div,
+	#inviteVoters div,
+	#checkResult div,
+	#electionClose div,
+	#electionDelete div{
+		width: 50%;
+	}
+	#infopage div,
+	#inviteVoters div,
+	#checkResult div,
+	#electionClose div,
+	#electionDelete div{
+		width: 30%;
+	}
+}
 
 @media all and (max-width: 820px) {
 
