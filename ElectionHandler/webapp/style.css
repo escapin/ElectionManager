@@ -205,7 +205,9 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 
 #newPass div,
 #askPass div,
-#alertfield div {
+#alertfield div,
+#electionClose div,
+#electionDelete div {
      width:15%;
      margin: 15% auto;
      background-color: #fff;
@@ -225,9 +227,7 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 
 #infopage div,
 #inviteVoters div,
-#checkResult div,
-#electionClose div,
-#electionDelete div{
+#checkResult div{
 	 overflow: auto;
      width:33%;
      margin: 50px auto;
@@ -278,18 +278,18 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 
 #close,
 #advance{
-	width: 12.5em;
-	margin-right: 21%;
+	width: 13.5em;
+	margin-right: 17%;
 }
 
 #mock,
 #remove,
 #compl-create{
-	width: 12.5em;
+	width: 13.5em;
 }
 
 #vote{
-	margin-left: 29%;
+	margin-left: 25.5%;
 	margin-top: 8%;
 	visibility: hidden;
 }

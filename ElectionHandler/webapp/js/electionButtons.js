@@ -564,7 +564,20 @@ function electionButtons() {
 			$("#close").prop('disabled', null);
 			$("#remove").prop('disabled', null);
 			
-    		document.getElementById("vote").style.visibility = "visible";
+			
+			getElectionStatus(value, function (eleID, stat){
+    			if(stat === "open"){
+    	    		document.getElementById("vote").value = "Invite Voters to Vote";
+    	    		document.getElementById("vote").style.visibility = "visible";
+    			}
+    			else if(stat === "closed"){
+    	    		document.getElementById("vote").value = "Check Election Result";
+    	    		document.getElementById("vote").style.visibility = "visible";
+    			}
+    			else{
+    				alerting("Server is not responding");
+    			}
+    	 	 });
 	        
 	    });
 	    
