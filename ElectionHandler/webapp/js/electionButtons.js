@@ -10,6 +10,7 @@ function electionButtons() {
 	var host;
 	var port;
 
+	var electionTable = null;
 	
 	/* Create 'click' event handler for rows */
     var rows;
@@ -18,6 +19,7 @@ function electionButtons() {
 	
 	var elecType = "none";
 	var buttonEnable = null;
+	var votingStatus = null;
 	
 	/* Ensure the table is always up to date */
 	window.onload = function(){reloading();}
@@ -61,6 +63,7 @@ function electionButtons() {
     			$('#processing').fadeOut(150);
     			enableButtons();
     			if (data == "removed") {
+    				window.clearInterval(votingStatus);
     				value = null;
     				reloading();
     				$('#processing').hide();
@@ -283,7 +286,7 @@ function electionButtons() {
     		$("#close").prop('disabled', true);
     		$("#remove").prop('disabled', true);
     		document.getElementById("vote").style.visibility = "hidden";
-    		
+			window.clearInterval(votingStatus);
         }        
     })
     
@@ -528,7 +531,8 @@ function electionButtons() {
 		$("#vote").prop('disabled', true);
 		$("#close").prop('disabled', true);
 		$("#remove").prop('disabled', true);
-		
+		document.getElementById("vote").style.visibility = "hidden";
+
 		
 		reload_js("js/ElectionConfigFile.js");
 		buildElectionTable();
@@ -551,8 +555,8 @@ function electionButtons() {
 		 }
 		/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');
-		
-		rows.on('click', function(e) {
+
+	    rows.on('click', function(e) {
 	        row = $(this);
 	        
 	        rows.removeClass('highlight');
@@ -560,21 +564,16 @@ function electionButtons() {
 	        
 	        value = $(this).text().trim().split(" ")[0]; 
 	        
-	        $("#vote").prop('disabled', null);
-			$("#close").prop('disabled', null);
 			$("#remove").prop('disabled', null);
 			
-			
-			getElectionStatus(value, function (eleID, stat){
-    			if(stat === "open"){
-    	    		document.getElementById("vote").value = "Invite Voters to Vote";
-    	    		document.getElementById("vote").style.visibility = "visible";
-    			}
-    			else if(stat === "closed"){
-    	    		document.getElementById("vote").value = "Check Election Result";
-    	    		document.getElementById("vote").style.visibility = "visible";
-    			}
-    	 	 });
+			// Show Invite Voters or Check Result button
+			// (depending on election state) and retest every second
+			window.clearInterval(votingStatus);
+			showVotingState(value);
+		    votingStatus = window.setInterval(function() {
+		    	showVotingState(value);
+		     }, 1000);
+		    
 	        
 	    });
 	    
@@ -586,7 +585,6 @@ function electionButtons() {
 
     ////////////////////////////////////////////////////////////////////////////
     // Password overlay
-    
     
     $("#ok-ov").click(function() {
     	createPass("complete", document.getElementById("mod").value);
@@ -813,12 +811,31 @@ function electionButtons() {
 		$( "#e-time" ).timespinner("value", current2);
 	}
 	
+	// Show Invite Voters or Check Result button
+	// (depending on election state)
+	function showVotingState(id){
+		getElectionStatus(id, function (eleID, stat){
+			if(stat === "open"){
+		        $("#vote").prop('disabled', null);
+				$("#close").prop('disabled', null);
+	    		document.getElementById("vote").value = "Invite Voters to Vote";
+	    		document.getElementById("vote").style.visibility = "visible";
+			}
+			else if(stat === "closed"){
+		        $("#vote").prop('disabled', null);
+				$("#close").prop('disabled', true);
+	    		document.getElementById("vote").value = "Check Election Result";
+	    		document.getElementById("vote").style.visibility = "visible";
+			}
+			else{
+				document.getElementById("vote").style.visibility = "hidden";
+			}
+	 	 });
+	}
 	
 	function getElectionStatus(eleID, callback) {
 	      // Detemine the status of the system: (not-yet) open/closed, 
 	      // by quering the final mix server.
-	      // Depending on the state, either the voting tab or the
-	      // verification tab will be opened.
 	      //
 	      // The state is detemined in a (too?) simple way, by
 	      // checking if the final server has ready result.
