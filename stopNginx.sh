@@ -8,5 +8,6 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-echo Stopping the nginx services managing the sElect servers...
+echo -n Stopping the nginx services managing the sElect servers...
 /usr/sbin/nginx -c $DIR/nginx_config/nginx_select.conf -s quit 2>/dev/null
+echo done.
