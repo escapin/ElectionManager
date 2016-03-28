@@ -187,22 +187,22 @@
      <div class="body">
      	  <input id='mod' class="pure-input-1" type="hidden">
           <p>Enter a password for your election</p>
-          <input id='cr-pass1' class="pure-input-1" type="password" size="20"></input>
+          <input id='cr-pass1' class="pure-input-1" type="password" size="20" style="width: 90%;"></input>
           <p>Verify the password</p>
-          <input id='cr-pass2' class="pure-input-1" type="password" size="20"></input>
+          <input id='cr-pass2' class="pure-input-1" type="password" size="20" style="width: 90%;"></input>
           <p></p>
           <input id='cancel-ov' type="button" class="pure-button pure-button-primary" value="Cancel"></input>
-          <input id='ok-ov' type="button" class="pure-button pure-button-primary" value="Ok"></input>
+          <input id='ok-ov' style="float: right;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
      </div>
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->
     <div id="askPass">
      <div class="body">
           <p>Enter password for this election</p>
-          <input id='e-pass' class="pure-input-1" type="password" size="20"></input>
+          <input id='e-pass' class="pure-input-1" type="password" size="20" style="width: 50%;"></input>
           <p></p>
           <input id='cancel-pass' type="button" class="pure-button pure-button-primary" value="Cancel"></input>
-          <input id='ok-pass' type="button" class="pure-button pure-button-primary" value="Ok"></input>
+          <input id='ok-pass' style="float: right;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
      </div>
 	</div>
     <!-- --------------------------------------------------------------------------------- -->
@@ -213,11 +213,11 @@
           that will be visible for verification, in order to enhance security.</p>
           <p></p>                
           <input id='u-rand' type="button" class="pure-button pure-button-primary" value="random"></input>
-          <input id='u-norm' type="button" class="pure-button pure-button-primary" value="normal"></input>
+          <input id='u-norm' style="float: right;" type="button" class="pure-button pure-button-primary" value="normal"></input>
      </div>
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->
-	<div id="alertfield">
+	<div id="alertfield" style="text-align: center;">
      <div class="body">
           <p id='showing'>here we go!</p>       
           <input id='reload' type="button" class="pure-button pure-button-primary" value="Ok"></input>
@@ -238,7 +238,7 @@
 	<!-- --------------------------------------------------------------------------------- -->
 	<div id="inviteVoters">
      <div class="body" style="text-align: left;">
-          <p>The election is open. To allow eligible voters to vote, invite them to visit the following web-page:</p>
+          <p style="text-align:center">The election is open. To allow eligible voters to vote, invite them to visit the following web-page:</p>
           <p style="text-align:center"><a id='votePage' href='' target="_blank"></a></p>
           <input id='closeInvite' style="margin-left: 43%;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
      </div>
@@ -253,11 +253,11 @@
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->
 	<div id="electionClose">
-     <div class="body" style="text-align: left;">
+     <div class="body">
           <p style="text-align:center">You are closing the election before the pre-established ending time.</p>
           <p style="text-align:center">Do you really want to proceed?</p>
-          <input id='cancelClose' style="margin-left: 15%;" type="button" class="pure-button pure-button-primary" value="No"></input>
-          <input id='confirmClose' style="margin-left: 20%;" type="button" class="pure-button pure-button-primary" onclick="winOpen()" value="Yes"></input>
+          <input id='cancelClose' type="button" class="pure-button pure-button-primary" value="No"></input>
+          <input id='confirmClose' style="float: right;" type="button" class="pure-button pure-button-primary toright" onclick="winOpen()" value="Yes"></input>
      </div>
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->
@@ -265,8 +265,8 @@
      <div class="body" style="text-align: left;">
           <p style="text-align:center">You are deleting an election. All the data related to this election will be permanently deleted, too.</p>
           <p style="text-align:center">Do you really want to proceed?</p>
-          <input id='cancelDelete' style="margin-left: 15%;" type="button" class="pure-button pure-button-primary" value="No"></input>
-          <input id='confirmDelete' style="margin-left: 20%;" type="button" class="pure-button pure-button-primary" value="Yes"></input>
+          <input id='cancelDelete' type="button" class="pure-button pure-button-primary" value="No"></input>
+          <input id='confirmDelete' style="float: right;" type="button" class="pure-button pure-button-primary" value="Yes"></input>
      </div>
 	</div>
 </body>
