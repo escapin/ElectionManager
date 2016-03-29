@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////Builds the HTML Table from ElectionIDs
 
-function buildElectionTable() {
+function buildElectionTable(res) {
 	 
 	 var electionConf = JSON.parse(electionConfigRaw);	
 	 var sAddresses = JSON.parse(sAddressesRaw);
@@ -85,7 +85,8 @@ function buildElectionTable() {
  	 }
   }, 1000);
   
-  
   $('#welcome').show();
+  
+  res(electionStates);
   
 }

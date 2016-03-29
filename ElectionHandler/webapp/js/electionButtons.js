@@ -6,7 +6,7 @@ function electionButtons() {
 	var collectingServer;
 	var lastMix;
 	var elections;
-    
+
 	var host;
 	var port;
 	var protocol;
@@ -20,7 +20,7 @@ function electionButtons() {
 	var elecType = "none";
 	var buttonEnable = null;
 	var votingStatus = null;
-	
+	var electionStatus = null;
 	/* Ensure the table is always up to date */
 	window.onload = function(){reloading();}
     
@@ -566,15 +566,19 @@ function electionButtons() {
 	
 	/* Load configs and enable selecting rows */
 	function reloading(){
+		value = null;
 		$("#vote").prop('disabled', true);
 		$("#close").prop('disabled', true);
 		$("#remove").prop('disabled', true);
 		document.getElementById("vote").style.visibility = "hidden";
-
 		
 		reload_js("js/ElectionConfigFile.js");
-		buildElectionTable();
-		
+
+		 window.clearInterval(electionStatus);
+	     buildElectionTable(function (electionStates){
+	  		 electionStatus = electionStates;
+	  	 });
+	     
 		electionConf = JSON.parse(electionConfigRaw);
 		sAddresses = JSON.parse(sAddressesRaw);
 		elections = electionConf.elections;
