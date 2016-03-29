@@ -9,14 +9,14 @@ function electionButtons() {
     
 	var host;
 	var port;
-
-	var electionTable = null;
+	var protocol;
 	
 	/* Create 'click' event handler for rows */
     var rows;
     var row;
     var value;
-	
+	var task;
+    
 	var elecType = "none";
 	var buttonEnable = null;
 	var votingStatus = null;
@@ -78,6 +78,27 @@ function electionButtons() {
     			 $('#processing').hide();
     			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
     		 });
+    	}
+	}
+	
+	function closeElection(pass) {
+		if(value == null){
+    		alerting("no election selected");
+    	}
+    	else{
+    		disableButtons();
+    		$('#processing').fadeIn(150);
+    		$.get(protocol+"admin:"+pass+"@"+collectingServer.replace(protocol, "")+"/"+value+"/collectingServer/admin/close", function(data){
+    			$('#processing').fadeOut(150);
+    			if(data.ok){
+    				alerting("closing election");
+    			}
+    			else{
+    				alerting("election already closed");
+    			}
+    		  });
+    		console.log(protocol+"admin:"+pass+"@"+collectingServer.replace(protocol, "")+"/"+value+"/collectingServer/admin/close");
+    		enableButtons();
     	}
 	}
     
@@ -417,17 +438,17 @@ function electionButtons() {
 	$("#cancelClose").click(function() {
 		document.getElementById("electionClose").style.visibility = "hidden";
 	});
-	//$("#confirmClose").click(function() {
-	//	document.getElementById("electionClose").style.visibility = "hidden";
-	//});
-	
+	$("#confirmClose").click(function() {
+		document.getElementById("electionClose").style.visibility = "hidden";
+		verifylayer("close");
+	});
 	/* Confirm page for deleting election */
 	$("#cancelDelete").click(function() {
 		document.getElementById("electionDelete").style.visibility = "hidden";
 	});
 	$("#confirmDelete").click(function() {
 		document.getElementById("electionDelete").style.visibility = "hidden";
-		verifylayer();
+		verifylayer("remove");
 	});
 	
 	this.winOpen = function(){
@@ -546,12 +567,14 @@ function electionButtons() {
 		votingBooth = "http://localhost:"+electionConf["nginx-port"];
 		collectingServer = "http://localhost:"+electionConf["nginx-port"];
 		lastMix = "http://localhost:"+electionConf["nginx-port"];
+		protocol = "http://";
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
 			 host = sAddresses.electionHandler;
 			 votingBooth = sAddresses["server-address"].votingbooth;
 			 collectingServer = sAddresses["server-address"].collectingserver;
 			 astMix = sAddresses["server-address"].mix2;
+			 protocol = "https://";
 		 }
 		/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');
@@ -597,7 +620,8 @@ function electionButtons() {
     });
     
     $("#ok-pass").click(function() {
-    	verifyPass();
+    	verifyPass(task);
+    	task = null;
 	});
     
     $("#cancel-pass").click(function() {
@@ -646,15 +670,22 @@ function electionButtons() {
     	}
     }
     
-    function verifyPass(){
+    function verifyPass(origin){
     	var temp = document.getElementById("e-pass").value;
 		document.getElementById("e-pass").value = "";
 		el = document.getElementById("askPass");
 		el.style.visibility = "hidden";
-		removeElection(temp);
+		switch(origin){
+		case "remove":
+			removeElection(temp);
+			break;
+		case "close":
+			closeElection(temp);
+		}
     }
     
-    function verifylayer() {
+    function verifylayer(origin) {
+    	task = origin;
     	if(value == null){
     		alerting("no election selected");
     	}
@@ -671,7 +702,13 @@ function electionButtons() {
     			document.getElementById("e-pass").focus();
     		}
     		else{
-    			removeElection("");
+    			switch(origin){
+        		case "remove":
+        			removeElection("");
+        			break;
+        		case "close":
+        			closeElection("");
+    			}
     		}
     	}
     }
