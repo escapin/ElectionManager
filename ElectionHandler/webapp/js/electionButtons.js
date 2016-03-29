@@ -47,7 +47,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
+			 alerting('cannot connect to ElectionHandler at '+ host+":"+port);
 		 });
 	}
 	
@@ -76,7 +76,7 @@ function electionButtons() {
     		 .fail(function(){
     			 enableButtons();
     			 $('#processing').hide();
-    			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
+    			 alerting('cannot connect to ElectionHandler at '+ host+":"+port);
     		 });
     	}
 	}
@@ -88,7 +88,9 @@ function electionButtons() {
     	else{
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		$.get(protocol+"admin:"+pass+"@"+collectingServer.replace(protocol, "")+"/"+value+"/collectingServer/admin/close", function(data){
+    		$.get(protocol+"admin:"+pass+"@"+collectingServer.replace(protocol, "")+"/"+value+"/collectingServer/admin/close")
+    		 .done(function(data){
+    			enableButtons();
     			$('#processing').fadeOut(150);
     			if(data.ok){
     				alerting("closing election");
@@ -96,7 +98,17 @@ function electionButtons() {
     			else{
     				alerting("election already closed");
     			}
-    		  });
+    		  })
+    		 .fail(function(data){
+    			enableButtons();
+    			$('#processing').hide();
+    			if(data===undefined){
+    				alerting("cannot connect to CollectingServer at "+ collectingServer);
+    			}
+    			else{
+    				alerting("wrong password");
+    			}
+    		 });
     		console.log(protocol+"admin:"+pass+"@"+collectingServer.replace(protocol, "")+"/"+value+"/collectingServer/admin/close");
     		enableButtons();
     	}
@@ -164,7 +176,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
+			 alerting('cannot connect to ElectionHandler at '+ host+":"+port);
 		 });
     }
 	
@@ -282,7 +294,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ host+":"+port+"/election");
+			 alerting('cannot connect to ElectionHandler at '+ host+":"+port);
 			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
 			 $('#complete').hide(150);
 			 $('#welcome').show();
