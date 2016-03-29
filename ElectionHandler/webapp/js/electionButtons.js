@@ -88,28 +88,27 @@ function electionButtons() {
     	else{
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		$.get(protocol+"admin:"+pass+"@"+collectingServer.replace(protocol, "")+"/"+value+"/collectingServer/admin/close")
+    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/"+value+"/collectingServer/admin/close")
     		 .done(function(data){
     			enableButtons();
     			$('#processing').fadeOut(150);
     			if(data.ok){
-    				alerting("closing election");
+    				alerting("closing election", false);
     			}
     			else{
-    				alerting("election already closed");
+    				alerting("election already closed", false);
     			}
     		  })
     		 .fail(function(data){
     			enableButtons();
     			$('#processing').hide();
     			if(data===undefined){
-    				alerting("cannot connect to CollectingServer at "+ collectingServer);
+    				alerting("cannot connect to CollectingServer at "+ collectingServer, false);
     			}
     			else{
-    				alerting("wrong password");
+    				alerting("wrong password", false);
     			}
     		 });
-    		console.log(protocol+"admin:"+pass+"@"+collectingServer.replace(protocol, "")+"/"+value+"/collectingServer/admin/close");
     		enableButtons();
     	}
 	}
@@ -435,7 +434,9 @@ function electionButtons() {
 		for (var i = 1; i < rows.length; i++){
 	        window.clearInterval(i);
 		}
-		reloading();
+		if($('#do-reload').html()==="true"){
+			reloading();
+		}
 	});
 
 	/* Close VotingBooth link */
@@ -472,8 +473,12 @@ function electionButtons() {
     /// Other Handlers
 	
 	/* Show alert message */
-	function alerting(data){
+	function alerting(data, reloads){
+		if(!(reloads===false)){
+			reloads = true;
+		}
 		$('#showing').html(data);
+		$('#do-reload').html(String(reloads));
 		document.getElementById("alertfield").style.visibility = "visible";
 	}
 	
@@ -579,16 +584,24 @@ function electionButtons() {
 		votingBooth = "http://localhost:"+electionConf["nginx-port"];
 		collectingServer = "http://localhost:"+electionConf["nginx-port"];
 		lastMix = "http://localhost:"+electionConf["nginx-port"];
-		protocol = "http://";
+		
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
 			 host = sAddresses.electionHandler;
 			 votingBooth = sAddresses["server-address"].votingbooth;
 			 collectingServer = sAddresses["server-address"].collectingserver;
 			 astMix = sAddresses["server-address"].mix2;
-			 protocol = "https://";
 		 }
-		/* Create 'click' event handler for rows */
+		var tmp = collectingServer.split("://");
+		if(tmp.length > 1){
+			protocol = tmp[0]+"://";
+			collectingServer = tmp[1];
+		}
+		else{
+			protocol = '';
+			collectingServer = tmp[0]
+		}
+			/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');
 
 	    rows.on('click', function(e) {
