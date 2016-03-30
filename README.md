@@ -81,7 +81,7 @@ development environment for it. This operation can be reverted by
 `make devclean`.
 
 
-The election manager and the nginx sessions used to handle the election created can be started by:
+The election manager and the nginx sessions used to handle the elections created can be started by:
 
 ```
 ./run.sh
