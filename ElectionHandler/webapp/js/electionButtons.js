@@ -578,7 +578,7 @@ function electionButtons() {
 		electionConf = JSON.parse(electionConfigRaw);
 		elections = electionConf.elections;
 	    
-		electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager/";
+		electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
 		votingBooth = "http://localhost:"+electionConf["nginx-port"];
 		collectingServer = "http://localhost:"+electionConf["nginx-port"];
 		lastMix = "http://localhost:"+electionConf["nginx-port"];
