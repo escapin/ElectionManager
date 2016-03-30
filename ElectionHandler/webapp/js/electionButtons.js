@@ -91,10 +91,7 @@ function electionButtons() {
     		 .done(function(data){
     			enableButtons();
     			$('#processing').fadeOut(150);
-    			if(data.ok){
-    				alerting("closing election", false);
-    			}
-    			else{
+    			if(!data.ok){
     				alerting("election already closed", false);
     			}
     		  })
