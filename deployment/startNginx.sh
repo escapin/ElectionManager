@@ -8,9 +8,10 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-echo \* Removing all nginx processes
+echo \* Removing all nginx processes...
 sudo killall nginx
+echo done!
 
-echo \* Redirecting the traffic from ports 80 and 433 to port 8433 \(requires *superuser* privileges\)
+echo \* Redirecting the traffic from ports 80 and 433 to port 8433 \(requires *superuser* privileges\)...
 sudo nginx -c $DIR/nginx_root.conf
-
+echo done!
