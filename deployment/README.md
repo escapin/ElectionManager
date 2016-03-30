@@ -1,10 +1,10 @@
-# Deployment of the Election Manager
+# Deployment
 
 ## How to deploy the Election Manager at `localhost`
 
 After creating the development environment in the folder
 `ElectionManager` (with `make devenv`), in the folder
-`ElectionManager/deployment' create the deployment environment with
+`ElectionManager/deployment` create the deployment environment with
 
 ```
 make depenv
@@ -30,7 +30,7 @@ This operation can be reverted by `make depclean`.
 	./run.sh
 	```
 
-   *It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.*
+   **It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.**
 
 
 3. When you stop the system, remember to stop all the nginx processes running
