@@ -30,7 +30,7 @@ This operation can be reverted by `make depclean`.
 	./run.sh
 	```
 
-   *It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.*
+   **It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.**
 
 
 3. When you stop the system, remember to stop all the nginx processes running
