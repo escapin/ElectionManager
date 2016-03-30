@@ -6,8 +6,7 @@ function electionButtons() {
 	var lastMix;
 	var elections;
 
-	var host;
-	var port;
+	var electionManager;
 	var protocol;
 	
 	/* Create 'click' event handler for rows */
@@ -29,7 +28,8 @@ function electionButtons() {
 	function simpleElection(rand) {
 		disableButtons();
 		$('#processing').fadeIn(150);
-		$.post(host+":"+port+"/election", {task: "simple", ID: "generated", random: rand, title: "", description: ""})
+		console.log(electionManager+"/election");
+		$.post(electionManager+"/election", {task: "simple", ID: "generated", random: rand, title: "", description: ""})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -46,7 +46,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ host+":"+port);
+			 alerting('cannot connect to ElectionHandler at '+ electionManager);
 		 });
 	}
 	
@@ -57,7 +57,7 @@ function electionButtons() {
     	else{
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		$.post(host+":"+port+"/election", {task: "remove", ID: value, password: pass})
+    		$.post(electionManager+"/election", {task: "remove", ID: value, password: pass})
     		 .done(function(data){
     			$('#processing').fadeOut(150);
     			enableButtons();
@@ -75,7 +75,7 @@ function electionButtons() {
     		 .fail(function(){
     			 enableButtons();
     			 $('#processing').hide();
-    			 alerting('cannot connect to ElectionHandler at '+ host+":"+port);
+    			 alerting('cannot connect to ElectionHandler at '+ electionManager);
     		 });
     	}
 	}
@@ -152,7 +152,7 @@ function electionButtons() {
 		var startingTime = $('#start-time').val();
 		var endingTime = $('#end-time').val();
 		$('#processing').fadeIn(150);
-		$.post(host+":"+port+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
+		$.post(electionManager+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -171,7 +171,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ host+":"+port);
+			 alerting('cannot connect to ElectionHandler at '+ electionManager);
 		 });
     }
 	
@@ -270,7 +270,7 @@ function electionButtons() {
 		}
 		electionCh.choices = echoices;
 		$('#processing').fadeIn(150);
-		$.post(host+":"+port+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
+		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -289,7 +289,7 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ host+":"+port);
+			 alerting('cannot connect to ElectionHandler at '+ electionManager);
 			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
 			 $('#complete').hide(150);
 			 $('#welcome').show();
@@ -578,8 +578,7 @@ function electionButtons() {
 		electionConf = JSON.parse(electionConfigRaw);
 		elections = electionConf.elections;
 	    
-		host = "http://localhost";
-		port = electionConf["handler-port"];
+		electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager/";
 		votingBooth = "http://localhost:"+electionConf["nginx-port"];
 		collectingServer = "http://localhost:"+electionConf["nginx-port"];
 		lastMix = "http://localhost:"+electionConf["nginx-port"];
@@ -587,7 +586,7 @@ function electionButtons() {
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
 			 var sAddresses = JSON.parse(sAddressesRaw);
-			 host = sAddresses.electionHandler;
+			 electionManager = sAddresses.electionHandler;
 			 votingBooth = sAddresses["server-address"].votingbooth;
 			 collectingServer = sAddresses["server-address"].collectingserver;
 			 lastMix = sAddresses["server-address"].mix2;
