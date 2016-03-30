@@ -590,7 +590,7 @@ function electionButtons() {
 			 host = sAddresses.electionHandler;
 			 votingBooth = sAddresses["server-address"].votingbooth;
 			 collectingServer = sAddresses["server-address"].collectingserver;
-			 astMix = sAddresses["server-address"].mix2;
+			 lastMix = sAddresses["server-address"].mix2;
 		 }
 		var tmp = collectingServer.split("://");
 		if(tmp.length > 1){
