@@ -3,8 +3,8 @@
 ## How to deploy the Election Manager at `localhost`
 
 After creating the development environment in the folder
-`ElectionManager` (with `make devenv`), in the folder
-`ElectionManager/deployment` create the deployment environment with
+`ElectionManager` (with `make devenv`) and configuring all the configuration
+files to the desired settings, create the deployment environment with
 
 ```
 make depenv
@@ -16,27 +16,21 @@ This operation can be reverted by `make depclean`.
 
 ## How to run the Election Manager at `localhost`
 
-1. In the folder `ElectionManager/deployment` start nginx by running
 
-	```
-	./startNginx.sh
-	```
-	This command requires root privileges.
+The election manager and the nginx sessions to handle the election created can be started by:
 
-
-2. In the folder `ElectionManager`, the election handler can be started by:
-
-	```
-	./run.sh
-	```
-
-   **It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.**
+```
+./run.sh
+```
+This script requires root privileges to redirect the traffic from port 80.
 
 
-3. When you stop the system, remember to stop all the nginx processes running
 
-	```
-	./stopNginx.sh
-	```
-	from both the `ElectionManager/deployment` and `ElectionManager` folders.
-	The script in `ElectionManager/deployment` requires root privileges, too.
+**It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.**
+
+The nginx sessions created can be stopped by
+
+```
+./stopNginx.sh
+```
+The script requires root privileges, too.

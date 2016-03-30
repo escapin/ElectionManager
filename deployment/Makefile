@@ -1,7 +1,7 @@
 default:
 	@echo Specify the goal: depenv OR depclean
 
-depenv: nginxFiles updateNginxConfig
+depenv: nginxFiles updateNginxConfig 
 
 nginxFiles:
 	cp -n template/serverAddresses.json .
@@ -10,6 +10,7 @@ nginxFiles:
 
 updateNginxConfig:
 	python configNginx.py
+
 
 depclean: 
 	-rm -rf nginx_config

@@ -10,4 +10,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 echo -n Stopping the nginx services managing the sElect servers...
 /usr/sbin/nginx -c $DIR/nginx_config/nginx_select.conf -s quit 2>/dev/null
-echo done.
+echo done!
