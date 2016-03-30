@@ -1,4 +1,6 @@
-# How to deploy the Election Manager at `localhost`
+# Election Manager deployment
+
+## How to deploy the Election Manager at `localhost`
 
 After creating the development environment in the folder
 `ElectionManager` (with `make devenv`), in the folder
@@ -12,7 +14,7 @@ It set up all the files and folders to deploy the system at `localhost`.
 This operation can be reverted by `make devclean`.
 
 
-# How to run the Election Manager at `localhost`
+## How to run the Election Manager at `localhost`
 
 1. In the folder `ElectionManager/deployment` start nginx by running
 
