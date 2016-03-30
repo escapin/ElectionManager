@@ -4,7 +4,7 @@
 
 After creating the development environment in the folder
 `ElectionManager` (with `make devenv`), in the folder
-`ElectionManager/deployment' create the deployment environment with
+`ElectionManager/deployment` create the deployment environment with
 
 ```
 make depenv
