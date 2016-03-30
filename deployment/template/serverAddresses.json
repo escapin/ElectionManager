@@ -1,5 +1,5 @@
 {
-	"electionHandler": "http://localhost",
+	"electionHandler": "http://localhost/electionManager",
 	"server-address": {
         "mix1": "http://localhost", 
         "mix2": "http://localhost", 
