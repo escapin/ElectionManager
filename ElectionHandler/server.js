@@ -6,8 +6,8 @@ var read = require('read');
 var fs = require('fs');
 var http = require('http');
 //var https = require('https');
-//var certificate = fs.readFileSync("../sElect/_sElectConfigFiles_/select.chained.crt", 'utf8');
-//var certificate_key = fs.readFileSync("../sElect/_sElectConfigFiles_/select.key", 'utf8');
+//var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
+//var certificate_key = fs.readFileSync("../deployment/cert/select.key", 'utf8');
 //var credentials = {key: certificate_key, cert: certificate};
 var app = express();
 
@@ -25,8 +25,6 @@ app.use(bodyParser.urlencoded({
 	extended : false
 }));
 //var httpsserver = https.createServer(credentials, app);
-//var basicAuth = require('basic-auth-connect');
-//app.use('/election/*', basicAuth('admin', '888')); // authentication for the admin panel only
 
 /**Resume previous elections **/
 var oldSession = spawn('python', ['src/resumeElection.py']);
@@ -194,6 +192,7 @@ function verify(passwd){
 
 // start the services
 function start(){
+	//var server = httpsserver.listen(port, function() {
 	var server = app.listen(port, function() {
 	    console.log('Serving %s on %s, port %d', path, server.address().address, server.address().port);
 	});
