@@ -1,4 +1,4 @@
-# Election Manager deployment
+# Deployment Election Manager
 
 ## How to deploy the Election Manager at `localhost`
 
@@ -11,7 +11,7 @@ make depenv
 ```
 
 It set up all the files and folders to deploy the system at `localhost`.
-This operation can be reverted by `make devclean`.
+This operation can be reverted by `make depclean`.
 
 
 ## How to run the Election Manager at `localhost`
