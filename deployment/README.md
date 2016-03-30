@@ -17,7 +17,7 @@ This operation can be reverted by `make depclean`.
 ## How to run the Election Manager at `localhost`
 
 
-The election manager and the nginx sessions to handle the election created can be started by:
+The election manager and the nginx sessions to handle the elections created can be started by:
 
 ```
 ./run.sh
