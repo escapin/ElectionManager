@@ -10,5 +10,5 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
 echo \* Stopping nginx services redirecting ports 80 and 433 \(requires *superuser* privileges\)...
-sudo nginx -c $DIR/nginx_config/nginx_root.conf -s quit 2>/dev/null
+sudo nginx -c $DIR/nginx_root.conf -s quit 2>/dev/null
 echo done.

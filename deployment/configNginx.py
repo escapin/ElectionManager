@@ -35,7 +35,7 @@ srcfile = os.path.realpath(__file__)
 deployDir = os.path.split(srcfile)[0]
 rootDirProject = os.path.split(deployDir)[0]
 nginxRootLog = deployDir + "/nginx_config/log"
-nginxRootFile = deployDir + "/nginx_config/nginx_root.conf"
+nginxRootFile = deployDir + "/nginx_root.conf"
 
 electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 
