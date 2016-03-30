@@ -1,7 +1,6 @@
 function electionButtons() {
 	
 	var electionConf;
-	var sAddresses;
 	var votingBooth;
 	var collectingServer;
 	var lastMix;
@@ -580,7 +579,6 @@ function electionButtons() {
 	  	 });
 	     
 		electionConf = JSON.parse(electionConfigRaw);
-		sAddresses = JSON.parse(sAddressesRaw);
 		elections = electionConf.elections;
 	    
 		host = "http://localhost";
@@ -591,6 +589,7 @@ function electionButtons() {
 		
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
+			 var sAddresses = JSON.parse(sAddressesRaw);
 			 host = sAddresses.electionHandler;
 			 votingBooth = sAddresses["server-address"].votingbooth;
 			 collectingServer = sAddresses["server-address"].collectingserver;

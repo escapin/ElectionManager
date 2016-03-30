@@ -4,12 +4,12 @@
 function buildElectionTable(res) {
 	 
 	 var electionConf = JSON.parse(electionConfigRaw);	
-	 var sAddresses = JSON.parse(sAddressesRaw);
 	 var elections = electionConf.elections;
 	 
 	 var lastMix = "http://localhost:"+electionConf["nginx-port"];
 	 //don't use port 80 if it's not deployed
 	 if(electionConf.deployment === true){
+		 var sAddresses = JSON.parse(sAddressesRaw);
 		 lastMix = sAddresses["server-address"].mix2;
 	 }
 	 
