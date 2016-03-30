@@ -24,8 +24,7 @@ This operation can be reverted by `make depclean`.
 This command requires root privileges.
 
 
-2. In the folder `ElectionManager`, the election handler can be started
-   by:
+2. In the folder `ElectionManager`, the election handler can be started by:
 
 ```
 ./run.sh
@@ -34,8 +33,7 @@ This command requires root privileges.
 ##### It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.
 
 
-3. When you stop the system, remember to stop all the nginx processes
-   running
+3. When you stop the system, remember to stop all the nginx processes running
 
 ```
 ./stopNginx.sh
