@@ -783,7 +783,7 @@ function electionButtons() {
 	$.widget( "ui.timespinner", $.ui.spinner, {
 		options: {
 			// seconds
-			step: 60 * 1000,
+			step: 10 * 60 * 1000,
 			// hours
 			page: 60
 		},
