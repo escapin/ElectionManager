@@ -19,13 +19,15 @@ def writeDirec(src, dest):
     nginxFile.truncate()
     nginxFile.close()
 
-def writePort(src, port):
+def writePort(src, nPort, hPort):
     nginxFile = open(src, 'r+')
     nginxData = nginxFile.readlines()
     counter = 0
     for line in nginxData:
         if "DEFAULT:PORT" in line:
-            nginxData[counter] = line.replace("DEFAULT:PORT", str(port))
+            nginxData[counter] = line.replace("DEFAULT:PORT", str(nPort))
+        if "HANDLER:PORT" in line:
+            nginxData[counter] = line.replace("HANDLER:PORT", str(hPort))
         counter = counter + 1
     nginxFile.seek(0)
     nginxFile.writelines(nginxData)
@@ -45,11 +47,12 @@ try:
     jsonFile = open(electionConfig, 'r')
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
     nginxPort = jsonData["nginx-port"]
+    handlerPort = jsonData["handler-port"]
     jsonFile.close()
 except IOError:
     print('Handler configuration file missing or corrupted ("nginx-port" field not found)')
 
 
 writeDirec(nginxFile, nginxLog)
-writePort(nginxFile, nginxPort)
+writePort(nginxFile, nginxPort, handlerPort)
 
