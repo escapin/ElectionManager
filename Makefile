@@ -6,7 +6,7 @@ devenv: handler nginx select
 
 handler:
 	cd ElectionHandler; make
-	mkdir _handlerConfigFiles_
+	mkdir -p _handlerConfigFiles_
 	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
 	mkdir -p elections
 
@@ -35,9 +35,7 @@ nginxclean:
 
 selectclean:
 	-rm -rf sElect/
-	
+
 elclean:
 	-rm -rf elections/
 
-
-	
