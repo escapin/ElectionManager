@@ -18,25 +18,25 @@ This operation can be reverted by `make depclean`.
 
 1. In the folder `ElectionManager/deployment` start nginx by running
 
-```
-./startNginx.sh
-```
-This command requires root privileges.
+	```
+	./startNginx.sh
+	```
+	This command requires root privileges.
 
 
 2. In the folder `ElectionManager`, the election handler can be started by:
 
-```
-./run.sh
-```
+	```
+	./run.sh
+	```
 
-##### It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.
+   *It is now possible to access the election manager via a browser typing ``localhost`` in the address bar.*
 
 
 3. When you stop the system, remember to stop all the nginx processes running
 
-```
-./stopNginx.sh
-```
-from both the `ElectionManager/deployment` and `ElectionManager` folders.
-The script in `ElectionManager/deployment` requires root privileges, too.
+	```
+	./stopNginx.sh
+	```
+	from both the `ElectionManager/deployment` and `ElectionManager` folders.
+	The script in `ElectionManager/deployment` requires root privileges, too.
