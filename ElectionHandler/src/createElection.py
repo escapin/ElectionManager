@@ -196,17 +196,17 @@ for i in range(3):
 sElectDir = rootDirProject + "/sElect"
 electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 defaultManifest = rootDirProject + "/_handlerConfigFiles_/ElectionManifest.json"
-serverAddr = rootDirProject + "/deployment/serverAddresses.json"
 nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
 passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
 
-
-#get duration from handlerConfigFile
+#get duration and deployment status from handlerConfigFile
 try:
     jsonFile = open(electionConfig, 'r')
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
     votingTime = jsonData["electionDurationInHours"]*60*60    #hours to seconds
+    if jsonData["deployment"] is True:
+        serverAddr = rootDirProject + "/deployment/serverAddresses.json"
     jsonFile.close()
 except IOError:
     sys.exit("handlerConfigFile.json missing or corrupt (electionDurationInHours)")
