@@ -1,4 +1,4 @@
-# Deployment of the Election Manager
+# Deployment
 
 ## How to deploy the Election Manager at `localhost`
 
