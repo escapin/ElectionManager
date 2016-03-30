@@ -1,4 +1,4 @@
-# Deployment Election Manager
+# Deployment of the Election Manager
 
 ## How to deploy the Election Manager at `localhost`
 
@@ -40,7 +40,5 @@ This command requires root privileges.
 ```
 ./stopNginx.sh
 ```
-from the folder `ElectionManager/deployment`
-(*not* the script in the folder `ElectionManager', which is only used
-for the software development).  This command requires root privileges,
-too.
+from both the `ElectionManager/deployment` and `ElectionManager` folders.
+The script in `ElectionManager/deployment` requires root privileges, too.
