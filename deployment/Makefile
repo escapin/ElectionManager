@@ -12,6 +12,6 @@ updateNginxConfig:
 	python configNginx.py
 
 depclean: 
-	rm -rf nginx_config
-	rm serverAddresses.json
-	rm nginx_root.conf
+	-rm -rf nginx_config
+	-rm serverAddresses.json
+	-rm nginx_root.conf
