@@ -4,8 +4,8 @@ default:
 depenv: nginxFiles updateNginxConfig 
 
 nginxFiles:
-	cp -n template/serverAddresses.json .
-	cp -n template/nginx_root.conf .
+	cp -n templates/serverAddresses.json .
+	cp -n templates/nginx_root.conf .
 	mkdir -p nginx_config/log
 
 updateNginxConfig:
