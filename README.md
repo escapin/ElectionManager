@@ -57,6 +57,7 @@ confirmation, if one was set.
 
 **Remove Election** removes the selected election. If the voting results
 should be saved on the server, the election must be closed first.
+It requires password confirmation, if one was set.
 
 **Invite Voters to Vote** shows a link to the voting booth of the selected election,
 to allow eligible voters to cast their ballots.
