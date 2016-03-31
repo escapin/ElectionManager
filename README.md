@@ -40,7 +40,7 @@ The web interface contains the following options to manage elections:
 such as title, description, starting/ending time, question, and 
 list of choices can be set. Moreover, two more options can be selected:
 
-* _Publish list of voters_: This option shows the e-mail addresses of
+* _Publish list of voters_: This option shows the email addresses of
   the voters who have voted in this election (but not what they have voted
   for), once the election is closed.
  
@@ -65,7 +65,7 @@ to allow eligible voters to cast their ballots.
 
 B) Once the election is closed, **Check Election Result** shows a link to the _same_ voting booth used by the voters
 to cast their ballot in order to allow them to check the election result. 
-This act triggers the *fully automated verification procedure* to investigate whether
+This act triggers the *fully automated verification* procedure to investigate whether
 the voter's choice has been actually counted.
 
 
