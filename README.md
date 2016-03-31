@@ -61,7 +61,7 @@ It requires password confirmation, if one was set.
 
 
 A) When the election is open, **Invite Voters to Vote** shows a link to the voting booth of the selected election,
-to allow eligible voters to cast their ballots.
+in order to allow eligible voters to cast their ballots.
 
 B) Once the election is closed, **Check Election Result** shows a link to the _same_ voting booth used by the voters
 to cast their ballot, in order to allow them to check the election result. 
