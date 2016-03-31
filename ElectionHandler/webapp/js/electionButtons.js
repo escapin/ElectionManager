@@ -881,12 +881,18 @@ function electionButtons() {
 				$("#close").prop('disabled', null);
 	    		document.getElementById("vote").value = "Invite Voters to Vote";
 	    		document.getElementById("vote").style.visibility = "visible";
+			//console.log( $("#removeMsg").html() );
+			//console.log( $("#removeOpen").html() );
+			// inserting the hidden message with id='removeOpen' inside the HTML tag with id='removeMsg'
+			$("#removeMsg").html( $("#removeOpen").html() );
 			}
 			else if(stat === "closed"){
 		        $("#vote").prop('disabled', null);
 				$("#close").prop('disabled', true);
 	    		document.getElementById("vote").value = "Check Election Result";
 	    		document.getElementById("vote").style.visibility = "visible";
+			// inserting the hidden message with id='removeClosed' inside the HTML tag with id='removeMsg'
+			$("#removeMsg").html( $("#removeClosed").html() );
 			}
 			else{
 				document.getElementById("vote").style.visibility = "hidden";

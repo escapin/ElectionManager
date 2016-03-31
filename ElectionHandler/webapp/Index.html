@@ -52,7 +52,7 @@
 						</div>
 						<div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
 							<input id='close' type="button" class="pure-button pure-button-primary" value="Close Election"></input> 
-						    <input id='remove' type="button" class="pure-button pure-button-primary" value="Delete Election"></input>
+						    <input id='remove' type="button" class="pure-button pure-button-primary" value="Remove Election"></input>
 						</div>
 					</div>
 				</fieldset>
@@ -273,7 +273,11 @@
 	<!-- --------------------------------------------------------------------------------- -->
 	<div id="electionDelete">
      <div class="body" style="text-align: left;">
-          <p style="text-align:center">You are deleting an election. All the data related to this election will be permanently deleted, too.</p>
+          <p style="text-align:center">You are removing an election.
+	  <span id='removeMsg'>???</span>
+	  <span id='removeOpen' hidden>The election is still open.</span>
+	  <span id='removeClosed' hidden>No voters will be able to check the election result anymore.</span>
+	  </p>
           <p style="text-align:center">Do you really want to proceed?</p>
           <input id='cancelDelete' type="button" class="pure-button pure-button-primary" value="No"></input>
           <input id='confirmDelete' style="float: right;" type="button" class="pure-button pure-button-primary" value="Yes"></input>
