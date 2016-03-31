@@ -10,6 +10,9 @@ import hashlib
 import codecs
 import subprocess
 import time
+import random
+import string
+
 
 def copy(src, dest):
     try:
@@ -172,7 +175,6 @@ def hashManifest():
     m.update(manifest_raw)
     return m.hexdigest()
 
-
 # sElect (partial) files path
 manifest = "/_sElectConfigFiles_/ElectionManifest.json"
 collectingConf = "/CollectingServer/config.json"
@@ -216,12 +218,14 @@ ports = usePorts()
 #where the servers are placed
 serverAddress = getsAddress()
 
-#modify ElectionManifest
-currentTime = getTime().strftime("%Y.%m.%d %H:%M GMT+0100")
+#modify ElectionManifest, if no arguments are given, this is a mock election
+mockElection = True
+currentTime = addSec(getTime(), -24*60*60).strftime("%Y.%m.%d %H:%M GMT+0100")
 endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
 if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
     currentTime = sys.argv[1]
     endingTime = sys.argv[2]
+    mockElection = False
 jwrite(sElectDir + manifest, "startTime", currentTime)
 jwrite(sElectDir + manifest, "endTime", endingTime)
 jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[4] + "/" + str(ports[4]) + "/", "URI")
@@ -240,6 +244,10 @@ try:
     elecQuestion = jsonData["question"]
     eleChoices = jsonData["choices"]
     publish = jsonData["publishListOfVoters"]
+    mixServers = jsonData["mixServers"]
+    mixServerEncKey = []
+    for x in range(len(mixServers)):
+        mixServerEncKey.append(mixServers[x]["encryption_key"])
     jsonFile.close()
 except IOError:
     sys.exit("ElectionManifest missing or corrupt")
@@ -308,11 +316,26 @@ if(len(sys.argv) > 9):
         random = False
     jwrite(dstroot + votingConf, "userChosenRandomness", random)
 
+#create Ballots
+if(mockElection):
+    os.mkdir(dstroot+"/CollectingServer/_data_")
+    mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
+    ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
+    for x in range(10):
+        userEmail = "user"+str(x)+"@uni-trier.de"
+        userRandom = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
+        userChoice = random.randint(0,(len(eleChoices)-1))
+        ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), hashManifest(), mixServerEncKeyString], cwd=(rootDirProject+"/ElectionHandler/src"))
+        ballots.wait()
+
 
 #start all node servers
 subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
 #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
-col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
+if(mockElection):
+    col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
+else:
+    col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
 m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
 m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
 m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
