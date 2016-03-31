@@ -60,10 +60,10 @@ should be saved on the server, the election must be closed first.
 It requires password confirmation, if one was set.
 
 
-I. When the election is open, **Invite Voters to Vote** shows a link to the voting booth of the selected election,
+A) When the election is open, **Invite Voters to Vote** shows a link to the voting booth of the selected election,
 to allow eligible voters to cast their ballots.
 
-II. Once the election is closed, **Check Election Result** shows a link to the _same_ voting booth used by the voters
+B) Once the election is closed, **Check Election Result** shows a link to the _same_ voting booth used by the voters
 to cast their ballot in order to allow them to check the election result. 
 This act triggers the *fully automated verification procedure* to investigate whether
 the voter's choice has been actually counted.
