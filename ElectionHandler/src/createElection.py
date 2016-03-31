@@ -207,6 +207,7 @@ try:
     jsonFile = open(electionConfig, 'r')
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
     votingTime = jsonData["electionDurationInHours"]*60*60    #hours to seconds
+    mockVoters = jsonData["numberOfMockVoters"]
     if jsonData["deployment"] is True:
         serverAddr = rootDirProject + "/deployment/serverAddresses.json"
     jsonFile.close()
@@ -321,7 +322,7 @@ if(mockElection):
     os.mkdir(dstroot+"/CollectingServer/_data_")
     mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
     ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
-    for x in range(10):
+    for x in range(mockVoters):
         userEmail = "user"+str(x)+"@uni-trier.de"
         userRandom = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
         userChoice = random.randint(0,(len(eleChoices)-1))
