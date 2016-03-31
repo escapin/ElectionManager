@@ -624,7 +624,7 @@ function electionButtons() {
 	        
 	    });
 	    
-	    $(document).bind('selectstart dragstart', function(e) { 
+	    $('#welcome').bind('selectstart dragstart', function(e) { 
 	        e.preventDefault(); 
 	        return false; 
 	    });
