@@ -28,7 +28,6 @@ function electionButtons() {
 	function simpleElection(rand) {
 		disableButtons();
 		$('#processing').fadeIn(150);
-		console.log(electionManager+"/election");
 		$.post(electionManager+"/election", {task: "simple", ID: "generated", random: rand, title: "", description: ""})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
