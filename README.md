@@ -36,7 +36,7 @@ or *closed* - the election is over and the final result is ready and available
 
 The web interface contains the following options to manage elections:
 
-**Create Election** allows to create customized elections.  Elements
+**Create Election** allows to create customized elections: Elements
 such as title, description, starting/ending time, question, and 
 list of choices can be set. Moreover, two more options can be selected:
 
@@ -64,7 +64,7 @@ A) When the election is open, **Invite Voters to Vote** shows a link to the voti
 to allow eligible voters to cast their ballots.
 
 B) Once the election is closed, **Check Election Result** shows a link to the _same_ voting booth used by the voters
-to cast their ballot in order to allow them to check the election result. 
+to cast their ballot, in order to allow them to check the election result. 
 This act triggers the *fully automated verification* procedure to investigate whether
 the voter's choice has been actually counted.
 
