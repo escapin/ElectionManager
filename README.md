@@ -38,7 +38,7 @@ The web interface contains the following options to manage elections:
 
 **Create Election** allows to create customized elections.  Elements
 such as title, description, starting/ending time, question, and candidates
-can be set. In particular:
+can be set. Moreover, two more options can be selected:
 
 * _Publish list of voters_: This option shows the e-mail addresses of
   the voters who have voted in this election (but not what they have voted
@@ -46,7 +46,7 @@ can be set. In particular:
  
 * _User providing verification code_: The voter will provide part of 
   the verification code to check whether her vote has been properly 
-  counted. In this way, not even the voting booth has to be trusted. 
+  counted. In this way, not even the voting booth needs to be trusted. 
 
 **Set up Mock Election** creates a mock election with predetermined settings
 (such as title, question, list of choices, and so on), which started one day ago
