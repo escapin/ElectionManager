@@ -229,20 +229,29 @@
      <div class="body" style="text-align: left;">
           <p id='info'></p>
           <p>
-          <b>Set up a Mock Election: </b>The button will create a simple election with predetermined properties to test the system, 
-          which include the following:<br><br>
-          <i>Starting time:</i> The election will start immediately after its creation.<br>
-          <i>Ending time:</i> The election will end after a fixed time (<i>default:</i> three days).<br>
-          <i>Verification code:</i> The verification code will be either provided entirely by the system, 
-          or the user will provide part of it (<i>default:</i> user provides part of the code).<br>
-          <i>Miscellaneous:</i> The election title, its description as well as the question and possible choices are already set.
+          <b>Create Election</b> allows to create customized elections: Elements such as title, description, starting/ending time, 
+	  question, and list of choices can be set. 
+<!--	  Moreover, two more options can be selected:<br><br>
+          <i>Publish list of voters:</i> This option shows the email addresses of the voters who have voted in this election 
+	  (but not what they have voted for), once the election is closed.<br>
+          <i>User providing verification code:</i> The voter will provide part of the verification code to check whether her vote has been properly 
+	  counted. In this way, not even the voting booth needs to be trusted.<br> -->
           </p>  
-          <p><b>Create Election: </b>This will show an advanced settings page where a customized election can be created.</p>
-          <p><b>Close Election: </b>The selected election will be closed after confirming the set password (if one was set).</p>   
-          <p><b>Remove Election: </b>Removes the selected election from the list. If the voting results should be saved, the election has to be closed first.</p>
-          <p><b>Invite Voters to Vote: </b>After selecting a running election the button will be displayed, providing a link to the voting procedure.</p>  
-          <p><b>Check Election Result: </b>After selecting a closed election the button will be displayed, providing a link to view the results.</p>  
+          <p><b>Set up Mock Election</b> creates a mock election with predetermined settings (such as title, question, list of choices, and so on), 
+	    which started 1 day ago and will end in 2 days. In this setting, some mock voters already casted their ballots.</p>
+          <p><b>Close Election</b> closes the selected election. It requires password confirmation, if one was set.</p>   
+          <p><b>Remove Election</b> removes the selected election. If the election result needs to be saved on the server, the election must be closed first.
+	    It requires password confirmation, if one was set.</p>
+          <p>A) When the election is open, <b>Invite Voters to Vote</b> shows a link to the Voting Booth of the selected election, in order to allow eligible 
+	    voters to cast their ballots.</p>  
+          <p>B) Once the election is closed, <b>Check Election Result</b> shows a link to the <em>same</em> Voting Booth used by the voters
+	    to cast their ballot, in order to allow them to check the election result.
+<!--	    <br>
+	    This act triggers the <em>fully automated verification</em> procedure to investigate whether the voter's choice has been actually counted.</p>  
+-->
+          </p>
           <input id='closehelp' style="margin-left: 43%;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
+
      </div>
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->
