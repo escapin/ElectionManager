@@ -37,7 +37,7 @@ or *closed* - the election is over and the final result is ready and available
 The web interface contains the following options to manage elections:
 
 **Create Election** allows to create customized elections.  Elements
-such as title, description, starting/ending time, questions and answers
+such as title, description, starting/ending time, questions and candidate
 can be set. In particular:
 
 * _Publish list of voters_: This option shows the e-mail addresses of
