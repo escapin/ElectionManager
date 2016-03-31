@@ -67,12 +67,6 @@ This act triggers the *fully automated verification procedure* to investigate wh
 the voter's choice has been actually counted.
 
 
-##### Security Issues
-
-Since the system is designed to run on https, running the system 
-on http allows the transmission of passwords as plaintext.
-
-
 ## Development Environment
 
 The development environment can be created with
@@ -107,3 +101,7 @@ The nginx sessions created can be stopped by
 ./stopNginx.sh
 ```
 
+### Notes
+
+Since the system is designed to run on https, running the system 
+on http allows the transmission of passwords as plaintext.
