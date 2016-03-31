@@ -59,6 +59,7 @@ confirmation, if one was set.
 should be saved on the server, the election must be closed first.
 It requires password confirmation, if one was set.
 
+
 When the election is open, **Invite Voters to Vote** shows a link to the voting booth of the selected election,
 to allow eligible voters to cast their ballots.
 
