@@ -55,7 +55,7 @@ and will end in two days. In this setting, some mock voters already casted their
 **Close Election** closes the selected election. It requires password 
 confirmation, if one was set.
 
-**Remove Election** removes the selected election. If the voting results
+**Remove Election** removes the selected election. If the election result
 needs to be saved on the server, the election must be closed first.
 It requires password confirmation, if one was set.
 
