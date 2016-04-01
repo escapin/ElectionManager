@@ -195,6 +195,15 @@ function verify(passwd){
 function start(){
 	//var server = httpsserver.listen(port, function() {
 	var server = app.listen(port, function() {
-	    console.log('Serving %s on %s, port %d', path, server.address().address, server.address().port);
+	    console.log('Serving on, port :%d', server.address().port);
 	});
+	try{
+		handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var usePorts = handlerConfigFile["available-ports"];
+		console.log("created elections use ports in range " + usePorts[0] + " - " + usePorts[1] +
+				", \na total of " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections can run at the same time.");
+	}
+	catch(e){
+		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
+	}
 }
