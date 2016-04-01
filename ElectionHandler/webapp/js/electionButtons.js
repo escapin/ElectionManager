@@ -259,8 +259,8 @@ function electionButtons() {
         var stime = $('#s-time').val();
         var etime = $('#e-time').val();
         changeCulture("en-EN");
-        var startingTime = sdate + " " + stime + " GMT+0100";
-        var endingTime = edate + " " + etime + " GMT+0100";
+        var startingTime = resolveTime(sdate + " " + stime) + " UTC+0000";
+        var endingTime = resolveTime(edate + " " + etime) + " UTC+0000";
 		var equestion = $('#e-question').val();
 		var electionCh = {};
 		var echoices = [];
@@ -858,6 +858,27 @@ function electionButtons() {
 		Globalize.culture(cult);
 		$( "#s-time" ).timespinner("value", current);
 		$( "#e-time" ).timespinner("value", current2);
+	}
+	
+	// expected time format is 'yy-mm-dd h:min [options not used yet]' 
+	var resolveTime = function(time){
+	    var dateTime = time.split(" ");
+	    var date = dateTime[0].split("-");
+	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]);
+	    clientDate = new Date(clientDate.setTime(clientDate.getTime()+clientDate.getTimezoneOffset()*60000))
+	    
+		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
+		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
+		
+		var hours = clientDate.getHours()	
+		var dt = (hours>=12)?"PM":"AM";
+		hours = (hours%12==0)?12:(hours%12);
+				
+		date = clientDate.getFullYear()+"-"+month+"-"+day;
+		time = hours+":"+clientDate.getMinutes()+" "+dt;
+		dateTime = date + " " + time;
+		
+	    return dateTime;
 	}
 	
 	// Show Invite Voters or Check Result button
