@@ -280,7 +280,7 @@ function electionButtons() {
 				$('#processing').hide();
 			}
 			else{
-				alerting(data);
+				alerting(data, false);
 				$('#processing').hide();
 			    buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
 			}
@@ -288,10 +288,8 @@ function electionButtons() {
 		 .fail(function(){
 			 enableButtons();
 			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ electionManager);
+			 alerting('cannot connect to ElectionHandler at '+ electionManager, false);
 			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
-			 $('#complete').hide(150);
-			 $('#welcome').show();
 		 });
     }
     
@@ -816,10 +814,11 @@ function electionButtons() {
 		$( "#e-time" ).timespinner();
 	});
 	
-	var serverTimezone = -60;
-	var clientDate = new Date();
-	var timeDifference = clientDate.getTimezoneOffset()-serverTimezone;
-	var currentDate = new Date(clientDate.setTime(clientDate.getTime()+timeDifference*60000));
+	//var serverTimezone = 0;
+	//var clientDate = new Date();
+	//var timeDifference = clientDate.getTimezoneOffset()-serverTimezone;
+	//var currentDate = new Date(clientDate.setTime(clientDate.getTime()+timeDifference*60000));
+	var currentDate = new Date();
 	var month = currentDate.getMonth()+1<10 ? "0"+(currentDate.getMonth()+1) : (currentDate.getMonth()+1);
 	var day = currentDate.getDate()+1<10 ? "0"+currentDate.getDate() : currentDate.getDate();
 	
