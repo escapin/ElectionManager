@@ -200,8 +200,9 @@ function start(){
 	try{
 		handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 		var usePorts = handlerConfigFile["available-ports"];
-		console.log("created elections use ports in range " + usePorts[0] + " - " + usePorts[1] +
-				", \na total of " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections can run at the same time.");
+		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
+				"Therefore you can run up to " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections at the same time," +
+						"\nbecause it runs 5 different servers for each election.\n");
 	}
 	catch(e){
 		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
