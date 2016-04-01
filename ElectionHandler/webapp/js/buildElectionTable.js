@@ -7,9 +7,11 @@ function buildElectionTable(res) {
 	var resolveTime = function(time){
 	    var dateTime = time.split(" ");
 	    var date = dateTime[0].split("-");
+	    // create a Date object from the incoming time string
 	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]);
+	    // add the timezone offset of your computer location to the (UTC) Date object
 	    clientDate = new Date(clientDate.setTime(clientDate.getTime()-clientDate.getTimezoneOffset()*60000))
-	    
+	    // display 03 for March instead of 3 (and months below 10)
 		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
 		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
 		
