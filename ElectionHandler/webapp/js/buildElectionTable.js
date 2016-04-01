@@ -3,7 +3,7 @@
 
 function buildElectionTable(res) {
 	
-	// expected time format is 'yy.mm.dd h:min [options not used yet]' in UTC+000 
+	// expected time format is 'yy-mm-dd h:min [options not used yet]' in UTC+000 
 	var resolveTime = function(time){
 	    var dateTime = time.split(" ");
 	    var date = dateTime[0].split("-");
