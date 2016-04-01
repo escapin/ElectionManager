@@ -214,28 +214,6 @@ try:
 except IOError:
     sys.exit("handlerConfigFile.json missing or corrupt (electionDurationInHours)")
 
-ports = usePorts()
-
-#where the servers are placed
-serverAddress = getsAddress()
-
-#modify ElectionManifest, if no arguments are given, this is a mock election
-mockElection = True
-currentTime = addSec(getTime(), -24*60*60).strftime("%Y.%m.%d %H:%M GMT+0100")
-endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
-if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
-    currentTime = sys.argv[1]
-    endingTime = sys.argv[2]
-    mockElection = False
-jwrite(sElectDir + manifest, "startTime", currentTime)
-jwrite(sElectDir + manifest, "endTime", endingTime)
-jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[4] + "/" + str(ports[4]) + "/", "URI")
-jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[3] + "/" + str(ports[3]) + "/", 0, "URI")
-jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[0] + "/" + str(ports[0]) + "/", 0, "URI")
-jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[1] + "/" + str(ports[1]) + "/", 1, "URI")
-jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
-
-
 #read default data from sElect/templates/ElectionManifest.json
 try:
     jsonFile = open(defaultManifest, 'r')
@@ -253,45 +231,45 @@ try:
 except IOError:
     sys.exit("ElectionManifest missing or corrupt")
 
-if(len(sys.argv) > 1):
-    elecTitle = sys.argv[3]
-    elecDescr = sys.argv[4]
+#get input parameters (if any)
+password = "";
+mockElection = True
+currentTime = addSec(getTime(), -24*60*60).strftime("%Y.%m.%d %H:%M GMT+0100")
+endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
+if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
+    electionArgs = json.loads(sys.argv[1])
+    currentTime = electionArgs['startTime']
+    endingTime = electionArgs['endTime']
+    elecTitle = electionArgs['title']
+    elecDescr = electionArgs['description']
+    elecQuestion = electionArgs['question']
+    eleChoices = electionArgs['choices[]']
+    publish = electionArgs['publishVoters']
+    publish = True if publish == "true" else False
+    random = electionArgs['random']
+    random = True if random == "true" else False
+    password = electionArgs['password']
+    mockElection = False
+    
+    
+ports = usePorts()
 
-if(len(sys.argv) > 5):
-    elecQuestion = sys.argv[5]
-    eleChoices = sys.argv[6].split(',')
- 
-if(len(sys.argv) > 8):
-    publish = sys.argv[8]
-    if publish == "true":
-        publish = True
-    else:
-        publish = False
+#where the servers are placed
+serverAddress = getsAddress()
 
-#write to manifest
+#modify ElectionManifest, if no arguments are given, this is a mock election
+jwrite(sElectDir + manifest, "startTime", currentTime)
+jwrite(sElectDir + manifest, "endTime", endingTime)
 jwrite(sElectDir + manifest, "title", elecTitle)
 jwrite(sElectDir + manifest, "description", elecDescr)
 jwrite(sElectDir + manifest, "question", elecQuestion)
 jwrite(sElectDir + manifest, "choices", eleChoices)  
 jwrite(sElectDir + manifest, "publishListOfVoters", publish)
-
-
-#modify Server ports
-jwrite(sElectDir + mix00Conf, "port", ports[0])
-jwrite(sElectDir + mix01Conf, "port", ports[1])
-jwrite(sElectDir + mix02Conf, "port", ports[2])
-jwrite(sElectDir + bulletinConf, "port", ports[3])
-jwrite(sElectDir + collectingConf, "port", ports[4])
-#jwrite(sElectDir + votingConf, "port", ports[5])        #not using the VotingBooth server, static path instead
-jwrite(sElectDir + votingConf, "authenticate", serverAddress[6])
-
-#add password
-protect = False
-password = "";
-if(len(sys.argv) > 7):
-    password = sys.argv[7]
-    protect = True;
-jwrite(sElectDir + collectingConf, "serverAdminPassword", password)
+jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[4] + "/" + str(ports[4]) + "/", "URI")
+jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[3] + "/" + str(ports[3]) + "/", 0, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[0] + "/" + str(ports[0]) + "/", 0, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[1] + "/" + str(ports[1]) + "/", 1, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
 
 #get ID after modifying Manifest
 iDlength = 5
@@ -307,14 +285,21 @@ while(iDlength < 40):
         iDlength = iDlength+1
         #sys.exit("ElectionID already exists.")
 
+#add the password
 jwrite(passList, electionID, password)
 
-if(len(sys.argv) > 9):
-    random = sys.argv[9]
-    if random == "true":
-        random = True
-    else:
-        random = False
+#modify Server ports
+jwrite(dstroot + mix00Conf, "port", ports[0])
+jwrite(dstroot + mix01Conf, "port", ports[1])
+jwrite(dstroot + mix02Conf, "port", ports[2])
+jwrite(dstroot + bulletinConf, "port", ports[3])
+jwrite(dstroot + collectingConf, "port", ports[4])
+#jwrite(dstroot + votingConf, "port", ports[5])        #not using the VotingBooth server, static path instead
+jwrite(dstroot + votingConf, "authenticate", serverAddress[6])
+jwrite(dstroot + collectingConf, "serverAdminPassword", password)
+
+#change user randomness if not a mock election
+if not mockElection:
     jwrite(dstroot + votingConf, "userChosenRandomness", random)
 
 #create Ballots
@@ -345,7 +330,7 @@ bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
 newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
 
 #add PIDs to config
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime, "protect": protect}
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
