@@ -29,7 +29,8 @@ unique ID, a given title, and a starting/ending time. Moreover, each
 election is either *open* - the election is currently running and
 eligible voters can cast their votes -
 or *closed* - the election is over and the final result is ready and available
-(*not responding* indicates a problem communicating with the server).
+(*not responding* indicates a problem communicating with the server outputting
+the election result).
 
 
 ## Usage

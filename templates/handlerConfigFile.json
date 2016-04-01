@@ -7,6 +7,6 @@
         3900
     ],
     "electionDurationInHours": 72,
-    "numberOfMockVoters": 5,
+    "numberOfMockVoters": 4,
     "elections": []
 }
