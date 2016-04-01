@@ -258,7 +258,7 @@ function electionButtons() {
     	var edate = $('#e-date').val();
         var stime = $('#s-time').val();
         var etime = $('#e-time').val();
-        changeCulture($( "#culture" ).val());
+        changeCulture("en-EN");
         var startingTime = sdate + " " + stime + " GMT+0100";
         var endingTime = edate + " " + etime + " GMT+0100";
 		var equestion = $('#e-question').val();
