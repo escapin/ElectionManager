@@ -6,7 +6,7 @@ function buildElectionTable(res) {
 	// expected time format is 'yy.mm.dd h:min [options not used yet]' in UTC+000 
 	var resolveTime = function(time){
 	    var dateTime = time.split(" ");
-	    var date = dateTime[0].split(".");
+	    var date = dateTime[0].split("-");
 	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]);
 	    clientDate = new Date(clientDate.setTime(clientDate.getTime()-clientDate.getTimezoneOffset()*60000))
 	    
@@ -17,7 +17,7 @@ function buildElectionTable(res) {
 		var dt = (hours>=12)?"PM":"AM";
 		hours = (hours%12==0)?12:(hours%12);
 				
-		date = clientDate.getFullYear()+"."+month+"."+day;
+		date = clientDate.getFullYear()+"-"+month+"-"+day;
 		time = hours+":"+clientDate.getMinutes()+" "+dt;
 		dateTime = date + " " + time;
 		
@@ -108,15 +108,6 @@ function buildElectionTable(res) {
           callback(eleID, stat)
         });
 
-  }
-  
-  // expected time format is 'yy.mm.dd h:min [options not used yet]' in UTC+000 
-  var resolveTime = function(time){
-      var dateTime = time.split(" ");
-      var date = dateTime[0].split(".");
-      var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]);
-      clientDate = new Date(clientDate.setTime(clientDate.getTime()-clientDate.getTimezoneOffset()*60000))
-      return clientDate;
   }
   
   ////////////////////////////////////////////////////////////////

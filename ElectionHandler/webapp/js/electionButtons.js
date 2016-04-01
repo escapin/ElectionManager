@@ -377,6 +377,7 @@ function electionButtons() {
 	$("#advance").click(function() {
 		$('#welcome').hide(150);
 	    $('#advanced').show(150);
+	    setDateTimes();
 	    buttonEnable = window.setInterval(enableWhenNotEmpty($('#next-adv')), 100);
 	});
 	
@@ -492,7 +493,7 @@ function electionButtons() {
 		if(!(stime.length === 3 || stime.length === 4)){
 			return false;
 		}
-		var date = stime[0].split(".");
+		var date = stime[0].split("-");
 		var time = stime[1].split(":");
 		var zone = stime[stime.length-1].split("+");
 		if(stime.length > 3){
@@ -812,54 +813,43 @@ function electionButtons() {
     
 	$(function() {
 		$( "#e-time" ).timespinner();
-	});
-	
-	//var serverTimezone = 0;
-	//var clientDate = new Date();
-	//var timeDifference = clientDate.getTimezoneOffset()-serverTimezone;
-	//var currentDate = new Date(clientDate.setTime(clientDate.getTime()+timeDifference*60000));
-	var currentDate = new Date();
-	var month = currentDate.getMonth()+1<10 ? "0"+(currentDate.getMonth()+1) : (currentDate.getMonth()+1);
-	var day = currentDate.getDate()+1<10 ? "0"+currentDate.getDate() : currentDate.getDate();
-	
-	var hours = currentDate.getHours()	
-	var dt = (hours>=12)?"PM":"AM";
-	hours = (hours%12==0)?12:(hours%12);
-			
-	document.getElementById("s-date").value = currentDate.getFullYear()+"."+month+"."+day;
-	document.getElementById("s-time").value = hours+":"+currentDate.getMinutes()+" "+dt;
-
-	var endDate = new Date(currentDate.setTime(currentDate.getTime()+10*60000));
-	month = endDate.getMonth()+1<10 ? "0"+(endDate.getMonth()+1) : (endDate.getMonth()+1);
-	day = endDate.getDate()+1<10 ? "0"+endDate.getDate() : endDate.getDate();
-	
-	hours = endDate.getHours()
-	dt = (hours>=12)?"PM":"AM";
-	hours = (hours%12==0)?12:(hours%12);
-	
-	document.getElementById("e-date").value = endDate.getFullYear()+"."+month+"."+day;
-	document.getElementById("e-time").value = hours+":"+endDate.getMinutes()+" "+dt;
-
-	
+	});	
 	
 	var currentTime = function(){
 		var currentDate = new Date();
 		var month = currentDate.getMonth()+1<10 ? "0"+(currentDate.getMonth()+1) : (currentDate.getMonth()+1);
 		var day = currentDate.getDate()+1<10 ? "0"+currentDate.getDate() : currentDate.getDate();
-		nowDate = currentDate.getFullYear()+"."+month+"."+day;
-		nowTime = currentDate.getHours()+":"+currentDate.getMinutes();
+		var hours = currentDate.getHours()	
+		var dt = (hours>=12)?"PM":"AM";
+		hours = (hours%12==0)?12:(hours%12);
+		var nowDate = currentDate.getFullYear()+"-"+month+"-"+day;
+		var nowTime = hours+":"+currentDate.getMinutes()+" "+dt;
 		
 		return nowDate + " " + nowTime;
 	}
 	
 	var endsTime = function(){
+		var currentDate = new Date();
 		var endDate = new Date(currentDate.setTime(currentDate.getTime()+10*60000));
-		month = endDate.getMonth()+1<10 ? "0"+(endDate.getMonth()+1) : (endDate.getMonth()+1);
-		day = endDate.getDate()+1<10 ? "0"+endDate.getDate() : endDate.getDate();
-		endingDate = endDate.getFullYear()+"."+month+"."+day;
-		endingTime = endDate.getHours()+":"+endDate.getMinutes();
+		var month = endDate.getMonth()+1<10 ? "0"+(endDate.getMonth()+1) : (endDate.getMonth()+1);
+		var day = endDate.getDate()+1<10 ? "0"+endDate.getDate() : endDate.getDate();
+		var hours = endDate.getHours()
+		var dt = (hours>=12)?"PM":"AM";
+		hours = (hours%12==0)?12:(hours%12);
+		var endingDate = endDate.getFullYear()+"-"+month+"-"+day;
+		var endingTime = hours+":"+endDate.getMinutes()+" "+dt;
 		
 		return endingDate + " " + endingTime;
+	}
+	
+	function setDateTimes(){
+		var date = currentTime().split(" ");
+		document.getElementById("s-date").value = date[0];
+		document.getElementById("s-time").value = date[1] + " " + date[2];
+
+		date = endsTime().split(" ");
+		document.getElementById("e-date").value = date[0];
+		document.getElementById("e-time").value = date[1] + " " + date[2];
 	}
 	
 	function changeCulture(cult){
