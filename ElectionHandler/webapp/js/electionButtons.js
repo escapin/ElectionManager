@@ -21,7 +21,7 @@ function electionButtons() {
 	var electionStatus = null;
 	/* Ensure the table is always up to date */
 	window.onload = function(){reloading();}
-    
+	
 	//////////////////////////////////////////////////////////////////////////////
 	/// PAGE 1
 	
@@ -574,13 +574,17 @@ function electionButtons() {
 	  		 electionStatus = electionStates;
 	  	 });
 	     
-		electionConf = JSON.parse(electionConfigRaw);
-		elections = electionConf.elections;
-	    
-		electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
-		votingBooth = "http://localhost:"+electionConf["nginx-port"];
-		collectingServer = "http://localhost:"+electionConf["nginx-port"];
-		lastMix = "http://localhost:"+electionConf["nginx-port"];
+	     console.log(document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size")));
+	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
+	     document.getElementById('advance').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
+	     
+	     electionConf = JSON.parse(electionConfigRaw);
+		 elections = electionConf.elections;
+	     
+		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
+		 votingBooth = "http://localhost:"+electionConf["nginx-port"];
+		 collectingServer = "http://localhost:"+electionConf["nginx-port"];
+		 lastMix = "http://localhost:"+electionConf["nginx-port"];
 		
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
