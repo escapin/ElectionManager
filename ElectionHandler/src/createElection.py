@@ -105,7 +105,6 @@ def jAddList(src, key, value):
 
 def getTime():
     utcTime = datetime.datetime.utcnow()
-    utcTime = utcTime + datetime.timedelta(hours=1)
     return utcTime
 
 def addSec(tm, secs):
@@ -234,8 +233,8 @@ except IOError:
 #get input parameters (if any)
 password = "";
 mockElection = True
-currentTime = addSec(getTime(), -24*60*60).strftime("%Y.%m.%d %H:%M GMT+0100")
-endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
+currentTime = addSec(getTime(), -24*60*60).strftime("%Y.%m.%d %H:%M UTC+0000")
+endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M UTC+0000")
 if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
     electionArgs = json.loads(sys.argv[1])
     currentTime = electionArgs['startTime']
