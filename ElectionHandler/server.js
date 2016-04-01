@@ -52,14 +52,15 @@ app.post('/election', function(req, res) {
 	var pass = req.body.password;
 	var rand = req.body.random;
 	var listVoters = req.body.publishVoters;
+	
+	var parameters = JSON.stringify(req.body);
 
 	var session = null;
 	if (task === "complete"){
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		
-		session = spawn('python', ['src/createElection.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters, rand]);
-		
+		session = spawn('python', ['src/createElection.py', parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				console.log('stdout: ' + data);

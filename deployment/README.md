@@ -4,7 +4,8 @@
 
 After creating the development environment in the folder
 `ElectionManager` (with `make devenv`) and configuring all the configuration
-files to the desired settings, create the deployment environment with
+files to the desired settings, in the folder `ElectionManager/deployment` 
+create the deployment environment with
 
 ```
 make depenv
@@ -16,8 +17,8 @@ This operation can be reverted by `make depclean`.
 
 ## How to run the Election Manager at `localhost`
 
-
-The election manager and the nginx sessions to handle the elections created can be started by:
+In the folder `ElectionManager/deployment`, the election manager and the nginx 
+sessions to handle the elections created can be started by:
 
 ```
 ./run.sh
