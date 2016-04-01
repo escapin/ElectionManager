@@ -106,7 +106,7 @@ The nginx sessions created can be stopped by
 
 ### Notes
 
-* The date and time on the web page are displayed in the timezone your 
-  computer is set to (usually where the computer is located).
+* The date and time on the web page are displayed in the user's machine 
+  timezone, whereas the UTC timezone is used on the server side.
 * Since the system is designed to run on https, running the system 
   on http allows the transmission of passwords as plaintext.
