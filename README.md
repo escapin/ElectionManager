@@ -106,5 +106,7 @@ The nginx sessions created can be stopped by
 
 ### Notes
 
-Since the system is designed to run on https, running the system 
-on http allows the transmission of passwords as plaintext.
+* The date and time on the web page are displayed in the timezone your 
+  computer is set to (usually where the computer is located).
+* Since the system is designed to run on https, running the system 
+  on http allows the transmission of passwords as plaintext.
