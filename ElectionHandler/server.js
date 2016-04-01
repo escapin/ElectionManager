@@ -53,13 +53,13 @@ app.post('/election', function(req, res) {
 	var rand = req.body.random;
 	var listVoters = req.body.publishVoters;
 	
-	var parameters = JSON.stringify(req.body);
-
 	var session = null;
 	if (task === "complete"){
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
-		
+		req.body.password = hash;
+		var parameters = JSON.stringify(req.body);
+
 		session = spawn('python', ['src/createElection.py', parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
