@@ -19,7 +19,7 @@ function buildElectionTable(res) {
 		var mins = clientDate.getMinutes()<10 ? "0"+clientDate.getMinutes() : clientDate.getMinutes();
 		date = clientDate.getFullYear()+"-"+month+"-"+day;
 		time = hours+":"+mins+" "+dt;
-		dateTime = date + " " + time;
+		dateTime = date + "<br>" + time;
 		
 	    return dateTime;
 	}

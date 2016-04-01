@@ -254,15 +254,18 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #back,
 #next-adv,
 #adv-create,
+#advance,
+#mock,
 #choice1,
 #choice2,
 #remove-choice,
-#add-choice,
-#advance,
-#mock{
+#add-choice{
 	margin-top: 1.3em;
 }
-
+#advance,
+#mock{
+	margin-bottom: 1.3em;
+}
 #u-rand{
 	margin-right: 10%;
 	margin-top: 5%;
@@ -274,11 +277,7 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 }
 
 #close,
-#advance{
-	width: 13.5em;
-	margin-right: 18%;
-}
-
+#advance,
 #mock,
 #remove,
 #compl-create{
@@ -338,8 +337,8 @@ th{
     font-size: inherit;
     margin: 0;
     overflow: visible; /*to make ths where the title is really long work*/
-    padding: 0.5em 1em; /* cell padding */
-        border-collapse: collapse;
+    padding: 0.5em 2em; /* cell padding */
+    border-collapse: collapse;
     border-spacing: 0;
     empty-cells: show;
     border: 1px solid #cbcbcb;
