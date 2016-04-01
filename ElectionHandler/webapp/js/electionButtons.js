@@ -98,10 +98,10 @@ function electionButtons() {
     		 .fail(function(data){
     			enableButtons();
     			$('#processing').hide();
-    			if(data===undefined){
-    				alerting("cannot connect to CollectingServer at "+ collectingServer, false);
+    			if(data.status===502){
+    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+value+"/collectingServer", false);
     			}
-    			else{
+    			else if(data.status===401){
     				alerting("wrong password", false);
     			}
     		 });
