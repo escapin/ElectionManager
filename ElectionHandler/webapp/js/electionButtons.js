@@ -860,33 +860,12 @@ function electionButtons() {
 		$( "#e-time" ).timespinner("value", current2);
 	}
 	
-	// expected time format is 'yy-mm-dd h:min [options not used yet]' 
-	var resolveTime = function(time){
-	    var dateTime = time.split(" ");
-	    var date = dateTime[0].split("-");
-	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]);
-	    clientDate = new Date(clientDate.setTime(clientDate.getTime()+clientDate.getTimezoneOffset()*60000))
-	    
-		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
-		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
-		
-		var hours = clientDate.getHours()	
-		var dt = (hours>=12)?"PM":"AM";
-		hours = (hours%12==0)?12:(hours%12);
-				
-		date = clientDate.getFullYear()+"-"+month+"-"+day;
-		time = hours+":"+clientDate.getMinutes()+" "+dt;
-		dateTime = date + " " + time;
-		
-	    return dateTime;
-	}
-	
+	// expected time format is 'yy-mm-dd h:min [options not used yet]' 	
 	var resolveTimeUTC = function(time){
 	    var dateTime = time.split(" ");
 	    var date = dateTime[0].split("-");
-	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]);
-	    clientDate = new Date(clientDate.setTime(clientDate.getTime()+clientDate.getTimezoneOffset()*60000))
-	    
+	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]+"Z");
+	    clientDate = new Date(clientDate.getTime()+clientDate.getTimezoneOffset()*60000*2);
 		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
 		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
 				
