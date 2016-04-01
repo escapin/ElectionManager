@@ -319,7 +319,9 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 	z-index: 10;
 }
 #cultEN,
-#cultDE{
+#cultDE,
+#dateStartLabel,
+#dateEndLabel{
 	font-size: 0.9em;
 }
 
@@ -437,6 +439,8 @@ span.testing{
 #elections,
 #cultENlabel,
 #cultDElabel,
+#dateStartLabel,
+#dateEndLabel,
 #hovering,
 #listVoters,
 body,
