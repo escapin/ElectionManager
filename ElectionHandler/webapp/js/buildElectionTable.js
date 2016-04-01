@@ -16,9 +16,9 @@ function buildElectionTable(res) {
 		var hours = clientDate.getHours()	
 		var dt = (hours>=12)?"PM":"AM";
 		hours = (hours%12==0)?12:(hours%12);
-				
+		var mins = clientDate.getMinutes()<10 ? "0"+clientDate.getMinutes() : clientDate.getMinutes();
 		date = clientDate.getFullYear()+"-"+month+"-"+day;
-		time = hours+":"+clientDate.getMinutes()+" "+dt;
+		time = hours+":"+mins+" "+dt;
 		dateTime = date + " " + time;
 		
 	    return dateTime;
