@@ -259,8 +259,8 @@ function electionButtons() {
         var stime = $('#s-time').val();
         var etime = $('#e-time').val();
         changeCulture("en-EN");
-        var startingTime = resolveTime(sdate + " " + stime) + " UTC+0000";
-        var endingTime = resolveTime(edate + " " + etime) + " UTC+0000";
+        var startingTime = resolveTimeUTC(sdate + " " + stime) + " UTC+0000";
+        var endingTime = resolveTimeUTC(edate + " " + etime) + " UTC+0000";
 		var equestion = $('#e-question').val();
 		var electionCh = {};
 		var echoices = [];
@@ -776,7 +776,7 @@ function electionButtons() {
 	$.widget( "ui.timespinner", $.ui.spinner, {
 		options: {
 			// seconds
-			step: 10 * 60 * 1000,
+			step: 60 * 1000,
 			// hours
 			page: 60
 		},
@@ -876,6 +876,22 @@ function electionButtons() {
 				
 		date = clientDate.getFullYear()+"-"+month+"-"+day;
 		time = hours+":"+clientDate.getMinutes()+" "+dt;
+		dateTime = date + " " + time;
+		
+	    return dateTime;
+	}
+	
+	var resolveTimeUTC = function(time){
+	    var dateTime = time.split(" ");
+	    var date = dateTime[0].split("-");
+	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]);
+	    clientDate = new Date(clientDate.setTime(clientDate.getTime()+clientDate.getTimezoneOffset()*60000))
+	    
+		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
+		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
+				
+		date = clientDate.getFullYear()+"-"+month+"-"+day;
+		time = clientDate.getHours()+":"+clientDate.getMinutes();
 		dateTime = date + " " + time;
 		
 	    return dateTime;
