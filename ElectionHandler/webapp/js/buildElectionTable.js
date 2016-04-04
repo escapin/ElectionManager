@@ -60,6 +60,7 @@ function buildElectionTable(res) {
 	head$.append($('<th style="text-align:center"/>').html(" Election State "));
 	$("#elections").append(head$);
   
+
 	for (var i = 0 ; i < elections.length ; i++) {
 		var elecID = elections[i].electionID;
 		var elecStatus = 'waiting';
@@ -67,11 +68,11 @@ function buildElectionTable(res) {
 		var endingTime = resolveTime(elections[i].endTime)
 		var row$ = $('<tr/>');
       
-		row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+" &nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+escapeHTML(elections[i].electionTitle, true)+"&nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+startingTime+"&nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+endingTime+"&nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+" &nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+escapeHTML(elections[i].electionTitle, true)+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+startingTime+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+endingTime+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
 		$("#elections").append(row$);
       
 		getElectionStatus(elecID, function (eleID, stat){
