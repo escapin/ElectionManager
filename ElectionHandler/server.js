@@ -1,30 +1,30 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var bcrypt = require("bcryptjs");
-
 var read = require('read');
 var fs = require('fs');
 var http = require('http');
+var mkdirp = require('mkdirp');
+
 //var https = require('https');
 //var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
 //var certificate_key = fs.readFileSync("../deployment/cert/select.key", 'utf8');
 //var credentials = {key: certificate_key, cert: certificate};
-var app = express();
-
 var cors = require('cors');
 var child_process = require("child_process");
-var spawn = child_process.spawn;
-
 var config = require('./src/config');
-
 var port = config.port;
-var path = 'webapp/';
-
+var app = express();
 app.use(cors());
-app.use(bodyParser.urlencoded({
-	extended : false
-}));
+app.use(bodyParser.urlencoded({ extended : false }));
+var spawn = child_process.spawn;
+var path = 'webapp/';
 //var httpsserver = https.createServer(credentials, app);
+
+//create '_data_' dir, if it doesn't exist
+DATA_DIR = './_data_';
+mkdirp.sync(DATA_DIR);
+
 
 /**Resume previous elections **/
 var oldSession = spawn('python', ['src/resumeElection.py']);
