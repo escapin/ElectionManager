@@ -1,56 +1,44 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var bcrypt = require("bcryptjs");
-
 var read = require('read');
 var fs = require('fs');
 var http = require('http');
-//var https = require('https');
-//var certificate = fs.readFileSync("../sElect/_sElectConfigFiles_/select.chained.crt", 'utf8');
-//var certificate_key = fs.readFileSync("../sElect/_sElectConfigFiles_/select.key", 'utf8');
-//var credentials = {key: certificate_key, cert: certificate};
-var app = express();
+var mkdirp = require('mkdirp');
 
+//var https = require('https');
+//var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
+//var certificate_key = fs.readFileSync("../deployment/cert/select.key", 'utf8');
+//var credentials = {key: certificate_key, cert: certificate};
 var cors = require('cors');
 var child_process = require("child_process");
-var spawn = child_process.spawn;
-
 var config = require('./src/config');
-
 var port = config.port;
-var path = 'webapp/';
-
+var app = express();
 app.use(cors());
-app.use(bodyParser.urlencoded({
-	extended : false
-}));
+app.use(bodyParser.urlencoded({ extended : false }));
+var spawn = child_process.spawn;
+var path = 'webapp/';
 //var httpsserver = https.createServer(credentials, app);
-//var basicAuth = require('basic-auth-connect');
-//app.use('/election/*', basicAuth('admin', '888')); // authentication for the admin panel only
 
-/**process.stdin.resume();
-process.stdin.setEncoding('utf8');
-var util = require('util');
-var adminpw = "";
-var verify = 0;
-process.stdin.on('data', function (text) {
-	if (text == ""){
-		console.log('password cannot be empty, try again:');
+//create '_data_' dir, if it doesn't exist
+DATA_DIR = './_data_';
+mkdirp.sync(DATA_DIR);
+
+
+/**Resume previous elections **/
+var oldSession = spawn('python', ['src/resumeElection.py']);
+oldSession.stdout.on('data', function (data) {
+	if(String(data).indexOf("OTP")>-1){
+		console.log('stdout: ' + data);
 	}
-	else if (verify == 0){
-		verify = 1;
-		adminpw = text;
-		console.log('reenter password:');
+	else if(String(data).indexOf("TLS")>-1){
+		console.log('mix stdout: ' + data);
 	}
-	else if (text == adminpw){
-		console.log('successfully entered password');
-	}
-	else {
-		verify = 0;
-		adminpw = "";
-		console.log('passwords do not match, try again:');
-	}
-});**/
+});
+oldSession.stderr.on('data', function (data) {
+    console.log('stderr: ' + data);
+});
 
 app.post('/election', function(req, res) {
 	var task = req.body.task;
@@ -65,45 +53,14 @@ app.post('/election', function(req, res) {
 	var rand = req.body.random;
 	var listVoters = req.body.publishVoters;
 	
-	var direc = "";
-	
-	if (rand === "true"){
-		direc = "sElectRandom/"
-	}
-	
 	var session = null;
 	if (task === "complete"){
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
-		
-		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py', startingTime, endingTime, etitle, edesc, equestion, echoices, hash, listVoters]);
-		
-		session.stdout.on('data', function (data) {
-			if(String(data).indexOf("OTP")>-1){
-				console.log('stdout: ' + data);
-			}
-			else if(String(data).indexOf("TLS")>-1){
-				console.log('mix stdout: ' + data);
-			}
-		});
-		session.stderr.on('data', function (data) {
-		    console.log('stderr: ' + data);
-		    res.end(data);
-		});
+		req.body.password = hash;
+		var parameters = JSON.stringify(req.body);
 
-		session.on('exit', function (code) {
-		    console.log('child process exited with code ' + code);
-		    if(code === 0){
-		    	res.end("created");
-		    }
-		    else{
-		    	res.end("error code" + code)
-		    }
-		});
-	}
-	else if (task === "advanced") {
-		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py', startingTime, endingTime, etitle, edesc]);
-		
+		session = spawn('python', ['src/createElection.py', parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				console.log('stdout: ' + data);
@@ -128,7 +85,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "simple") {
-		session = spawn('python', ['../'+direc+'ElectionSetup/NewSession.py']);
+		session = spawn('python', ['src/createElection.py']);
 		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
@@ -154,21 +111,21 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "remove") {
-		var passList = JSON.parse(fs.readFileSync("_data_/pass.json"));
+		var passList = JSON.parse(fs.readFileSync("_data_/pwd.json"));
 		var match = passList[value];
 		var hash = match;
 		if(match !== ""){
 			var salt = bcrypt.getSalt(match);
 			hash = bcrypt.hashSync(pass, salt);
 			if(match !== hash){
-				match = passList["masterpass"];
+				match = passList["adminpassword"];
 				salt = bcrypt.getSalt(match);
 				hash = bcrypt.hashSync(pass, salt);
 			}
 		}
 		pass = hash;
 		
-		session = spawn('python', ['../'+direc+'ElectionSetup/CloseSession.py', value, pass]);
+		session = spawn('python', ['src/removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
 			console.log('stdout: ' + data);
 		});
@@ -192,12 +149,12 @@ app.post('/election', function(req, res) {
 
 // Test if the file with stored passwords exists and is a valid json file
 try{
-	var passFile = JSON.parse(fs.readFileSync("_data_/pass.json"));
+	var passFile = JSON.parse(fs.readFileSync("_data_/pwd.json"));
 	start();
 }
 catch(e){	//if not, remove (if existing but broken json file) and ask for an admin password
 	try{
-		fs.unlinkSync('_data_/pass.json');
+		fs.unlinkSync('_data_/pwd.json');
 	}
 	catch(e){
 	}
@@ -226,7 +183,7 @@ function verify(passwd){
       	  var salt = bcrypt.genSaltSync();
       	  var adminpw = bcrypt.hashSync(password, salt);
       	  var obj = {adminpassword: adminpw}
-      	  fs.writeFileSync('_data_/pass.json', JSON.stringify(obj, null, 4), {spaces:4});
+      	  fs.writeFileSync('_data_/pwd.json', JSON.stringify(obj, null, 4), {spaces:4});
       	  console.log('Password stored');
       	  console.log();
       	  start();
@@ -236,7 +193,18 @@ function verify(passwd){
 
 // start the services
 function start(){
+	//var server = httpsserver.listen(port, function() {
 	var server = app.listen(port, function() {
-	    console.log('Serving %s on %s, port %d', path, server.address().address, server.address().port);
+	    console.log('Serving on, port :%d', server.address().port);
 	});
+	try{
+		handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var usePorts = handlerConfigFile["available-ports"];
+		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
+				"Therefore you can run up to " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections at the same time," +
+						"\nbecause it runs 5 different servers for each election.\n");
+	}
+	catch(e){
+		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
+	}
 }

@@ -1,43 +1,41 @@
 default:
 	@echo Specify the goal: devenv OR devclean
 
-devenv: nginx handler select
+devenv: handler nginx select
 
-nginx:
-	mkdir -p nginx_config/handler/log
-	mkdir -p nginx_config/root/log
-	cp templates/nginx_root.conf nginx_config/root/nginx_root.conf
-	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
-	python configNginx.py
 
 handler:
 	cd ElectionHandler; make
-	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
+	mkdir -p _handlerConfigFiles_
+	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
 	mkdir -p elections
+
+nginx:
+	mkdir -p nginx_config/log
+	cp templates/nginx_select.conf nginx_config/nginx_select.conf
+	python configNginx.py
 
 select:
 	git clone -b master https://github.com/escapin/sElect.git
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
-	cp templates/refreshConfig.sh sElect/VotingBooth/refreshConfig.sh
+	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
+	cp sElect/templates/ElectionManifest.json _handlerConfigFiles_/ElectionManifest.json
 
 
-devclean: configclean selectclean elclean
+devclean: handlerclean nginxclean selectclean elclean
 
-configclean:
+
+handlerclean:
 	cd ElectionHandler; make clean
-	-rm ElectionConfigFile.json
+	-rm -rf _handlerConfigFiles_
+
+nginxclean:	
 	-rm -rf nginx_config/
 
 selectclean:
 	-rm -rf sElect/
+
 elclean:
 	-rm -rf elections/
 
-
-restart:
-	-rm nginx_config/handler/nginx_select.conf
-	-rm ElectionConfigFile.json
-	cp templates/nginx_select.conf nginx_config/handler/nginx_select.conf
-	cp templates/ElectionConfigFile.json ./ElectionConfigFile.json
-	python configNginx.py

@@ -6,6 +6,7 @@
 <script src="js/jquery-1.11.1.min.js"></script>
 <script src="js/electionButtons.js"></script>
 <script src="js/buildElectionTable.js"></script>
+<script src="js/serverAddresses.js"></script>
 <script src="js/config.js"></script>
 <script src="date/datePicker.js"></script>
 <!-- time and date-->
@@ -34,20 +35,20 @@
         Secure elections powered by <em>sElect</em>
     </div>
     <div class="body">
-    	<img src="pic/sElect-logo.svg" align="right" alt="sElect-logo" width="25%"/>
+    	<img src="pic/sElect-logo.png" align="right" alt="sElect-logo" width="25%"/>
         <h1 class="title"> Election Manager </h1>  
         <h3> 
-            Current Elections:
-        </h3>
-		<div style="width: 90%; max-width: 570px; height: 18.5em; overflow: auto;">
+            Click on the <em>entry</em> of the election you want to manage (if any):
+	</h3>
+		<div style="width: 90%; max-width: 580px;">
 			<table id="elections"></table>
 		</div>
 			<form class="pure-form" action="">
 				<fieldset>
 					<div class="pure-g">
 						<div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
-							<input id='vote' type="button" class="pure-button pure-button-primary" value="Vote"></input> 
-							<input id='create' type="button" class="pure-button pure-button-primary" value="Create Election"></input>
+							<input id='advance' type="button" class="pure-button pure-button-primary" value="Create Election"></input>
+							<input id='mock' type="button" class="pure-button pure-button-primary" value="Set up a Mock Election"></input>
 						</div>
 						<div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
 							<input id='close' type="button" class="pure-button pure-button-primary" value="Close Election"></input> 
@@ -56,7 +57,7 @@
 					</div>
 				</fieldset>
 				<div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
-					<input id='advance' type="button" class="pure-button pure-button-primary" value="Advanced Election"></input>
+						<input id='vote' type="button" class="pure-button pure-button-primary" value="Invite Voters"></input> 
 				</div>
 				<a id="help" href="#" class="stylish"><span id="buttontext">Help</span></a>
 			</form>			
@@ -102,20 +103,26 @@
                         type="text" size="50" placeholder="election description">
                     </div>
                     <div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
+                    	<label id="dateStartLabel" for="s-date">
+                    	Starting time: 
                     	<input type="text" id="s-date" placeholder="starting date" style="width: 26%">
-						<input id="s-time" name="spinner" placeholder="starting time">
-						<label id="cultENlabel" for="cultEN">
+						</label>
+						<input id="s-time" name="spinner" placeholder="starting time" maxlength="8">
+						<!--<label id="cultENlabel" for="cultEN">
 							<input id="cultEN" type="radio" name="culture" value="en-EN">
 							AM/PM
-						</label>						
+						</label>-->			
 					</div>
                     <div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
-                    	<input type="text" id="e-date" placeholder="ending date" style="width: 26%">
-						<input id="e-time" name="spinner" placeholder="ending time">
-						<label id="cultDElabel" for="cultDE">
+                    	<label id="dateEndLabel" for="s-date">
+                    	Ending time:&nbsp&nbsp 
+						<input type="text" id="e-date" placeholder="ending date" style="width: 26%">
+						</label>
+						<input id="e-time" name="spinner" placeholder="ending time" maxlength="8">
+						<!--<label id="cultDElabel" for="cultDE">
 							<input id="cultDE" type="radio" name="culture" value="de-DE" checked>
 							24h
-						</label>
+						</label>-->
 					</div>
                 	<div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
                     	<input id='back' type="button" class="pure-button pure-button-primary" value="back"></input>
@@ -186,22 +193,22 @@
      <div class="body">
      	  <input id='mod' class="pure-input-1" type="hidden">
           <p>Enter a password for your election</p>
-          <input id='cr-pass1' class="pure-input-1" type="password" size="20"></input>
+          <input id='cr-pass1' class="pure-input-1" type="password" size="20" style="width: 90%;"></input>
           <p>Verify the password</p>
-          <input id='cr-pass2' class="pure-input-1" type="password" size="20"></input>
+          <input id='cr-pass2' class="pure-input-1" type="password" size="20" style="width: 90%;"></input>
           <p></p>
-          <input id='ok-ov' type="button" class="pure-button pure-button-primary" value="Ok"></input>
           <input id='cancel-ov' type="button" class="pure-button pure-button-primary" value="Cancel"></input>
+          <input id='ok-ov' style="float: right;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
      </div>
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->
     <div id="askPass">
      <div class="body">
           <p>Enter password for this election</p>
-          <input id='e-pass' class="pure-input-1" type="password" size="20"></input>
+          <input id='e-pass' class="pure-input-1" type="password" size="20" style="width: 90%;"></input>
           <p></p>
-          <input id='ok-pass' type="button" class="pure-button pure-button-primary" value="Ok"></input>
           <input id='cancel-pass' type="button" class="pure-button pure-button-primary" value="Cancel"></input>
+          <input id='ok-pass' style="float: right;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
      </div>
 	</div>
     <!-- --------------------------------------------------------------------------------- -->
@@ -212,13 +219,14 @@
           that will be visible for verification, in order to enhance security.</p>
           <p></p>                
           <input id='u-rand' type="button" class="pure-button pure-button-primary" value="random"></input>
-          <input id='u-norm' type="button" class="pure-button pure-button-primary" value="normal"></input>
+          <input id='u-norm' style="float: right;" type="button" class="pure-button pure-button-primary" value="normal"></input>
      </div>
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->
-	<div id="alertfield">
+	<div id="alertfield" style="text-align: center;">
      <div class="body">
-          <p id='showing'>here we go!</p>       
+          <p id='showing'>here we go!</p>      
+          <p id='do-reload' hidden>true</p> 
           <input id='reload' type="button" class="pure-button pure-button-primary" value="Ok"></input>
      </div>
 	</div>
@@ -226,21 +234,75 @@
 	<div id="infopage">
      <div class="body" style="text-align: left;">
           <p id='info'></p>
-          <p><b>Vote: </b>After selecting a running Election this will redirect you to the voting procedure.</p>  
-          <p><b>Create Election: </b>The button will create a simple election with predetermined properties to test the system.</p>  
-          <p><b>Close Election: </b>The selected election will be closed after confirming the set password (if any - leave blank if not; the username is <b><i>admin</i></b>).</p>   
-          <p><b>Remove Election: </b>Removes the selected election from the list. If the voting results should be saved, the election has to be closed first.</p>
-          <p><b>Advanced Election: </b>This will show an advanced settings page where a customized election can be created - such as title, description, starting-/ending time, questions and answers.</p>
-          <input id='closehelp' style="margin-left: 40%;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
+          <p>
+          <b>Create Election</b> allows to create customized elections: Elements such as title, description, starting/ending time, 
+	  question, and list of choices can be set. 
+<!--	  Moreover, two more options can be selected:<br><br>
+          <i>Publish list of voters:</i> This option shows the email addresses of the voters who have voted in this election 
+	  (but not what they have voted for), once the election is closed.<br>
+          <i>User providing verification code:</i> The voter will provide part of the verification code to check whether her vote has been properly 
+	  counted. In this way, not even the voting booth needs to be trusted.<br> -->
+          </p>  
+          <p><b>Set up a Mock Election</b> creates a mock election with predetermined settings (such as title, question, list of choices, and so on), 
+	    which started 1 day ago and will end in 2 days. In this setting, some mock voters already casted their ballots.</p>
+          <p><b>Close Election</b> closes the selected election. It requires password confirmation, if one was set.</p>   
+          <p><b>Remove Election</b> removes the selected election. If the election result needs to be saved on the server, the election must be closed first.
+	    It requires password confirmation, if one was set.</p>
+          <p>A) When the election is open, <b>Invite Voters to Vote</b> shows a link to the Voting Booth of the selected election, in order to allow eligible 
+	    voters to cast their ballots.</p>  
+          <p>B) Once the election is closed, <b>Check Election Result</b> shows a link to the <em>same</em> Voting Booth used by the voters
+	    to cast their ballot, in order to allow them to check the election result.
+<!--	    <br>
+	    This act triggers the <em>fully automated verification</em> procedure to investigate whether the voter's choice has been actually counted.</p>  
+-->
+          </p>
+          <input id='closehelp' style="margin-left: 43%;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
+
+     </div>
+	</div>
+	<!-- --------------------------------------------------------------------------------- -->
+	<div id="inviteVoters">
+     <div class="body" style="text-align: left;">
+          <p style="text-align:center">The election is open. To allow eligible voters to vote, invite them to visit the following web-page:</p>
+          <p style="text-align:center"><a id='votePage' href='' target="_blank"></a></p>
+          <input id='closeInvite' style="margin-left: 43%;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
+     </div>
+	</div>
+	<!-- --------------------------------------------------------------------------------- -->
+	<div id="checkResult">
+     <div class="body" style="text-align: left;">
+          <p>The election is closed. To allow voters to check the election result, invite them to visit the same web-page they used to vote:</p>
+          <p style="text-align:center"><a id='resultPage' href='' target="_blank"></a></p>
+          <input id='closeCheck' style="margin-left: 43%;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
+     </div>
+	</div>
+	<!-- --------------------------------------------------------------------------------- -->
+	<div id="electionClose">
+     <div class="body">
+          <p style="text-align:center">You are closing the election before the pre-established ending time.</p>
+          <p style="text-align:center">Do you really want to proceed?</p>
+          <input id='cancelClose' type="button" class="pure-button pure-button-primary" value="No"></input>
+          <input id='confirmClose' style="float: right;" type="button" class="pure-button pure-button-primary toright" value="Yes"></input>
+     </div>
+	</div>
+	<!-- --------------------------------------------------------------------------------- -->
+	<div id="electionDelete">
+     <div class="body" style="text-align: left;">
+          <p style="text-align:center">You are removing an election.
+	  <span id='removeMsg'></span>
+	  <span id='removeOpen' hidden>The election is still open.</span>
+	  <span id='removeClosed' hidden>No voters will be able to check the election result anymore.</span>
+	  </p>
+          <p style="text-align:center">Do you really want to proceed?</p>
+          <input id='cancelDelete' type="button" class="pure-button pure-button-primary" value="No"></input>
+          <input id='confirmDelete' style="float: right;" type="button" class="pure-button pure-button-primary" value="Yes"></input>
      </div>
 	</div>
 </body>
-</html>
 <script type="text/javascript">	
-    $(document).ready(buildElectionTable);
     $(document).ready(electionButtons);
     $(function() {
         $( "#datepicker" ).datepicker();
       });
 </script>
-
+</html>

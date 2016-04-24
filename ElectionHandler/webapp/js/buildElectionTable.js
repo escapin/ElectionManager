@@ -1,40 +1,85 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////Builds the HTML Table from ElectionIDs
 
-function buildElectionTable() {
+function buildElectionTable(res) {
+	
+	// expected time format is 'yy-mm-dd h:min [options not used yet]' in UTC+000 
+	var resolveTime = function(time){
+	    var dateTime = time.split(" ");
+	    var date = dateTime[0].split("-");
+	    // create a Date object from the incoming time string
+	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]+"Z");
+	    // display 03 for March instead of 3 (and months below 10)
+		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
+		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
+		
+		var hours = clientDate.getHours()	
+		var dt = (hours>=12)?"PM":"AM";
+		hours = (hours%12==0)?12:(hours%12);
+		var mins = clientDate.getMinutes()<10 ? "0"+clientDate.getMinutes() : clientDate.getMinutes();
+		date = clientDate.getFullYear()+"-"+month+"-"+day;
+		time = hours+":"+mins+" "+dt;
+		dateTime = date + " " + time;
+		
+	    return dateTime;
+	}
+
+    //////////////////////////////////////////////////////////////////////////////
+    /// Escape HTML
+    var MAP = { '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'};
+
+    function escapeHTML(s, forAttribute) {
+    	return s.replace(forAttribute ? /[&<>'"]/g : /[&<>]/g, function(c) {
+    		return MAP[c];
+    	});
+    }
+	
+    //////////////////////////////////////////////////////////////////////////////
+    /// Build the election table
+	var electionConf = JSON.parse(electionConfigRaw);	
+	var elections = electionConf.elections;
+	
+	var lastMix = "http://localhost:"+electionConf["nginx-port"];
+	//don't use port 80 if it's not deployed
+	if(electionConf.deployment === true){
+		var sAddresses = JSON.parse(sAddressesRaw);
+		lastMix = sAddresses["server-address"].mix2;
+	}
 	 
-	 var configs = JSON.parse(configRaw);
-	 var host = configs.address;
-	 var electionConf = JSON.parse(electionConfigRaw);	 
-	 var elections = electionConf.elections;
-	 	 
-	 document.getElementById("elections").innerHTML = "";
-	 	 
-	 var head$ = $('<tr/>');
-	 head$.append($('<th style="text-align:center"/>').html(" Election IDs "));
-	 head$.append($('<th style="text-align:center"/>').html(" Election Title "));
-	 head$.append($('<th style="text-align:center"/>').html(" Election State "));
-	 head$.append($('<th style="text-align:center"/>').html(" Starting Time "));
-	 head$.append($('<th style="text-align:center"/>').html(" Ending Time "));
-  $("#elections").append(head$);
+	document.getElementById("elections").innerHTML = "";
+		 
+	var head$ = $('<tr/>');
+	head$.append($('<th style="text-align:center"/>').html(" Election IDs "));
+	head$.append($('<th style="text-align:center"/>').html(" Election Title "));
+	head$.append($('<th style="text-align:center"/>').html(" Starting Time "));
+	head$.append($('<th style="text-align:center"/>').html(" Ending Time "));
+	head$.append($('<th style="text-align:center"/>').html(" Election State "));
+	$("#elections").append(head$);
   
-  for (var i = 0 ; i < elections.length ; i++) {
- 	 var elecID = elections[i].electionID;
- 	 var elecStatus = 'waiting';
-  
-      var row$ = $('<tr/>');
+
+	for (var i = 0 ; i < elections.length ; i++) {
+		var elecID = elections[i].electionID;
+		var elecStatus = 'waiting';
+		var startingTime = resolveTime(elections[i].startTime)
+		var endingTime = resolveTime(elections[i].endTime)
+		var row$ = $('<tr/>');
       
-      row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+" &nbsp;&nbsp;&nbsp;"));
-      row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionTitle+"&nbsp;&nbsp;&nbsp;"));
-      row$.append($('<td style="text-align:center" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
-      row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].startTime.substring(0, elections[i].startTime.length-9)+"&nbsp;&nbsp;&nbsp;"));
-      row$.append($('<td style="text-align:center"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].endTime.substring(0, elections[i].endTime.length-9)+"&nbsp;&nbsp;&nbsp;"));
-      $("#elections").append(row$);
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+" &nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+escapeHTML(elections[i].electionTitle, true)+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+startingTime+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+endingTime+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
+		$("#elections").append(row$);
       
-      getElectionStatus(elecID, function (eleID, stat){
- 		 document.getElementById(eleID).innerHTML = stat;
- 	 });
-  }     
+		getElectionStatus(elecID, function (eleID, stat){
+			document.getElementById(eleID).innerHTML = stat;
+		});
+      
+	}     
   
   
   function getElectionStatus(eleID, callback) {
@@ -47,7 +92,7 @@ function buildElectionTable() {
       // checking if the final server has ready result.
       //
  	 var stat = 'what';
- 	 var url = host+'/'+eleID+'/mix/03/status';
+ 	 var url = lastMix+'/'+eleID+'/mix/03/status';
       $.get(url)
        .fail(function () { 
           var stat = 'no response';
@@ -59,37 +104,12 @@ function buildElectionTable() {
          	 stat = 'closed';
           }
           else {
-         	 stat = 'ready';
+         	 stat = 'open';
           }
           callback(eleID, stat)
         });
 
   }
-
-
-  // Returns a promise of the state of the final mix server
-  // The promise resolves to true if the result is ready and
-  // to false otherwise.
-  // The promise is rejected if the final server is down of
-  // works for a different election.
-  //
-  function resultOfFinalServerReady(eleID) {
- 	 var url = host+'/'+eleID+'/mix/03/status';
-      $.get(url)
-       .fail(function () { 
-          return 'pending';
-        })
-       .done(function (result) {  // we have some response
-          if (result.electionID.substring(0, 5).toUpperCase() !== electionID.toUpperCase()) {
-              reject('wrong election ID')
-          }
-          else if (result.status==='result ready'){
-         		 return 'closed';
-          }
-          else {return 'ready';}
-        });
-  }
-  
   
   ////////////////////////////////////////////////////////////////
   ///////// Refresh State
@@ -104,7 +124,8 @@ function buildElectionTable() {
  	 }
   }, 1000);
   
-  
   $('#welcome').show();
+  
+  res(electionStates);
   
 }

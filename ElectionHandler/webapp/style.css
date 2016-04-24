@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,350,350italic,400italic,500,500italic);
+@import url(roboto/font.css);
 
 body {
     background: #eee;
@@ -186,14 +186,17 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #askPass,
 #userRandom,
 #alertfield,
-#infopage {
+#infopage,
+#inviteVoters,
+#checkResult,
+#electionClose,
+#electionDelete {
      visibility: hidden;
      position: fixed;
      left: 0px;
      top: 0px;
      width:100%;
      height:100%;
-     text-align:center;
      z-index: 1000;
      background:rgba(0, 0, 0, 0.3);
      overflow: auto;
@@ -201,13 +204,14 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 
 #newPass div,
 #askPass div,
-#alertfield div {
+#alertfield div,
+#electionClose div,
+#electionDelete div {
      width:15%;
      margin: 15% auto;
      background-color: #fff;
      border:1px solid #000;
      padding:1em;
-     text-align:center;
 }
 
 #userRandom div {
@@ -219,14 +223,15 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
      text-align:center;
 }
 
-#infopage div {
+#infopage div,
+#inviteVoters div,
+#checkResult div{
 	 overflow: auto;
      width:33%;
      margin: 50px auto;
      background-color: #fff;
      border:1px solid #000;
      padding: 1em;
-     text-align:center;
 }
 
 #adv-create{
@@ -253,8 +258,8 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #choice2,
 #remove-choice,
 #add-choice,
-#vote,
-#create{
+#advance,
+#mock{
 	margin-top: 1.3em;
 }
 
@@ -269,19 +274,21 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 }
 
 #close,
-#vote{
-	width: 10.5em;
-	margin-right: 30%;
-}
-#create,
-#remove,
-#compl-create{
-	width: 10.5em;
+#advance{
+	width: 13.5em;
+	margin-right: 18%;
 }
 
-#advance{
-	margin-left: 26%;
+#mock,
+#remove,
+#compl-create{
+	width: 13.5em;
+}
+
+#vote{
+	margin-left: 25.5%;
 	margin-top: 8%;
+	visibility: hidden;
 }
 
 #back{
@@ -312,7 +319,10 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 	z-index: 10;
 }
 #cultEN,
-#cultDE{
+#cultDE,
+#dateStartLabel,
+#dateEndLabel{
+	color: #999;
 	font-size: 0.9em;
 }
 
@@ -372,7 +382,7 @@ span.testing{
 #hovering,
 #labelVoters{
 	cursor:pointer;
-	font-size: 0.7em;
+	font-size: 0.8em;
 }
         
 #hovering:hover span{
@@ -390,12 +400,32 @@ span.testing{
 
 #buttontext {position: relative; top: -15px; position: relative; left: -6.75px;}
 
+@media all and (max-width: 1520px) {
+	#newPass div,
+	#askPass div,
+	#alertfield div,
+	#userRandom div,
+	#infopage div,
+	#inviteVoters div,
+	#checkResult div,
+	#electionClose div,
+	#electionDelete div{
+		width: 20%;
+	}
+	#infopage div,
+	#inviteVoters div,
+	#checkResult div,
+	#electionClose div,
+	#electionDelete div{
+		width: 30%;
+	}
+}
 
 @media all and (max-width: 820px) {
 
 #close,
 #vote,
-#create,
+#mock,
 #remove,
 #advance,
 #back,
@@ -410,6 +440,8 @@ span.testing{
 #elections,
 #cultENlabel,
 #cultDElabel,
+#dateStartLabel,
+#dateEndLabel,
 #hovering,
 #listVoters,
 body,
@@ -421,11 +453,19 @@ tr{
 #askPass div,
 #alertfield div,
 #userRandom div,
-#infopage div{
+#infopage div,
+#inviteVoters div,
+#checkResult div,
+#electionClose div,
+#electionDelete div{
 	width: 50%;
 	font-size:3.5vw;
 }
-#infopage div{
+#infopage div,
+#inviteVoters div,
+#checkResult div,
+#electionClose div,
+#electionDelete div{
 	width: 90%;
 }
 

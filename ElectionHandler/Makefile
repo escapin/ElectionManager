@@ -1,8 +1,7 @@
-build: 	devenv references
+build: 	devenv references roboto
 
 devenv:
 	npm install
-	cp ../node_modules/cryptofunc/index.js webapp/js/cryptofunc.js
 	mkdir -p webapp/pure
 	cd webapp/pure; wget -N http://yui.yahooapis.com/pure/0.5.0/pure-min.css
 	cd webapp/pure; wget -N http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css
@@ -17,7 +16,17 @@ references:
 	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-TR-sElect-2016.abstract
 	cd webapp/ref; wget -N  http://infsec.uni-trier.de/people/publications/paper/KuestersMuellerScapinTruderung-TR-sElect-2016.pdf
 
-clean:	devclean refclean
+roboto:
+	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/Jzo62I39jc0gQRrbndN6nfesZW2xOQ-xsNqO47m55DA.ttf
+	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/Hgo13k-tfSpn0qi1SFdUfaCWcynf_cDxXwCLxiixG1c.ttf
+	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/zN7GBFwfMP4uA6AR0HCoLQ.ttf
+	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/RxZJdnzeo3R5zSexge8UUaCWcynf_cDxXwCLxiixG1c.ttf
+	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/12mE4jfMSBTmg-81EiS-YS3USBnSvpkopQaUR-2r7iU.ttf
+	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/7m8l7TlFO-S3VkhHuR0at50EAVxt0G0biEntp43Qt6E.ttf
+	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/W4wDsBUluyw0tK3tykhXEfesZW2xOQ-xsNqO47m55DA.ttf
+	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/OLffGBTaF0XFOW1gnuHF0Z0EAVxt0G0biEntp43Qt6E.ttf
+
+clean:	devclean refclean robotoclean
 
 devclean:
 	-rm -r node_modules
@@ -28,3 +37,6 @@ devclean:
 
 refclean:
 	-rm -r webapp/ref
+	
+robotoclean:
+	-rm webapp/roboto/*.ttf

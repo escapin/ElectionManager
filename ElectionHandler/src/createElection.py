@@ -10,7 +10,9 @@ import hashlib
 import codecs
 import subprocess
 import time
-from signal import SIGKILL
+import random
+import string
+
 
 def copy(src, dest):
     try:
@@ -103,24 +105,16 @@ def jAddList(src, key, value):
 
 def getTime():
     utcTime = datetime.datetime.utcnow()
-    utcTime = utcTime + datetime.timedelta(hours=1)
     return utcTime
 
 def addSec(tm, secs):
     fulldate = tm + datetime.timedelta(seconds=secs)
     return fulldate
 
-def createElec():
-    jsonFile = open(srcdir + electionConfig, 'w')
-    saddress = { "bulletinboard": "http://localhost", "collectingserver": "http://localhost", "votingbooth": "http://localhost", "authbooth": "http://localhost", "mix0": "http://localhost", "mix1": "http://localhost", "mix2": "http://localhost",}
-    jsonData = {"available-ports": [3300, 3500], "elections": [], "server-address": saddress}
-    json.dump(jsonData, jsonFile, indent = 4)
-    jsonFile.close()
-
 def usePorts():
     newPorts = []
     try:
-        jsonFile = open(srcdir + electionConfig, 'r')
+        jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         rangePorts = jsonData["available-ports"]
         elecs = jsonData["elections"]
@@ -131,34 +125,40 @@ def usePorts():
             if openPort in usingPorts:
                 continue
             newPorts.append(openPort)
-            if len(newPorts) >= 6:
+            if len(newPorts) >= 5:
                 break
-        if len(newPorts) < 6:
+        if len(newPorts) < 5:
             sys.exit("Not enough ports available.")
         jsonFile.close()
     except IOError:
-        createElec()
-        newPorts = [3300, 3301, 3302, 3111, 3299, 3333]
+        sys.exit("handlerConfigFile.json missing or corrupt")
     return newPorts
 
 def getsAddress():
     sAddress = []
     try:
-        jsonFile = open(srcdir + electionConfig, 'r')
+        jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        addresses = jsonData["server-address"]
-        sAddress.append(addresses["mix0"])
-        sAddress.append(addresses["mix1"])
-        sAddress.append(addresses["mix2"])
-        sAddress.append(addresses["bulletinboard"])
-        sAddress.append(addresses["collectingserver"])
-        sAddress.append(addresses["votingbooth"])
-        sAddress.append(addresses["authbooth"])
+        if jsonData["deployment"] is False:
+            for x in range(6):
+                sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
+            sAddress.append("http://localhost:"+str(jsonData["nginx-port"])+"/auth")
+            jsonFile.close()
+        else:
+            jsonFile.close()
+            jsonFile = open(serverAddr, 'r')
+            jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+            addresses = jsonData["server-address"]
+            sAddress.append(addresses["mix0"])
+            sAddress.append(addresses["mix1"])
+            sAddress.append(addresses["mix2"])
+            sAddress.append(addresses["bulletinboard"])
+            sAddress.append(addresses["collectingserver"])
+            sAddress.append(addresses["votingbooth"])
+            sAddress.append(addresses["authbooth"])
         jsonFile.close()
     except IOError:
-        for x in range(6):
-            sAddress.append("http://localhost")
-        sAddress.append("http://localhost/test/verify")
+        sys.exit("serverAddresses.json missing or corrupt")
     return sAddress
 
 def getID(num):
@@ -168,13 +168,13 @@ def getID(num):
     return elecID
 
 def hashManifest():
-    manifest_raw = codecs.open(srcdir + manifest, 'r', encoding='utf8').read()
+    manifest_raw = codecs.open(sElectDir + manifest, 'r', encoding='utf8').read()
     manifest_raw = manifest_raw.replace("\n", '').replace("\r", '').strip()
     m = hashlib.sha1()
     m.update(manifest_raw)
     return m.hexdigest()
 
-electionConfig = "/../ElectionConfigFile.json"
+# sElect (partial) files path
 manifest = "/_sElectConfigFiles_/ElectionManifest.json"
 collectingConf = "/CollectingServer/config.json"
 bulletinConf = "/BulletinBoard/config.json"
@@ -183,104 +183,144 @@ votingConf = "/VotingBooth/config.json"
 mix00Conf = "/templates/config_mix00.json"
 mix01Conf = "/templates/config_mix01.json"
 mix02Conf = "/templates/config_mix02.json"
-nginxConf = "/../nginx_config/handler/nginx_select.conf"
-passList = "/../ElectionHandler/_data_/pass.json"
 
-srcfile = os.path.realpath(__file__)
-srcdirec = os.path.split(os.path.split(srcfile)[0])
-srcdir = srcdirec[0]+"/sElect"
 
-votingTime = 259200    #seconds, 3 days
+
+
+# the root dir is three folders back
+rootDirProject = os.path.realpath(__file__)
+for i in range(3):
+    rootDirProject=os.path.split(rootDirProject)[0]
+#print rootDirProject
+
+# absolute paths
+sElectDir = rootDirProject + "/sElect"
+electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
+defaultManifest = rootDirProject + "/_handlerConfigFiles_/ElectionManifest.json"
+nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
+passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
+
+
+#get duration and deployment status from handlerConfigFile
+try:
+    jsonFile = open(electionConfig, 'r')
+    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+    votingTime = jsonData["electionDurationInHours"]*60*60    #hours to seconds
+    mockVoters = jsonData["numberOfMockVoters"]
+    if jsonData["deployment"] is True:
+        serverAddr = rootDirProject + "/deployment/serverAddresses.json"
+    jsonFile.close()
+except IOError:
+    sys.exit("handlerConfigFile.json missing or corrupt (electionDurationInHours)")
+
+#read default data from sElect/templates/ElectionManifest.json
+try:
+    jsonFile = open(defaultManifest, 'r')
+    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+    elecTitle = jsonData["title"]
+    elecDescr = jsonData["description"]
+    elecQuestion = jsonData["question"]
+    eleChoices = jsonData["choices"]
+    publish = jsonData["publishListOfVoters"]
+    mixServers = jsonData["mixServers"]
+    mixServerEncKey = []
+    for x in range(len(mixServers)):
+        mixServerEncKey.append(mixServers[x]["encryption_key"])
+    jsonFile.close()
+except IOError:
+    sys.exit("ElectionManifest missing or corrupt")
+
+#get input parameters (if any)
+password = "";
+mockElection = True
+currentTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
+endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
+if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
+    electionArgs = json.loads(sys.argv[1])
+    currentTime = electionArgs['startTime']
+    endingTime = electionArgs['endTime']
+    elecTitle = electionArgs['title']
+    elecDescr = electionArgs['description']
+    elecQuestion = electionArgs['question']
+    eleChoices = electionArgs['choices[]']
+    publish = electionArgs['publishVoters']
+    publish = True if publish == "true" else False
+    random = electionArgs['random']
+    random = True if random == "true" else False
+    password = electionArgs['password']
+    mockElection = False
+    
+    
 ports = usePorts()
 
 #where the servers are placed
 serverAddress = getsAddress()
 
-#modify ElectionManifest
-currentTime = getTime().strftime("%Y.%m.%d %H:%M GMT+0100")
-endingTime = addSec(getTime(), votingTime).strftime("%Y.%m.%d %H:%M GMT+0100")
-if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
-    currentTime = sys.argv[1]
-    endingTime = sys.argv[2]
-jwrite(srcdir + manifest, "startTime", currentTime)
-jwrite(srcdir + manifest, "endTime", endingTime)
-jwriteAdv(srcdir + manifest, "collectingServer", serverAddress[4] + "/" + str(ports[4]) + "/", "URI")
-jwriteAdv(srcdir + manifest, "bulletinBoards", serverAddress[3] + "/" + str(ports[3]) + "/", 0, "URI")
-jwriteAdv(srcdir + manifest, "mixServers", serverAddress[0] + "/" + str(ports[0]) + "/", 0, "URI")
-jwriteAdv(srcdir + manifest, "mixServers", serverAddress[1] + "/" + str(ports[1]) + "/", 1, "URI")
-jwriteAdv(srcdir + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
-
-elecTitle = "Your Favorite Superhero Election"
-elecDescr = "This is the election of the Greatest Superhero Ever."
-if(len(sys.argv) > 1):
-    elecTitle = sys.argv[3]
-    elecDescr = sys.argv[4]
-jwrite(srcdir + manifest, "title", elecTitle)
-jwrite(srcdir + manifest, "description", elecDescr)
-elecQuestion = "Who is Your Favorite Superhero?"
-eleChoices = [
-	"Iron Man",
-	"Batman",
-	"Wonder Woman",
-	"Spider Man",
-	"Dr. Manhattan",
-	"Hulk",
-	"Superman",
-	"Bugs Bunny"
-    ]
-if(len(sys.argv) > 5):
-    elecQuestion = sys.argv[5]
-    eleChoices = sys.argv[6].split(',')
-jwrite(srcdir + manifest, "question", elecQuestion)
-jwrite(srcdir + manifest, "choices", eleChoices)   
-
-publish = True
-if(len(sys.argv) > 8):
-    publish = sys.argv[8]
-    if publish == "true":
-        publish = True
-    else:
-        publish = False
-        
-jwrite(srcdir + manifest, "publishListOfVoters", publish)
-
-#modify Server ports
-jwrite(srcdir + mix00Conf, "port", ports[0])
-jwrite(srcdir + mix01Conf, "port", ports[1])
-jwrite(srcdir + mix02Conf, "port", ports[2])
-jwrite(srcdir + bulletinConf, "port", ports[3])
-jwrite(srcdir + collectingConf, "port", ports[4])
-jwrite(srcdir + votingConf, "port", ports[5])
-jwrite(srcdir + votingConf, "authenticate", serverAddress[6])
-
-#add password
-protect = False
-password = "";
-if(len(sys.argv) > 7):
-    password = sys.argv[7]
-    protect = True;
-jwrite(srcdir + collectingConf, "serverAdminPassword", password)
+#modify ElectionManifest, if no arguments are given, this is a mock election
+jwrite(sElectDir + manifest, "startTime", currentTime)
+jwrite(sElectDir + manifest, "endTime", endingTime)
+jwrite(sElectDir + manifest, "title", elecTitle)
+jwrite(sElectDir + manifest, "description", elecDescr)
+jwrite(sElectDir + manifest, "question", elecQuestion)
+jwrite(sElectDir + manifest, "choices", eleChoices)  
+jwrite(sElectDir + manifest, "publishListOfVoters", publish)
+jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[4] + "/" + str(ports[4]) + "/", "URI")
+jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[3] + "/" + str(ports[3]) + "/", 0, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[0] + "/" + str(ports[0]) + "/", 0, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[1] + "/" + str(ports[1]) + "/", 1, "URI")
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
 
 #get ID after modifying Manifest
 iDlength = 5
 while(iDlength < 40):
     electionID = getID(iDlength)
-    dstroot = os.path.join(os.path.split(srcdir)[0], "elections/"+electionID + "_" + os.path.split(srcdir)[1])
+    dstroot = os.path.join(rootDirProject, "elections/" + electionID + "_" + os.path.split(sElectDir)[1])
 
     try:
-        copy(srcdir, dstroot)
+        copy(sElectDir, dstroot)
         link(dstroot)
         break
     except:
         iDlength = iDlength+1
         #sys.exit("ElectionID already exists.")
 
-jwrite(srcdir + passList, electionID, password)
+#add the password
+jwrite(passList, electionID, password)
+
+#modify Server ports
+jwrite(dstroot + mix00Conf, "port", ports[0])
+jwrite(dstroot + mix01Conf, "port", ports[1])
+jwrite(dstroot + mix02Conf, "port", ports[2])
+jwrite(dstroot + bulletinConf, "port", ports[3])
+jwrite(dstroot + collectingConf, "port", ports[4])
+#jwrite(dstroot + votingConf, "port", ports[5])        #not using the VotingBooth server, static path instead
+jwrite(dstroot + votingConf, "authenticate", serverAddress[6])
+jwrite(dstroot + collectingConf, "serverAdminPassword", password)
+
+#change user randomness if not a mock election
+if not mockElection:
+    jwrite(dstroot + votingConf, "userChosenRandomness", random)
+
+#create Ballots
+if(mockElection):
+    os.mkdir(dstroot+"/CollectingServer/_data_")
+    mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
+    ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
+    for x in range(mockVoters):
+        userEmail = "user"+str(x)+"@uni-trier.de"
+        userRandom = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
+        userChoice = random.randint(0,(len(eleChoices)-1))
+        ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), hashManifest(), mixServerEncKeyString], cwd=(rootDirProject+"/ElectionHandler/src"))
+        ballots.wait()
+
 
 #start all node servers
-subprocess.call([dstroot + "/VotingBooth/refreshConfig.sh"], cwd=(dstroot+"/VotingBooth"))
+subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
 #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
-col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
+if(mockElection):
+    col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
+else:
+    col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
 m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
 m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
 m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
@@ -289,12 +329,12 @@ bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
 newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
 
 #add PIDs to config
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime, "protect": protect}
-jAddList(srcdir + electionConfig, "elections", newElection)
-subprocess.call([srcdir + "/../ElectionHandler/refreshConfig.sh"], cwd=(srcdir+"/../ElectionHandler"))
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime, "protect": not mockElection}
+jAddList(electionConfig, "elections", newElection)
+subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
 #modify nginx File
-nginxFile = open(srcdir + nginxConf, 'r+')
+nginxFile = open(nginxConf, 'r+')
 nginxData = nginxFile.readlines()
 lastBracket = 0
 counter = 0
@@ -321,5 +361,6 @@ nginxFile.seek(0)
 nginxFile.writelines(nginxData)
 nginxFile.close()
 
-#refresh nginx
-subprocess.call(["/usr/sbin/nginx", "-c", srcdir + nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
+#refresh nginx 
+#TODO: fix /usr/sbin nginx issue
+subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))

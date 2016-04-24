@@ -1,0 +1,12 @@
+{    
+    "deployment": false,
+    "handler-port":8442,
+	"nginx-port": 8443,
+    "available-ports": [
+        3300, 
+        3900
+    ],
+    "electionDurationInHours": 72,
+    "numberOfMockVoters": 4,
+    "elections": []
+}
