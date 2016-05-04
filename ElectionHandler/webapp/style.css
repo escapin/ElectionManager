@@ -359,15 +359,17 @@ td{
     empty-cells: show;
     border: 1px solid #cbcbcb;
 }
-	
-.highlight { 
-	background: #035FD8; 
-	color: #fafcff
+
+tr:hover{
+	background: #94c1fc;
+	color: #fafcff;
+}	
+
+.highlight, 
+.highlight:hover{ 
+	background: #035fd8; 
+	color: #fafcff;
 }
-
-
-
-
 
 span.testing{
         background:#035FD8;
@@ -396,7 +398,8 @@ span.testing{
 }
 
 
-.stylish{margin-left: 95%;display:block;width:10px;height:10px;border-radius:66px;border:4px double #062ca5;font-size:14px;line-height:0px;color:#035FD8;text-align:center;text-decoration:none;text-shadow:0 1px 0 #fff;background:#035FD8}.stylish:hover{border:4px double #39f;color:#08e;text-decoration:none;background:#39f}
+.stylish{margin-left: 95%;display:block;width:10px;height:10px;border-radius:66px;border:4px double #062ca5;font-size:14px;line-height:0px;color:#035FD8;text-align:center;text-decoration:none;text-shadow:0 1px 0 #fff;background:#035FD8}
+.stylish:hover{border:4px double #39f;color:#08e;text-decoration:none;background:#39f}
 
 #buttontext {position: relative; top: -15px; position: relative; left: -6.75px;}
 
