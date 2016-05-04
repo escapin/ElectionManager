@@ -53,8 +53,33 @@ app.post('/election', function(req, res) {
 	var rand = req.body.random;
 	var listVoters = req.body.publishVoters;
 	
+
 	var session = null;
 	if (task === "complete"){
+		/** TO DO send to python script
+		// get available ports and mark them as used, sync 
+		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var rangePorts = handlerConfigFile["available-ports"];
+	    var usingPorts = handlerConfigFile["usedPorts"];
+	    var newPorts = [];
+		for(var i = rangePorts[0]; i < rangePorts[1]; i++){
+			if(usingPorts.indexOf(i) < 0){
+				usingPorts.push(i);
+				newPorts.push(i);
+			}
+			if(newPorts.length >= 5){
+				break;
+			}
+		}
+	    if (newPorts.length < 5)
+	        res.end("Not enough ports available.");
+	    else{
+	    //store new ports
+	    handlerConfigFile["usedPorts"] = usingPorts;
+	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
+	    }
+		**/
+	    //hash password
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		req.body.password = hash;
@@ -85,6 +110,29 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "simple") {
+		/** TO DO send to python script
+		// get available ports and mark them as used, sync 
+		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var rangePorts = handlerConfigFile["available-ports"];
+	    var usingPorts = handlerConfigFile["usedPorts"];
+	    var newPorts = [];
+		for(var i = rangePorts[0]; i < rangePorts[1]; i++){
+			if(usingPorts.indexOf(i) < 0){
+				usingPorts.push(i);
+				newPorts.push(i);
+			}
+			if(newPorts.length >= 5){
+				break;
+			}
+		}
+	    if (newPorts.length < 5)
+	        res.end("Not enough ports available.");
+	    else{
+	    //store new ports
+	    handlerConfigFile["usedPorts"] = usingPorts;
+	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
+	    }
+		**/
 		session = spawn('python', ['src/createElection.py']);
 		
 		session.stdout.on('data', function (data) {
@@ -198,7 +246,7 @@ function start(){
 	    console.log('Serving on, port :%d', server.address().port);
 	});
 	try{
-		handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 		var usePorts = handlerConfigFile["available-ports"];
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
 				"Therefore you can run up to " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections at the same time," +
