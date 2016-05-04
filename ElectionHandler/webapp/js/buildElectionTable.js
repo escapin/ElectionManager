@@ -45,7 +45,7 @@ function buildElectionTable(res) {
 	
 	var collectingServer = "http://localhost:"+electionConf["nginx-port"];
 	//don't use port 80 if it's not deployed
-	if(electionConf.deployment === true){
+	if(electionConf.deployment){
 		var sAddresses = JSON.parse(sAddressesRaw);
 		collectingServer = sAddresses["server-address"].collectingserver;
 	}
