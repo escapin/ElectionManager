@@ -38,6 +38,20 @@ function buildElectionTable(res) {
     	});
     }
 	
+    function breakLines(etitle){
+    	var brokenStr = etitle.replace("-", "- ").split(" ");
+    	console.log(etitle);
+    	for(var i = 0; i < brokenStr.length; i++){
+    		if(brokenStr[i].length > 27){
+    			temp = brokenStr[i];
+    			brokenStr[i] = temp.substring(0, 24)+"-";
+    			brokenStr.splice(i+1, 0, temp.substring(16, temp.length))
+    			console.log(brokenStr[i] + " " + brokenStr[i+1]);
+    		}
+    	}
+    	return brokenStr.join(" ").replace("- ", "-");
+    }
+    
     //////////////////////////////////////////////////////////////////////////////
     /// Build the election table
 	var electionConf = JSON.parse(electionConfigRaw);	
@@ -69,7 +83,7 @@ function buildElectionTable(res) {
 		var row$ = $('<tr/>');
       
 		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+" &nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+escapeHTML(elections[i].electionTitle, true)+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+escapeHTML(breakLines(elections[i].electionTitle), true)+"&nbsp;&nbsp;&nbsp;"));
 		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+startingTime+"&nbsp;&nbsp;&nbsp;"));
 		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+endingTime+"&nbsp;&nbsp;&nbsp;"));
 		row$.append($('<td style="text-align:center; cursor: pointer;" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
