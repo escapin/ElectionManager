@@ -874,7 +874,7 @@ function electionButtons() {
 	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]+"Z");
 	    clientDate = new Date(clientDate.getTime()+clientDate.getTimezoneOffset()*60000*2);
 		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
-		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
+		var day = clientDate.getDate()<10 ? "0"+clientDate.getDate() : clientDate.getDate();
 		var hours = clientDate.getHours()<10 ? "0"+clientDate.getHours() : clientDate.getHours();
 		var mins = clientDate.getMinutes()<10 ? "0"+clientDate.getMinutes() : clientDate.getMinutes();
 
