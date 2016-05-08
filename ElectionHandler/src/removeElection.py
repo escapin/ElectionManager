@@ -33,9 +33,13 @@ def jRemElec(src, value):
         elecs = jsonData["elections"]
         for x in range(len(elecs)):
             if elecs[x]["electionID"] == value:
-                elecs.pop(x)
+                remElec = elecs.pop(x)
+                remPorts = remElec["used-ports"]
                 break
         jsonData["elections"] = elecs
+        portsInUse = jsonData["usedPorts"]
+        for x in range(len(remPorts)):
+            portsInUse.remove(remPorts[x])
         jsonFile.seek(0)
     except IOError:
         print("file missing")

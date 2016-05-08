@@ -235,8 +235,8 @@ password = "";
 mockElection = True
 currentTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
 endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
-if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
-    electionArgs = json.loads(sys.argv[1])
+if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
+    electionArgs = json.loads(sys.argv[2])
     currentTime = electionArgs['startTime']
     endingTime = electionArgs['endTime']
     elecTitle = electionArgs['title']
@@ -251,7 +251,7 @@ if(len(sys.argv) > 1 and len(sys.argv[1]) > 1 ):
     mockElection = False
     
     
-ports = usePorts()
+ports = json.loads(sys.argv[1])['usedPorts']
 
 #where the servers are placed
 serverAddress = getsAddress()
