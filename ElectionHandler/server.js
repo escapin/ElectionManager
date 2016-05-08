@@ -78,14 +78,15 @@ app.post('/election', function(req, res) {
 	    handlerConfigFile["usedPorts"] = usingPorts;
 	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	    }
-			
+	    var ports = JSON.stringify({usedPorts: newPorts});
+	    
 	    //hash password
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		req.body.password = hash;
 		var parameters = JSON.stringify(req.body);
 
-		session = spawn('python', ['src/createElection.py', usingPorts, parameters]);
+		session = spawn('python', ['src/createElection.py', ports, parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				console.log('stdout: ' + data);
@@ -132,10 +133,10 @@ app.post('/election', function(req, res) {
 	    handlerConfigFile["usedPorts"] = usingPorts;
 	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	    }
-	    var ports = {usedPorts: newPorts};
+	    var ports = JSON.stringify({usedPorts: newPorts});
 
 	    
-	    session = spawn('python', ['src/createElection.py', JSON.stringify(ports)]);
+	    session = spawn('python', ['src/createElection.py', ports]);
 		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
