@@ -74,9 +74,9 @@ app.post('/election', function(req, res) {
 	    if (newPorts.length < 5)
 	        res.end("Not enough ports available.");
 	    else{
-	    //store new ports
-	    handlerConfigFile["usedPorts"] = usingPorts;
-	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
+	    	//store new ports
+	    	handlerConfigFile["usedPorts"] = usingPorts;
+	    	fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	    }
 	    var ports = JSON.stringify({usedPorts: newPorts});
 	    
@@ -252,8 +252,10 @@ function start(){
 		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 		var usePorts = handlerConfigFile["available-ports"];
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
-				"Therefore you can run up to " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections at the same time," +
-						"\nbecause it runs 5 different servers for each election.\n");
+				"You can run up to " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections at the same time\n" +
+						"(if your hardware supports them),\n" +
+						"since each election needs 5 different servers.\n");
+		//FIXME: parametrize the number of the server needed with the number of mix servers in the ElectionManifest.
 	}
 	catch(e){
 		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
