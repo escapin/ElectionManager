@@ -358,6 +358,8 @@ td{
     border-spacing: 0;
     empty-cells: show;
     border: 1px solid #cbcbcb;
+    word-wrap: break-word;
+    max-width: 15vw;
 }
 
 tr:hover{
@@ -487,6 +489,10 @@ tr{
 	right: 21.4em;
 	font-size: 0.9em;
 	z-index: 10;
+}
+
+td{
+    max-width: 12vw;
 }
 
 }

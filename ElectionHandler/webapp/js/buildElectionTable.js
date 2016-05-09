@@ -38,19 +38,6 @@ function buildElectionTable(res) {
     	});
     }
 	
-    function breakLines(etitle){
-    	var brokenStr = etitle.replace("-", "- ").split(" ");
-    	console.log(etitle);
-    	for(var i = 0; i < brokenStr.length; i++){
-    		if(brokenStr[i].length > 27){
-    			temp = brokenStr[i];
-    			brokenStr[i] = temp.substring(0, 24)+"-";
-    			brokenStr.splice(i+1, 0, temp.substring(16, temp.length))
-    			console.log(brokenStr[i] + " " + brokenStr[i+1]);
-    		}
-    	}
-    	return brokenStr.join(" ").replace("- ", "-");
-    }
     
     //////////////////////////////////////////////////////////////////////////////
     /// Build the election table
@@ -74,7 +61,8 @@ function buildElectionTable(res) {
 	head$.append($('<th style="text-align:center"/>').html(" Election State "));
 	$("#elections").append(head$);
   
-
+	var electionTitles = [];
+	
 	for (var i = 0 ; i < elections.length ; i++) {
 		var elecID = elections[i].electionID;
 		var elecStatus = 'waiting';
@@ -83,7 +71,7 @@ function buildElectionTable(res) {
 		var row$ = $('<tr/>');
       
 		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+" &nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+escapeHTML(breakLines(elections[i].electionTitle), true)+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+escapeHTML(elections[i].electionTitle, true)+"&nbsp;&nbsp;&nbsp;"));
 		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+startingTime+"&nbsp;&nbsp;&nbsp;"));
 		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+endingTime+"&nbsp;&nbsp;&nbsp;"));
 		row$.append($('<td style="text-align:center; cursor: pointer;" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
@@ -92,9 +80,8 @@ function buildElectionTable(res) {
 		getElectionStatus(elecID, function (eleID, stat){
 			document.getElementById(eleID).innerHTML = stat;
 		});
-      
+        
 	}     
-  
   
   function getElectionStatus(eleID, callback) {
       // Detemine the status of the system: (not-yet) open/closed, 
@@ -138,3 +125,14 @@ function buildElectionTable(res) {
   res(electionStates);
   
 }
+String.prototype.width = function(font) {
+	  var f = font || '12px arial',
+	      o = $('<div>' + this + '</div>')
+	            .css({'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden', 'font': f})
+	            .appendTo($('body')),
+	      w = o.width();
+
+	  o.remove();
+
+	  return w;
+	}	
