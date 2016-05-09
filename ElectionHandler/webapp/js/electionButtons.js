@@ -574,7 +574,6 @@ function electionButtons() {
 	  		 electionStatus = electionStates;
 	  	 });
 	     
-	     console.log(document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size")));
 	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
 	     document.getElementById('advance').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
 	     
@@ -894,8 +893,6 @@ function electionButtons() {
 				$("#close").prop('disabled', null);
 	    		document.getElementById("vote").value = "Invite Voters to Vote";
 	    		document.getElementById("vote").style.visibility = "visible";
-			//console.log( $("#removeMsg").html() );
-			//console.log( $("#removeOpen").html() );
 			// inserting the hidden message with id='removeOpen' inside the HTML tag with id='removeMsg'
 			$("#removeMsg").html( $("#removeOpen").html() );
 			}
