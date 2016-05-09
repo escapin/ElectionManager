@@ -365,7 +365,7 @@ td{
     cursor: pointer;
 }
 
-tr:hover{
+.faintHover:hover{
 	background: #94c1fc;
 	color: #fafcff;
 }	
