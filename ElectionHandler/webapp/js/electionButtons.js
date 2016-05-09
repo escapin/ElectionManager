@@ -823,7 +823,7 @@ function electionButtons() {
 	var currentTime = function(){
 		var currentDate = new Date();
 		var month = currentDate.getMonth()+1<10 ? "0"+(currentDate.getMonth()+1) : (currentDate.getMonth()+1);
-		var day = currentDate.getDate()+1<10 ? "0"+currentDate.getDate() : currentDate.getDate();
+		var day = currentDate.getDate()<10 ? "0"+currentDate.getDate() : currentDate.getDate();
 		var hours = currentDate.getHours();	
 		var dt = (hours>=12)?"PM":"AM";
 		hours = (hours%12==0)?12:(hours%12);
@@ -838,7 +838,7 @@ function electionButtons() {
 		var currentDate = new Date();
 		var endDate = new Date(currentDate.setTime(currentDate.getTime()+10*60000));
 		var month = endDate.getMonth()+1<10 ? "0"+(endDate.getMonth()+1) : (endDate.getMonth()+1);
-		var day = endDate.getDate()+1<10 ? "0"+endDate.getDate() : endDate.getDate();
+		var day = endDate.getDate()<10 ? "0"+endDate.getDate() : endDate.getDate();
 		var hours = endDate.getHours();
 		var dt = (hours>=12)?"PM":"AM";
 		hours = (hours%12==0)?12:(hours%12);
