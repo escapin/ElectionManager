@@ -23,6 +23,12 @@ select:
 	cp sElect/templates/ElectionManifest.json _handlerConfigFiles_/ElectionManifest.json
 
 
+electionsClean:
+	rm -rf elections
+	rm ElectionHandler/_data_/pwd.json
+	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
+
+
 devclean: handlerclean nginxclean selectclean elclean
 
 
