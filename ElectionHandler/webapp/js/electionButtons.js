@@ -458,11 +458,7 @@ function electionButtons() {
 		document.getElementById("electionDelete").style.visibility = "hidden";
 		verifylayer("remove");
 	});
-	
-	this.winOpen = function(){
-        window.open(collectingServer+"/"+value+"/collectingServer/admin/close");
-    	document.getElementById("electionClose").style.visibility = "hidden";
-    }
+
 	
     ////////////////////////////////////////////////////////////////
     /// Other Handlers
@@ -918,22 +914,16 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = lastMix+'/'+eleID+'/mix/03/status';
+	 	 var url = protocol + collectingServer+'/'+eleID+'/collectingServer/status';
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';
 	          callback(eleID, stat)
 	        })
-	       .done(function (result) {  // we have some response
-	          var stat = 'pending';
-	     	 if (result.status==='result ready'){
-	         	 stat = 'closed';
-	          }
-	          else {
-	         	 stat = 'open';
-	          }
-	          callback(eleID, stat)
-	        });
+	        .done(function (result) {  // we have some response
+	            var stat = result.status;
+	            callback(eleID, stat)
+	          });
 
 	  }
 	

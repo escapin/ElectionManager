@@ -43,22 +43,17 @@ oldSession.stderr.on('data', function (data) {
 app.post('/election', function(req, res) {
 	var task = req.body.task;
 	var value = req.body.ID;
-	var etitle = req.body.title;
-	var edesc = req.body.description;
-	var startingTime = req.body.startTime;
-	var endingTime = req.body.endTime;
-	var equestion = req.body.question;
-	var echoices = req.body["choices[]"];
 	var pass = req.body.password;
-	var rand = req.body.random;
-	var listVoters = req.body.publishVoters;
 	
-
+	
+	var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+	var incr = handlerConfigFile["nameIncrement"]+1;
+	handlerConfigFile["nameIncrement"] = incr;
+    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	var session = null;
 	if (task === "complete"){
 		
 		// get available ports and mark them as used, sync 
-		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 		var rangePorts = handlerConfigFile["available-ports"];
 	    var usingPorts = handlerConfigFile["usedPorts"];
 	    var newPorts = [];
@@ -78,7 +73,7 @@ app.post('/election', function(req, res) {
 	    	handlerConfigFile["usedPorts"] = usingPorts;
 	    	fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	    }
-	    var ports = JSON.stringify({usedPorts: newPorts});
+	    var ports = JSON.stringify({usedPorts: newPorts, nameIncrement: incr});
 	    
 	    //hash password
 		var salt = bcrypt.genSaltSync(10);
@@ -86,6 +81,7 @@ app.post('/election', function(req, res) {
 		req.body.password = hash;
 		var parameters = JSON.stringify(req.body);
 
+		//call the python script to start the servers
 		session = spawn('python', ['src/createElection.py', ports, parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
@@ -113,7 +109,6 @@ app.post('/election', function(req, res) {
 	else if (task === "simple") {
 		
 		// get available ports and mark them as used, sync 
-		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 		var rangePorts = handlerConfigFile["available-ports"];
 	    var usingPorts = handlerConfigFile["usedPorts"];
 	    var newPorts = [];
@@ -133,11 +128,10 @@ app.post('/election', function(req, res) {
 	    handlerConfigFile["usedPorts"] = usingPorts;
 	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	    }
-	    var ports = JSON.stringify({usedPorts: newPorts});
+	    var ports = JSON.stringify({usedPorts: newPorts, nameIncrement: incr});
 
-	    
+		//call the python script to start the servers
 	    session = spawn('python', ['src/createElection.py', ports]);
-		
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				console.log('stdout: ' + data);
@@ -176,6 +170,7 @@ app.post('/election', function(req, res) {
 		}
 		pass = hash;
 		
+		//call the python script to shutdown the servers
 		session = spawn('python', ['src/removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
 			console.log('stdout: ' + data);

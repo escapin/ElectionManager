@@ -65,8 +65,10 @@ jsonFile.close()
 for x in range (len(elecs)):
     
     electionID = elecs[x]["electionID"]
-
-    dstroot = os.path.join(rootDirProject, "elections/" + electionID + "_" + os.path.split(sElectDir)[1])
+    startingTime = elecs[x]["startTime"]    
+    tStamp = startingTime.replace("-", "").replace(":", "").split()
+    
+    dstroot = os.path.join(rootDirProject, "elections/" + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
 
     #restart all node servers
     if os.path.exists(dstroot+"/CollectingServer/_data_/partialResult.msg"):
