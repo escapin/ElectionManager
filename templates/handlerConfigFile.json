@@ -6,6 +6,7 @@
         3300, 
         3900
     ],
+    "usedPorts": [], 
     "electionDurationInHours": 72,
     "numberOfMockVoters": 4,
     "elections": []
