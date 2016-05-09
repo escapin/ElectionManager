@@ -572,6 +572,7 @@ function electionButtons() {
 	     
 	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
 	     document.getElementById('advance').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
+	     document.getElementById('mock').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
 	     
 	     electionConf = JSON.parse(electionConfigRaw);
 		 elections = electionConf.elections;
