@@ -277,7 +277,7 @@ jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[2] + "/" + "m3/" + s
 iDlength = 5
 while(iDlength < 40):
     electionID = getID(iDlength)
-    dstroot = os.path.join(rootDirProject, "elections/" + sName + "_" + electionID + "_" + os.path.split(sElectDir)[1])
+    dstroot = os.path.join(rootDirProject, "elections/" + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
 
     try:
         copy(sElectDir, dstroot)
