@@ -233,11 +233,11 @@ except IOError:
 #get input parameters (if any)
 password = "";
 mockElection = True
-currentTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
+startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
 endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
 if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
     electionArgs = json.loads(sys.argv[2])
-    currentTime = electionArgs['startTime']
+    startingTime = electionArgs['startTime']
     endingTime = electionArgs['endTime']
     elecTitle = electionArgs['title']
     elecDescr = electionArgs['description']
@@ -252,29 +252,32 @@ if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
     
     
 ports = json.loads(sys.argv[1])['usedPorts']
+increment = json.loads(sys.argv[1])['nameIncrement']
+tStamp = startingTime.replace("-", "").replace(":", "").split()
+sName = tStamp[0] + tStamp[1] + "_" + str(increment)
 
 #where the servers are placed
 serverAddress = getsAddress()
 
 #modify ElectionManifest, if no arguments are given, this is a mock election
-jwrite(sElectDir + manifest, "startTime", currentTime)
+jwrite(sElectDir + manifest, "startTime", startingTime)
 jwrite(sElectDir + manifest, "endTime", endingTime)
 jwrite(sElectDir + manifest, "title", elecTitle)
 jwrite(sElectDir + manifest, "description", elecDescr)
 jwrite(sElectDir + manifest, "question", elecQuestion)
 jwrite(sElectDir + manifest, "choices", eleChoices)  
 jwrite(sElectDir + manifest, "publishListOfVoters", publish)
-jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[4] + "/" + str(ports[4]) + "/", "URI")
-jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[3] + "/" + str(ports[3]) + "/", 0, "URI")
-jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[0] + "/" + str(ports[0]) + "/", 0, "URI")
-jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[1] + "/" + str(ports[1]) + "/", 1, "URI")
-jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[2] + "/" + str(ports[2]) + "/", 2, "URI")
+jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[4] + "/" + "cs/" + sName + "/", "URI")    #str(ports[4])
+jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[3] + "/" + "bb/" + sName + "/", 0, "URI")   #str(ports[3])
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[0] + "/" + "m1/" + sName + "/", 0, "URI")       #str(ports[0])
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[1] + "/" + "m2/" + sName + "/", 1, "URI")       #str(ports[1])
+jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[2] + "/" + "m3/" + sName + "/", 2, "URI")       #str(ports[2])
 
 #get ID after modifying Manifest
 iDlength = 5
 while(iDlength < 40):
     electionID = getID(iDlength)
-    dstroot = os.path.join(rootDirProject, "elections/" + electionID + "_" + os.path.split(sElectDir)[1])
+    dstroot = os.path.join(rootDirProject, "elections/" + sName + "_" + electionID + "_" + os.path.split(sElectDir)[1])
 
     try:
         copy(sElectDir, dstroot)
@@ -329,32 +332,34 @@ bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
 newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
 
 #add PIDs to config
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": currentTime, "endTime": endingTime, "protect": not mockElection}
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
 #modify nginx File
 nginxFile = open(nginxConf, 'r+')
 nginxData = nginxFile.readlines()
+prevBracket = 0
 lastBracket = 0
 counter = 0
 for line in nginxData:
-    if line == "}\n":
+    if "}\n" in line:
+        prevBracket = lastBracket
         lastBracket = counter
     counter = counter + 1
-bracketIt = nginxData[lastBracket-1:]
-del nginxData[lastBracket-1:]
+bracketIt = nginxData[prevBracket:]
+del nginxData[prevBracket:]
 comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
             "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[4]) + "/;\n", "    }\n", "\n",
             "    # Mix server " + electionID + " #1\n", "    location " + "/" + electionID + "/mix/00/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
             "    # Mix server " + electionID + " #2\n", "    location " + "/" + electionID + "/mix/01/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n",
             "    # Mix server " + electionID + " #3\n", "    location " + "/" + electionID + "/mix/03/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[2]) + "/;\n", "    }\n", "\n",
             "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[3]) + "/;\n", "    }\n",
-            "\n    # Collecting server " + electionID + " \n", "    location " + "/" + str(ports[4]) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[4]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #1\n", "    location " + "/" + str(ports[0]) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #2\n", "    location " + "/" + str(ports[1]) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n",
-            "    # Mix server " + electionID + " #3\n", "    location " + "/" + str(ports[2]) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[2]) + "/;\n", "    }\n", "\n",
-            "    # Bulletin board " + electionID + " \n", "    location " + "/" + str(ports[3]) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[3]) + "/;\n", "    }\n"]
+            "\n    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[4]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #1\n", "    location " + "/" + "m1/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #2\n", "    location " + "/" + "m2/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n",
+            "    # Mix server " + electionID + " #3\n", "    location " + "/" + "m3/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[2]) + "/;\n", "    }\n", "\n",
+            "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[3]) + "/;\n", "    }\n"]
 comments.extend(bracketIt)
 nginxData.extend(comments)
 nginxFile.seek(0)
