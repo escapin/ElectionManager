@@ -3,8 +3,8 @@
     "handler-port":8442,
 	"nginx-port": 8443,
     "available-ports": [
-        3300, 
-        3900
+        49160,
+        65530
     ],
     "usedPorts": [], 
     "electionDurationInHours": 72,
