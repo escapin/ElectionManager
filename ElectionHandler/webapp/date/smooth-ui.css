@@ -407,7 +407,6 @@ button.ui-button::-moz-focus-inner {
 
 .ui-spinner {
 	height: 2.2em;
-	width: 15%;
 	position: relative;
 	display: inline-block;
 	overflow: hidden;
