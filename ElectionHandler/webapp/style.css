@@ -257,9 +257,7 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #choice1,
 #choice2,
 #remove-choice,
-#add-choice,
-#advance,
-#mock{
+#add-choice{
 	margin-top: 1.3em;
 }
 
@@ -276,7 +274,6 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #close,
 #advance{
 	width: 13.5em;
-	margin-right: 18%;
 }
 
 #mock,
@@ -361,7 +358,7 @@ td{
     border: 1px solid #cbcbcb;
     text-align:center;
     word-wrap: break-word;
-    max-width: 15vw;
+    max-width: 12vw;
     cursor: pointer;
 }
 
@@ -403,7 +400,7 @@ span.testing{
 }
 
 
-.stylish{margin-left: 95%;display:block;width:10px;height:10px;border-radius:66px;border:4px double #062ca5;font-size:14px;line-height:0px;color:#035FD8;text-align:center;text-decoration:none;text-shadow:0 1px 0 #fff;background:#035FD8}
+.stylish{margin-left: 98%;display:block;width:10px;height:10px;border-radius:66px;border:4px double #062ca5;font-size:14px;line-height:0px;color:#035FD8;text-align:center;text-decoration:none;text-shadow:0 1px 0 #fff;background:#035FD8}
 .stylish:hover{border:4px double #39f;color:#08e;text-decoration:none;background:#39f}
 
 #buttontext {position: relative; top: -15px; position: relative; left: -6.75px;}
@@ -495,7 +492,7 @@ tr{
 }
 
 td{
-    max-width: 12vw;
+    max-width: 8vw;
 }
 
 }
