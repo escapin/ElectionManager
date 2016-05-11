@@ -68,6 +68,7 @@ function buildElectionTable(res) {
 		var elecStatus = 'waiting';
 		var startingTime = resolveTime(elections[i].startTime)
 		var endingTime = resolveTime(elections[i].endTime)
+		var tStamp = elections[i].timeStamp
 		var row$ = $('<tr class="faintHover"/>');
       
 		row$.append($('<td />').html(elections[i].electionID));
@@ -77,13 +78,13 @@ function buildElectionTable(res) {
 		row$.append($('<td id='+elecID+'/>').html(elecStatus));
 		$("#elections").append(row$);
       
-		getElectionStatus(elecID, function (eleID, stat){
-			document.getElementById(eleID).innerHTML = stat;
+		getElectionStatus(tStamp, function (tStamp, stat){
+			document.getElementById(elecID).innerHTML = stat;
 		});
         
 	}     
   
-  function getElectionStatus(eleID, callback) {
+  function getElectionStatus(tStamp, callback) {
       // Detemine the status of the system: (not-yet) open/closed, 
       // by quering the final mix server.
       // Depending on the state, either the voting tab or the
@@ -94,15 +95,15 @@ function buildElectionTable(res) {
       //
 
  	 var stat = 'what';
- 	 var url = collectingServer+'/'+eleID+'/collectingServer/status';
+ 	 var url = collectingServer+'/cs/'+tStamp+'/status';
       $.get(url)
        .fail(function () { 
           var stat = 'no response';
-          callback(eleID, stat)
+          callback(tStamp, stat)
         })
        .done(function (result) {  // we have some response
           var stat = result.status;
-          callback(eleID, stat)
+          callback(tStamp, stat)
         });
 
   }
@@ -114,8 +115,9 @@ function buildElectionTable(res) {
   var electionStates = window.setInterval(function() {
  	 for (var i = 0 ; i < elections.length ; i++) {
      	 var elecID = elections[i].electionID;
-     	 getElectionStatus(elecID, function (eleID, stat){
-     		 document.getElementById(eleID).innerHTML = stat;
+     	 var tStamp = elections[i].timeStamp;
+     	 getElectionStatus(tStamp, function (tStamp, stat){
+     		 document.getElementById(elecID).innerHTML = stat;
      	 });
  	 }
   }, 1000);

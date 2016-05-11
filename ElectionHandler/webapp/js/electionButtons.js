@@ -13,6 +13,7 @@ function electionButtons() {
     var rows;
     var row;
     var value;
+    var tStamp
 	var task;
     
 	var elecType = "none";
@@ -326,13 +327,15 @@ function electionButtons() {
     		getElectionStatus(value, function (eleID, stat){
     			if(stat === "open"){
     				document.getElementById("inviteVoters").style.visibility = "visible";
-    	    		document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		//document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
+    	    		//document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		document.getElementById("votePage").href = votingBooth+"/vb/"+tStamp+"/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth+"/vb/"+tStamp+"/";
     			}
     			else if(stat === "closed"){
     				document.getElementById("checkResult").style.visibility = "visible";
-    	    		document.getElementById("resultPage").href = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		document.getElementById("resultPage").href = votingBooth+"/vb/"+tStamp+"/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/vb/"+tStamp+"/";
     			}
     			else{
     				alerting("Server is not responding");
@@ -600,15 +603,24 @@ function electionButtons() {
 		}
 			/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');
-
+	    
 	    rows.on('click', function(e) {
 	        row = $(this);
 	        
 	        rows.removeClass('highlight');
 	        row.addClass('highlight');
 	        
-	        value = $(this).text().trim().split(" ")[0]; 
+	        value = $(this).children()["0"].innerHTML; 
 	        
+	        // read the time stamp for the election address
+	        var i = 0;
+    		for(i = 0; i < elections.length ; i++) {
+    			if(elections[i].electionID == value){
+    				break;
+    			}
+    		}
+	        tStamp = elections[i]["timeStamp"];
+
 			$("#remove").prop('disabled', null);
 			
 			// Show Invite Voters or Check Result button
@@ -914,7 +926,7 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = protocol + collectingServer+'/'+eleID+'/collectingServer/status';
+	 	 var url = protocol + collectingServer+'/cs/'+tStamp+'/status';
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';
