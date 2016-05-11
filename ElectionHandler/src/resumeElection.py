@@ -66,6 +66,7 @@ for x in range (len(elecs)):
     
     electionID = elecs[x]["electionID"]
     startingTime = elecs[x]["startTime"]    
+    numMix = elecs[x]["mixServers"]
     tStamp = startingTime.replace("-", "").replace(":", "").split()
     
     dstroot = os.path.join(rootDirProject, "elections/" + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
@@ -75,26 +76,20 @@ for x in range (len(elecs)):
         col = subprocess.Popen(["node", "collectingServer.js", "--serveResult"], cwd=(dstroot+"/CollectingServer"))
     else:
         col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
-        
-    if os.path.exists(dstroot+"/mix/00/_data_/ballots00_output.msg"):
-        m1 = subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/00"))
-    else:
-        m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
-        
-    if os.path.exists(dstroot+"/mix/01/_data_/ballots01_output.msg"):
-        m2 = subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/01"))
-    else:
-        m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
-        
-    if os.path.exists(dstroot+"/mix/02/_data_/ballots02_output.msg"):
-        m3 = subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/02"))
-    else:
-        m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
+    mix = []
+    for x in range(numMix):
+        if os.path.exists(dstroot+"/mix/00/_data_/ballots00_output.msg"):
+            mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/00")))
+        else:
+            mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/00")))
     if os.path.exists(dstroot+"/BulletinBoard/_data_/resultMIX2.msg"):
         bb = subprocess.Popen(["node", "bb.js", "--serveResult"], cwd=(dstroot+"/BulletinBoard"))
     else:
         bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-    newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
+    
+    newPIDs = [col.pid, bb.pid]
+    for x in range(numMix):
+        newPIDs.append(mix[x].pid)
         
     jwriteAdv(electionConfig, "elections", newPIDs, 0, "processIDs")
 

@@ -25,6 +25,7 @@ var path = 'webapp/';
 DATA_DIR = './_data_';
 mkdirp.sync(DATA_DIR);
 
+var numMix = 0;
 
 /**Resume previous elections **/
 var oldSession = spawn('python', ['src/resumeElection.py']);
@@ -62,11 +63,11 @@ app.post('/election', function(req, res) {
 				usingPorts.push(i);
 				newPorts.push(i);
 			}
-			if(newPorts.length >= 5){
+			if(newPorts.length >= 2+numMix){
 				break;
 			}
 		}
-	    if (newPorts.length < 5)
+	    if (newPorts.length < 2+numMix)
 	        res.end("Not enough ports available.");
 	    else{
 	    	//store new ports
@@ -117,11 +118,11 @@ app.post('/election', function(req, res) {
 				usingPorts.push(i);
 				newPorts.push(i);
 			}
-			if(newPorts.length >= 5){
+			if(newPorts.length >= 2+numMix){
 				break;
 			}
 		}
-	    if (newPorts.length < 5)
+	    if (newPorts.length < 2+numMix)
 	        res.end("Not enough ports available.");
 	    else{
 	    //store new ports
@@ -244,13 +245,20 @@ function start(){
 	    console.log('Serving on, port :%d', server.address().port);
 	});
 	try{
+		var manifest = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/ElectionManifest.json"));
+		var mixServers = manifest["mixServers"];
+		numMix = mixServers.length;
+	}
+	catch(e){
+		console.log("../_handlerConfigFiles_/ElectionManifest.json is missing or corrupt ([mixServers] field not found)");
+	}
+	try{
 		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 		var usePorts = handlerConfigFile["available-ports"];
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
-				"You can run up to " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections at the same time\n" +
+				"You can run up to " + Math.floor((usePorts[1]-usePorts[0])/2+numMix) + " elections at the same time\n" +
 						"(if your hardware supports them),\n" +
-						"since each election needs 5 different servers.\n");
-		//FIXME: parametrize the number of the server needed with the number of mix servers in the ElectionManifest.
+						"since each election needs "+2+numMix+" different servers.\n");
 	}
 	catch(e){
 		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");

@@ -139,7 +139,7 @@ def getsAddress():
     try:
         jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        if jsonData["deployment"] is False:
+        if mockElection:
             for x in range(4+len(mixServers)):
                 sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
             sAddress.append("http://localhost:"+str(jsonData["nginx-port"])+"/auth")
@@ -309,7 +309,7 @@ if not mockElection:
     jwrite(dstroot + votingConf, "userChosenRandomness", random)
 
 #create Ballots
-if(mockElection):
+if mockElection:
     os.mkdir(dstroot+"/CollectingServer/_data_")
     mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
     ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
@@ -324,19 +324,21 @@ if(mockElection):
 #start all node servers
 subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
 #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
-if(mockElection):
+if mockElection:
     col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
 else:
     col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
-m1 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/00"))
-m2 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/01"))
-m3 = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/02"))
+mix = []
+for x in range(len(mixServers)):
+    mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/00")))
 bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
 #newPIDs = [vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
-newPIDs = [col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
+newPIDs = [col.pid, bb.pid]
+for x in range(len(mixServers)):
+    newPIDs.append(mix[x].pid)
 
 #add PIDs to config
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "protect": not mockElection}
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": len(mixServers), "increment": increment, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
@@ -353,7 +355,8 @@ for line in nginxData:
     counter = counter + 1
 bracketIt = nginxData[prevBracket:]
 del nginxData[prevBracket:]
-comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
+#comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",     #old link
+comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + "vb/" + sName + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
             "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
             "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
 for x in range(len(mixServers)):
