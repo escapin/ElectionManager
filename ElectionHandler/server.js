@@ -47,12 +47,14 @@ app.post('/election', function(req, res) {
 	var pass = req.body.password;
 	
 	
-	var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
-	var incr = handlerConfigFile["nameIncrement"]+1;
-	handlerConfigFile["nameIncrement"] = incr;
-    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	var session = null;
 	if (task === "complete"){
+		
+		// get increment in case of dublicate names
+		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var incr = handlerConfigFile["nameIncrement"]+1;
+		handlerConfigFile["nameIncrement"] = incr;
+	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 		
 		// get available ports and mark them as used, sync 
 		var rangePorts = handlerConfigFile["available-ports"];
@@ -108,6 +110,12 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if (task === "simple") {
+		
+		// get increment in case of dublicate names
+		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var incr = handlerConfigFile["nameIncrement"]+1;
+		handlerConfigFile["nameIncrement"] = incr;
+	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 		
 		// get available ports and mark them as used, sync 
 		var rangePorts = handlerConfigFile["available-ports"];
