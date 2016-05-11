@@ -52,8 +52,8 @@ app.post('/election', function(req, res) {
 		
 		// get increment in case of dublicate names
 		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
-		var incr = handlerConfigFile["nameIncrement"]+1;
-		handlerConfigFile["nameIncrement"] = incr;
+		var incr = handlerConfigFile["electionsCreated"]+1;
+		handlerConfigFile["electionsCreated"] = incr;
 	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 		
 		// get available ports and mark them as used, sync 
@@ -76,7 +76,7 @@ app.post('/election', function(req, res) {
 	    	handlerConfigFile["usedPorts"] = usingPorts;
 	    	fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	    }
-	    var ports = JSON.stringify({usedPorts: newPorts, nameIncrement: incr});
+	    var ports = JSON.stringify({usedPorts: newPorts, electionsCreated: incr});
 	    
 	    //hash password
 		var salt = bcrypt.genSaltSync(10);
@@ -113,8 +113,8 @@ app.post('/election', function(req, res) {
 		
 		// get increment in case of dublicate names
 		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
-		var incr = handlerConfigFile["nameIncrement"]+1;
-		handlerConfigFile["nameIncrement"] = incr;
+		var incr = handlerConfigFile["electionsCreated"]+1;
+		handlerConfigFile["electionsCreated"] = incr;
 	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 		
 		// get available ports and mark them as used, sync 
@@ -137,7 +137,7 @@ app.post('/election', function(req, res) {
 	    handlerConfigFile["usedPorts"] = usingPorts;
 	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
 	    }
-	    var ports = JSON.stringify({usedPorts: newPorts, nameIncrement: incr});
+	    var ports = JSON.stringify({usedPorts: newPorts, electionsCreated: incr});
 
 		//call the python script to start the servers
 	    session = spawn('python', ['src/createElection.py', ports]);

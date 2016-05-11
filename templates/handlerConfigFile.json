@@ -7,7 +7,7 @@
         65530
     ],
     "usedPorts": [], 
-    "nameIncrement": 0, 
+    "electionsCreated": 0, 
     "electionDurationInHours": 72,
     "numberOfMockVoters": 4,
     "elections": []
