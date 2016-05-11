@@ -248,7 +248,7 @@ if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
     
     
 ports = json.loads(sys.argv[1])['usedPorts']
-increment = json.loads(sys.argv[1])['nameIncrement']
+increment = json.loads(sys.argv[1])['electionsCreated']
 tStamp = startingTime.replace("-", "").replace(":", "").split()
 sName = tStamp[0] + tStamp[1] + "_" + str(increment)
 
@@ -338,7 +338,7 @@ for x in range(len(mixServers)):
     newPIDs.append(mix[x].pid)
 
 #add PIDs to config
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": len(mixServers), "increment": increment, "protect": not mockElection}
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": len(mixServers), "timeStamp": sName, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
