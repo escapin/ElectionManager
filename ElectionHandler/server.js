@@ -266,7 +266,7 @@ function start(){
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
 				"You can run up to " + Math.floor((usePorts[1]-usePorts[0])/2+numMix) + " elections at the same time\n" +
 						"(if your hardware supports them),\n" +
-						"since each election needs "+2+numMix+" different servers.\n");
+						"since each election needs "+ (2+ numMix) + " different servers.\n");
 	}
 	catch(e){
 		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
