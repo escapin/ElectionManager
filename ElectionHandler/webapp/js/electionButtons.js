@@ -88,7 +88,7 @@ function electionButtons() {
     	else{
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/"+value+"/collectingServer/admin/close")
+    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/cs/"+tStamp+"/admin/close")
     		 .done(function(data){
     			enableButtons();
     			$('#processing').fadeOut(150);
@@ -100,7 +100,7 @@ function electionButtons() {
     			enableButtons();
     			$('#processing').hide();
     			if(data.status===502){
-    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+value+"/collectingServer", false);
+    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/cs/"+tStamp+"/", false);
     			}
     			else if(data.status===401){
     				alerting("wrong password", false);
@@ -323,7 +323,6 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-    		//window.location.href = votingBooth+"/"+value+"/votingBooth/";
     		getElectionStatus(value, function (eleID, stat){
     			if(stat === "open"){
     				document.getElementById("inviteVoters").style.visibility = "visible";
@@ -350,7 +349,6 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-			//window.location.href = collectingServer+"/"+value+"/collectingServer/admin/close";
 			document.getElementById("electionClose").style.visibility = "visible";
 		}
 	});
