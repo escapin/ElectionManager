@@ -78,10 +78,13 @@ for x in range (len(elecs)):
         col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
     mix = []
     for x in range(numMix):
-        if os.path.exists(dstroot+"/mix/00/_data_/ballots00_output.msg"):
-            mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/00")))
+        numMixStr = str(x)
+        if x < 10:
+            mixNum = "0"+str(x)
+        if os.path.exists(dstroot+"/mix/0/"+numMixStr+"_data_/ballots00_output.msg"):
+            mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/"+numMixStr)))
         else:
-            mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/00")))
+            mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/"+numMixStr)))
     if os.path.exists(dstroot+"/BulletinBoard/_data_/resultMIX2.msg"):
         bb = subprocess.Popen(["node", "bb.js", "--serveResult"], cwd=(dstroot+"/BulletinBoard"))
     else:
