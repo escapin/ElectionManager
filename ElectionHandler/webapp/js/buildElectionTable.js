@@ -78,13 +78,13 @@ function buildElectionTable(res) {
 		row$.append($('<td id='+elecID+'/>').html(elecStatus));
 		$("#elections").append(row$);
       
-		getElectionStatus(tStamp, function (tStamp, stat){
-			document.getElementById(elecID).innerHTML = stat;
+		getElectionStatus(elecID, tStamp, function (eleID, tStamp, stat){
+			document.getElementById(eleID).innerHTML = stat;
 		});
         
 	}     
   
-  function getElectionStatus(tStamp, callback) {
+  function getElectionStatus(eleID, tStamp, callback) {
       // Detemine the status of the system: (not-yet) open/closed, 
       // by quering the final mix server.
       // Depending on the state, either the voting tab or the
@@ -99,11 +99,11 @@ function buildElectionTable(res) {
       $.get(url)
        .fail(function () { 
           var stat = 'no response';
-          callback(tStamp, stat)
+          callback(eleID, tStamp, stat)
         })
        .done(function (result) {  // we have some response
           var stat = result.status;
-          callback(tStamp, stat)
+          callback(eleID, tStamp, stat)
         });
 
   }
@@ -116,8 +116,8 @@ function buildElectionTable(res) {
  	 for (var i = 0 ; i < elections.length ; i++) {
      	 var elecID = elections[i].electionID;
      	 var tStamp = elections[i].timeStamp;
-     	 getElectionStatus(tStamp, function (tStamp, stat){
-     		 document.getElementById(elecID).innerHTML = stat;
+     	 getElectionStatus(elecID, tStamp, function (eleID, tStamp, stat){
+     		 document.getElementById(eleID).innerHTML = stat;
      	 });
  	 }
   }, 1000);
