@@ -139,7 +139,7 @@ def getsAddress():
     try:
         jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        if mockElection:
+        if jsonData["deployment"] is False:
             for x in range(4+len(mixServers)):
                 sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
             sAddress.append("http://localhost:"+str(jsonData["nginx-port"])+"/auth")
