@@ -367,7 +367,7 @@ del nginxData[prevBracket:]
 #        comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/0"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])    
 #    else:
 #        comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
-comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + "vb/" + sName + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
 comments.extend(["\n    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
                 "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"])
 for x in range(len(mixServers)):
