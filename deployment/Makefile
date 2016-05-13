@@ -12,9 +12,6 @@ updateConfig:
 	python configNginx.py
 	python configDeployment.py
 
-electionsClean:
-	cd ..; make electionsClean
-
 depclean: 
 	-rm -rf nginx_config
 	-rm serverAddresses.json
