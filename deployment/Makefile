@@ -10,8 +10,10 @@ nginxFiles:
 
 updateConfig:
 	python configNginx.py
-	python deployConfig.py
+	python configDeployment.py
 
+electionsClean:
+	cd ..; make electionsClean
 
 depclean: 
 	-rm -rf nginx_config
