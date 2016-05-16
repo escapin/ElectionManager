@@ -270,6 +270,7 @@ jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + "bb/"
 for x in range(len(mixServers)):
     jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + "m"+str(x)+"/" + sName + "/", x, "URI")       #str(ports[x+2])
 
+
 #get ID after modifying Manifest
 iDlength = 5
 while(iDlength < 40):
@@ -283,6 +284,10 @@ while(iDlength < 40):
     except:
         iDlength = iDlength+1
         #sys.exit("ElectionID already exists.")
+
+#update mix and cs keys
+subprocess.call(["python", rootDirProject + "/ElectionHandler/src/updateKeys.py", dstroot], cwd=(rootDirProject+"/ElectionHandler/src/"))
+
 
 #add the password
 jwrite(passList, electionID, password)
