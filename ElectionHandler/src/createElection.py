@@ -139,7 +139,7 @@ def getsAddress():
     try:
         jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        if jsonData["deployment"] is False:
+        if not deployment:
             for x in range(4+len(mixServers)):
                 sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
             sAddress.append("http://localhost:"+str(jsonData["nginx-port"])+"/auth")
@@ -198,6 +198,7 @@ passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
 
 #get duration and deployment status from handlerConfigFile
+deployment = False
 try:
     jsonFile = open(electionConfig, 'r')
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
@@ -205,6 +206,7 @@ try:
     mockVoters = jsonData["numberOfMockVoters"]
     if jsonData["deployment"] is True:
         serverAddr = rootDirProject + "/deployment/serverAddresses.json"
+        deployment = True
     jsonFile.close()
 except IOError:
     sys.exit("handlerConfigFile.json missing or corrupt (electionDurationInHours)")
@@ -219,9 +221,6 @@ try:
     eleChoices = jsonData["choices"]
     publish = jsonData["publishListOfVoters"]
     mixServers = jsonData["mixServers"]
-    mixServerEncKey = []
-    for x in range(len(mixServers)):
-        mixServerEncKey.append(mixServers[x]["encryption_key"])
     jsonFile.close()
 except IOError:
     sys.exit("ElectionManifest missing or corrupt")
@@ -265,12 +264,32 @@ jwrite(sElectDir + manifest, "description", elecDescr)
 jwrite(sElectDir + manifest, "question", elecQuestion)
 jwrite(sElectDir + manifest, "choices", eleChoices)  
 jwrite(sElectDir + manifest, "publishListOfVoters", publish)
-jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + "cs/" + sName + "/", "URI")    #str(ports[0])
-jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + "bb/" + sName + "/", 0, "URI")   #str(ports[1])
-for x in range(len(mixServers)):
-    jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + "m"+str(x)+"/" + sName + "/", x, "URI")       #str(ports[x+2])
+if deployment:    #and not localhost
+    jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + sName + "/", "URI")    #str(ports[0])
+    jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + sName + "/", 0, "URI")   #str(ports[1])
+    for x in range(len(mixServers)):
+        jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + sName + "/", x, "URI")       #str(ports[x+2])   
+else:
+    jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + "cs/" + sName + "/", "URI")    #str(ports[0])
+    jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + "bb/" + sName + "/", 0, "URI")   #str(ports[1])
+    for x in range(len(mixServers)):
+        jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + "m"+str(x)+"/" + sName + "/", x, "URI")       #str(ports[x+2])
 
+#update mix and cs keys
+update = subprocess.Popen(["python", rootDirProject + "/ElectionHandler/src/updateKeys.py", sElectDir], cwd=(rootDirProject+"/ElectionHandler/src/"))
+update.wait()
 
+#get new keys
+try:
+    jsonFile = open(sElectDir + manifest, 'r')
+    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+    mixServers = jsonData["mixServers"]
+    mixServerEncKey = []
+    for x in range(len(mixServers)):
+        mixServerEncKey.append(mixServers[x]["encryption_key"])
+except IOError:
+    sys.exit("sElect/_sElectConfigFiles_/ElectionManifest.json missing or corrupt")
+    
 #get ID after modifying Manifest
 iDlength = 5
 while(iDlength < 40):
@@ -284,9 +303,6 @@ while(iDlength < 40):
     except:
         iDlength = iDlength+1
         #sys.exit("ElectionID already exists.")
-
-#update mix and cs keys
-subprocess.call(["python", rootDirProject + "/ElectionHandler/src/updateKeys.py", dstroot], cwd=(rootDirProject+"/ElectionHandler/src/"))
 
 
 #add the password
@@ -350,40 +366,118 @@ newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electi
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
+
 #modify nginx File
-nginxFile = open(nginxConf, 'r+')
-nginxData = nginxFile.readlines()
-prevBracket = 0
-lastBracket = 0
-counter = 0
-for line in nginxData:
-    if "}\n" in line:
-        prevBracket = lastBracket
-        lastBracket = counter
-    counter = counter + 1
-bracketIt = nginxData[prevBracket:]
-del nginxData[prevBracket:]
-#comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",     #old link
-#comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + "vb/" + sName + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
-#            "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
-#            "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
-#for x in range(len(mixServers)):
-#    if x < 10:
-#        comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/0"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])    
-#    else:
-#        comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
-comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
-comments.extend(["\n    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
-                "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"])
-for x in range(len(mixServers)):
+if deployment:
+    nginxFile = open(nginxConf, 'r+')
+    nginxData = nginxFile.readlines()
+    prevBracket = 0
+    counter = 0
+    for line in nginxData:
+        if "}" in line:
+            prevBracket = counter
+        if "end collecting server" in line:
+            break
+        counter = counter + 1
+    bracketIt = nginxData[prevBracket:]
+    del nginxData[prevBracket:]
+    comments = ["    # Collecting server " + electionID + " \n", "    location " + "/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n"]
+    comments.extend(bracketIt)
+    nginxData.extend(comments)
+    nginxFile.seek(0)
+
+    prevBracket = 0
+    counter = 0
+    for line in nginxData:
+        if "}" in line:
+            prevBracket = counter
+        if "end bulletin board" in line:
+            break
+        counter = counter + 1
+    bracketIt = nginxData[prevBracket:]
+    del nginxData[prevBracket:]
+    comments = ["    # Bulletin board " + electionID + " \n", "    location " + "/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
+    comments.extend(bracketIt)
+    nginxData.extend(comments)
+    nginxFile.seek(0)
+
+    for x in range(len(mixServers)):
+        prevBracket = 0
+        counter = 0
+        for line in nginxData:
+            if "}" in line:
+                prevBracket = counter
+            if "end mix server "+str(x) in line:
+                break
+            counter = counter + 1
+        bracketIt = nginxData[prevBracket:]
+        del nginxData[prevBracket:]
+        comments = ["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"]
+        comments.extend(bracketIt)
+        nginxData.extend(comments)
+        nginxFile.seek(0)
+
+    prevBracket = 0
+    counter = 0
+    for line in nginxData:
+        if "}" in line:
+            prevBracket = counter
+        if "end main server" in line:
+            break
+        counter = counter + 1
+    bracketIt = nginxData[prevBracket:]
+    del nginxData[prevBracket:]
+    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+    comments.extend(bracketIt)
+    nginxData.extend(comments)
+    nginxFile.seek(0)
+    
+    nginxFile.writelines(nginxData)
+    nginxFile.close()
+else:
+    nginxFile = open(nginxConf, 'r+')
+    nginxData = nginxFile.readlines()
+    prevBracket = 0
+    lastBracket = 0
+    counter = 0
+    #for line in nginxData:
+    #    if "}" in line:
+    #        prevBracket = lastBracket
+    #        lastBracket = counter
+    #    counter = counter + 1
+    for line in nginxData:
+        if "}" in line:
+            prevBracket = counter
+        if "end main server" in line:
+            break
+        counter = counter + 1
+    bracketIt = nginxData[prevBracket:]
+    del nginxData[prevBracket:]
+    '''
+    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",     #old link
+    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + "vb/" + sName + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
+                "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
+                "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
+    for x in range(len(mixServers)):
+        if x < 10:
+            comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/0"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])    
+        else:
+            comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
+    '''
+    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+    comments.extend(["    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
+                    "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"])
+    for x in range(len(mixServers)):
         comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + "m"+str(x)+"/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
 
-comments.extend(bracketIt)
-nginxData.extend(comments)
-nginxFile.seek(0)
-nginxFile.writelines(nginxData)
-nginxFile.close()
+    comments.extend(bracketIt)
+    nginxData.extend(comments)
+    nginxFile.seek(0)
+    nginxFile.writelines(nginxData)
+    nginxFile.close()
+
 
 #refresh nginx 
 #TODO: fix /usr/sbin nginx issue
 subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
+

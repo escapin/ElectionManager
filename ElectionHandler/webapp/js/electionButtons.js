@@ -88,7 +88,8 @@ function electionButtons() {
     	else{
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/cs/"+tStamp+"/admin/close")
+    		console.log(protocol+"admin:"+pass+"@"+collectingServer+"/"+tStamp+"/admin/close");
+    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/"+tStamp+"/admin/close")
     		 .done(function(data){
     			enableButtons();
     			$('#processing').fadeOut(150);
@@ -100,7 +101,7 @@ function electionButtons() {
     			enableButtons();
     			$('#processing').hide();
     			if(data.status===502){
-    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/cs/"+tStamp+"/", false);
+    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+tStamp+"/", false);
     			}
     			else if(data.status===401){
     				alerting("wrong password", false);
@@ -579,8 +580,7 @@ function electionButtons() {
 	     
 		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
 		 votingBooth = "http://localhost:"+electionConf["nginx-port"];
-		 collectingServer = "http://localhost:"+electionConf["nginx-port"];
-		 lastMix = "http://localhost:"+electionConf["nginx-port"];
+		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 		
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
@@ -924,7 +924,7 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = protocol + collectingServer+'/cs/'+tStamp+'/status';
+	 	 var url = protocol + collectingServer+'/'+tStamp+'/status';
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';

@@ -44,7 +44,7 @@ function buildElectionTable(res) {
 	var electionConf = JSON.parse(electionConfigRaw);	
 	var elections = electionConf.elections;
 	
-	var collectingServer = "http://localhost:"+electionConf["nginx-port"];
+	var collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 	//don't use port 80 if it's not deployed
 	if(electionConf.deployment){
 		var sAddresses = JSON.parse(sAddressesRaw);
@@ -95,7 +95,7 @@ function buildElectionTable(res) {
       //
 
  	 var stat = 'what';
- 	 var url = collectingServer+'/cs/'+tStamp+'/status';
+ 	 var url = collectingServer+'/'+tStamp+'/status';
       $.get(url)
        .fail(function () { 
           var stat = 'no response';
