@@ -12,6 +12,7 @@ import subprocess
 import time
 import random
 import string
+import re
 
 
 def copy(src, dest):
@@ -169,7 +170,7 @@ def getID(num):
 def hashManifest():
     manifest_raw = codecs.open(sElectDir + manifest, 'r', encoding='utf8').read()
     manifest_raw = manifest_raw.replace("\n", '').replace("\r", '').strip()
-    m = hashlib.sha1()
+    m = hashlib.sha256()
     m.update(manifest_raw)
     return m.hexdigest()
 
@@ -256,6 +257,28 @@ sName = tStamp[0] + tStamp[1] + "_" + str(increment)
 serverAddress = getsAddress()
 
 
+#update keys
+pattern="[0-9]+"
+keyGeneratorMix_file="genKeys4mixServer.js"
+keyGeneratorCS_file="genKeys4collectingServer.js"
+
+
+# absolute paths
+tools_path = sElectDir + "/tools"
+
+
+files = os.listdir(sElectDir+"/mix")
+p=re.compile(pattern)
+configMix_files=filter(p.search, files);
+mkeys = []
+for file in configMix_files:
+    subprocess.call(["node", os.path.join(tools_path,keyGeneratorMix_file),
+                     sElectDir+manifest, os.path.join(sElectDir,"mix/"+file+"/config.json")])
+
+subprocess.call(["node", os.path.join(tools_path,keyGeneratorCS_file),
+                sElectDir+manifest, sElectDir+collectingConf])
+
+
 #modify ElectionManifest, if no arguments are given, this is a mock election
 jwrite(sElectDir + manifest, "startTime", startingTime)
 jwrite(sElectDir + manifest, "endTime", endingTime)
@@ -264,7 +287,8 @@ jwrite(sElectDir + manifest, "description", elecDescr)
 jwrite(sElectDir + manifest, "question", elecQuestion)
 jwrite(sElectDir + manifest, "choices", eleChoices)  
 jwrite(sElectDir + manifest, "publishListOfVoters", publish)
-if deployment:    #and not localhost
+
+if "localhost" not in serverAddress[0]:
     jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + sName + "/", "URI")    #str(ports[0])
     jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + sName + "/", 0, "URI")   #str(ports[1])
     for x in range(len(mixServers)):
@@ -274,10 +298,6 @@ else:
     jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + "bb/" + sName + "/", 0, "URI")   #str(ports[1])
     for x in range(len(mixServers)):
         jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + "m"+str(x)+"/" + sName + "/", x, "URI")       #str(ports[x+2])
-
-#update mix and cs keys
-update = subprocess.Popen(["python", rootDirProject + "/ElectionHandler/src/updateKeys.py", sElectDir], cwd=(rootDirProject+"/ElectionHandler/src/"))
-update.wait()
 
 #get new keys
 try:
@@ -303,7 +323,6 @@ while(iDlength < 40):
     except:
         iDlength = iDlength+1
         #sys.exit("ElectionID already exists.")
-
 
 #add the password
 jwrite(passList, electionID, password)
@@ -368,7 +387,7 @@ subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElec
 
 
 #modify nginx File
-if deployment:
+if "localhost" not in serverAddress[0]:
     nginxFile = open(nginxConf, 'r+')
     nginxData = nginxFile.readlines()
     prevBracket = 0
