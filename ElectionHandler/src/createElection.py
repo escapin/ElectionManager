@@ -9,11 +9,12 @@ import sys
 import hashlib
 import codecs
 import subprocess
+from subprocess import check_output
 import time
 import random
 import string
 import re
-
+import timeit
 
 def copy(src, dest):
     try:
@@ -174,7 +175,7 @@ def hashManifest():
     m.update(manifest_raw)
     return m.hexdigest()
 
-# sElect (partial) files path
+# sElect (partial) mixFiles path
 manifest = "/_sElectConfigFiles_/ElectionManifest.json"
 collectingConf = "/CollectingServer/config.json"
 bulletinConf = "/BulletinBoard/config.json"
@@ -256,27 +257,34 @@ sName = tStamp[0] + tStamp[1] + "_" + str(increment)
 #where the servers are placed
 serverAddress = getsAddress()
 
+#mix server config mixFiles
+mixConf = []
+for x in range(len(mixServers)):
+    if x < 10:
+        mixConf.append("/templates/config_mix0" + str(x) + ".json")
+    else:
+        mixConf.append("/templates/config_mix" + str(x) + ".json")
 
 #update keys
 pattern="[0-9]+"
 keyGeneratorMix_file="genKeys4mixServer.js"
 keyGeneratorCS_file="genKeys4collectingServer.js"
-
-
-# absolute paths
 tools_path = sElectDir + "/tools"
 
+keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(len(mixServers))]).splitlines()
 
-files = os.listdir(sElectDir+"/mix")
-p=re.compile(pattern)
-configMix_files=filter(p.search, files);
-mkeys = []
-for file in configMix_files:
-    subprocess.call(["node", os.path.join(tools_path,keyGeneratorMix_file),
-                     sElectDir+manifest, os.path.join(sElectDir,"mix/"+file+"/config.json")])
-
-subprocess.call(["node", os.path.join(tools_path,keyGeneratorCS_file),
-                sElectDir+manifest, sElectDir+collectingConf])
+#write new keys to manifest and config files
+jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["encryptionKey"], "encryption_key")
+jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["verificationKey"], "verification_key")
+jwrite(sElectDir + collectingConf, "signing_key", json.loads(keys[len(keys)-1])["signingKey"])
+jwrite(sElectDir + collectingConf, "decryption_key", json.loads(keys[len(keys)-1])["decryptionKey"])
+for x in range(len(mixServers)):
+    jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["encryptionKey"], x, "encryption_key")
+    jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["verificationKey"], x, "verification_key")
+    jwrite(sElectDir + mixConf[x], "encryption_key", json.loads(keys[x])["encryptionKey"])
+    jwrite(sElectDir + mixConf[x], "verification_key", json.loads(keys[x])["verificationKey"])
+    jwrite(sElectDir + mixConf[x], "signing_key", json.loads(keys[x])["signingKey"])
+    jwrite(sElectDir + mixConf[x], "decryption_key", json.loads(keys[x])["decryptionKey"])
 
 
 #modify ElectionManifest, if no arguments are given, this is a mock election
@@ -328,14 +336,6 @@ while(iDlength < 40):
 jwrite(passList, electionID, password)
 
 #modify Server ports
-#mix server config files
-mixConf = []
-for x in range(len(mixServers)):
-    if x < 10:
-        mixConf.append("/templates/config_mix0" + str(x) + ".json")
-    else:
-        mixConf.append("/templates/config_mix" + str(x) + ".json")
-
 for x in range(len(mixServers)):     
     jwrite(dstroot + mixConf[x], "port", ports[x+2])
 jwrite(dstroot + collectingConf, "port", ports[0])
