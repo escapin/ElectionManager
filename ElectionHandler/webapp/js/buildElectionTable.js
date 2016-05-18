@@ -44,11 +44,14 @@ function buildElectionTable(res) {
 	var electionConf = JSON.parse(electionConfigRaw);	
 	var elections = electionConf.elections;
 	
-	var collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
+	var collectingServer = "http://localhost:"+electionConf["nginx-port"];
 	//don't use port 80 if it's not deployed
 	if(electionConf.deployment){
 		var sAddresses = JSON.parse(sAddressesRaw);
 		collectingServer = sAddresses["server-address"].collectingserver;
+	}
+	if(collectingServer.indexOf("http://localhost") > -1){
+		collectingServer += "/cs"
 	}
 	 
 	document.getElementById("elections").innerHTML = "";

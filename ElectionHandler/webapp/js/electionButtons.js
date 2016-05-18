@@ -580,7 +580,7 @@ function electionButtons() {
 	     
 		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
 		 votingBooth = "http://localhost:"+electionConf["nginx-port"];
-		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
+		 collectingServer = "http://localhost:"+electionConf["nginx-port"];
 		
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
@@ -599,6 +599,10 @@ function electionButtons() {
 			protocol = '';
 			collectingServer = tmp[0]
 		}
+		if((protocol + collectingServer).indexOf("http://localhost") > -1){
+			collectingServer += "/cs"
+		}
+		
 			/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');
 	    
