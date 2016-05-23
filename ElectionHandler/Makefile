@@ -12,9 +12,9 @@ devenv:
 
 references:
 	mkdir -p webapp/ref
-	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-TR-sElect-2016.bib
-	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-TR-sElect-2016.abstract
-	cd webapp/ref; wget -N  http://infsec.uni-trier.de/people/publications/paper/KuestersMuellerScapinTruderung-TR-sElect-2016.pdf
+	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-CSF-2016.bib; mv KuestersMuellerScapinTruderung-CSF-2016.bib KuestersMuellerScapinTruderung-CSF-2016.bib.txt
+	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-CSF-2016.abstract; mv KuestersMuellerScapinTruderung-CSF-2016.abstract KuestersMuellerScapinTruderung-CSF-2016.abstract.txt
+	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/paper/KuestersMuellerScapinTruderung-CSF-2016.pdf
 
 roboto:
 	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/Jzo62I39jc0gQRrbndN6nfesZW2xOQ-xsNqO47m55DA.ttf
