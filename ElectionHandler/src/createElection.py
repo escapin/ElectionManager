@@ -170,7 +170,7 @@ def getID(num):
 def hashManifest():
     manifest_raw = codecs.open(sElectDir + manifest, 'r', encoding='utf8').read()
     manifest_raw = manifest_raw.replace("\n", '').replace("\r", '').strip()
-    m = hashlib.sha1()
+    m = hashlib.sha256()
     m.update(manifest_raw)
     return m.hexdigest()
 

@@ -11,7 +11,7 @@ function buildElectionTable(res) {
 	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]+"Z");
 	    // display 03 for March instead of 3 (and months below 10)
 		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
-		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
+		var day = clientDate.getDate()<10 ? "0"+clientDate.getDate() : clientDate.getDate();
 		
 		var hours = clientDate.getHours()	
 		var dt = (hours>=12)?"PM":"AM";
@@ -43,15 +43,15 @@ function buildElectionTable(res) {
 	var electionConf = JSON.parse(electionConfigRaw);	
 	var elections = electionConf.elections;
 	
-	var lastMix = "http://localhost:"+electionConf["nginx-port"];
+	var collectingServer = "http://localhost:"+electionConf["nginx-port"];
 	//don't use port 80 if it's not deployed
-	if(electionConf.deployment === true){
+	if(electionConf.deployment){
 		var sAddresses = JSON.parse(sAddressesRaw);
-		lastMix = sAddresses["server-address"].mix2;
+		collectingServer = sAddresses["server-address"].collectingserver;
 	}
 	 
 	document.getElementById("elections").innerHTML = "";
-		 
+	 
 	var head$ = $('<tr/>');
 	head$.append($('<th style="text-align:center"/>').html(" Election IDs "));
 	head$.append($('<th style="text-align:center"/>').html(" Election Title "));
@@ -60,19 +60,21 @@ function buildElectionTable(res) {
 	head$.append($('<th style="text-align:center"/>').html(" Election State "));
 	$("#elections").append(head$);
   
-
+	var electionTitles = [];
+	
 	for (var i = 0 ; i < elections.length ; i++) {
 		var elecID = elections[i].electionID;
 		var elecStatus = 'waiting';
 		var startingTime = resolveTime(elections[i].startTime)
 		var endingTime = resolveTime(elections[i].endTime)
-		var row$ = $('<tr/>');
+		var ELS = elections[i].ELS
+		var row$ = $('<tr class="faintHover"/>');
       
-		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+elections[i].electionID+" &nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+escapeHTML(elections[i].electionTitle, true)+"&nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+startingTime+"&nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center; cursor: pointer;"/>').html("&nbsp;&nbsp;&nbsp;"+endingTime+"&nbsp;&nbsp;&nbsp;"));
-		row$.append($('<td style="text-align:center; cursor: pointer;" id='+elecID+'/>').html("&nbsp;&nbsp;&nbsp;"+elecStatus+"&nbsp;&nbsp;&nbsp;"));
+		row$.append($('<td />').html(elections[i].electionID));
+		row$.append($('<td />').html(escapeHTML(elections[i].electionTitle, true)));
+		row$.append($('<td />').html(startingTime));
+		row$.append($('<td />').html(endingTime));
+		row$.append($('<td id='+elecID+'/>').html(elecStatus));
 		$("#elections").append(row$);
       
 		getElectionStatus(elecID, function (eleID, stat){
@@ -84,7 +86,7 @@ function buildElectionTable(res) {
   
   function getElectionStatus(eleID, callback) {
       // Detemine the status of the system: (not-yet) open/closed, 
-      // by quering the final mix server.
+      // by quering the collecting server.
       // Depending on the state, either the voting tab or the
       // verification tab will be opened.
       //
@@ -92,20 +94,14 @@ function buildElectionTable(res) {
       // checking if the final server has ready result.
       //
  	 var stat = 'what';
- 	 var url = lastMix+'/'+eleID+'/mix/03/status';
+ 	 var url = collectingServer+'/'+eleID+'/collectingServer/status';
       $.get(url)
        .fail(function () { 
           var stat = 'no response';
           callback(eleID, stat)
         })
        .done(function (result) {  // we have some response
-          var stat = 'pending';
-     	 if (result.status==='result ready'){
-         	 stat = 'closed';
-          }
-          else {
-         	 stat = 'open';
-          }
+          var stat = result.status;
           callback(eleID, stat)
         });
 

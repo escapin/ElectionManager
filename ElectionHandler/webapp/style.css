@@ -257,9 +257,7 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #choice1,
 #choice2,
 #remove-choice,
-#add-choice,
-#advance,
-#mock{
+#add-choice{
 	margin-top: 1.3em;
 }
 
@@ -276,17 +274,17 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 #close,
 #advance{
 	width: 13.5em;
-	margin-right: 18%;
 }
 
 #mock,
 #remove,
 #compl-create{
+	float: right;
 	width: 13.5em;
 }
 
 #vote{
-	margin-left: 25.5%;
+	float: right;
 	margin-top: 8%;
 	visibility: hidden;
 }
@@ -354,20 +352,26 @@ td{
     overflow: visible; /*to make ths where the title is really long work*/
     padding: 0.5em 1em; /* cell padding */
     border-bottom: 1px solid #cbcbcb;
-        border-collapse: collapse;
+    border-collapse: collapse;
     border-spacing: 0;
     empty-cells: show;
     border: 1px solid #cbcbcb;
+    text-align:center;
+    word-wrap: break-word;
+    max-width: 12vw;
+    cursor: pointer;
 }
-	
-.highlight { 
-	background: #035FD8; 
-	color: #fafcff
+
+.faintHover:hover{
+	background: #94c1fc;
+	color: #fafcff;
+}	
+
+.highlight, 
+.highlight:hover{ 
+	background: #035fd8; 
+	color: #fafcff;
 }
-
-
-
-
 
 span.testing{
         background:#035FD8;
@@ -395,8 +399,12 @@ span.testing{
 	font-size: 0.8em;
 }
 
+.ui-spinner{
+	width: 22%;
+}
 
-.stylish{margin-left: 95%;display:block;width:10px;height:10px;border-radius:66px;border:4px double #062ca5;font-size:14px;line-height:0px;color:#035FD8;text-align:center;text-decoration:none;text-shadow:0 1px 0 #fff;background:#035FD8}.stylish:hover{border:4px double #39f;color:#08e;text-decoration:none;background:#39f}
+.stylish{margin-left: 98%;display:block;width:10px;height:10px;border-radius:66px;border:4px double #062ca5;font-size:14px;line-height:0px;color:#035FD8;text-align:center;text-decoration:none;text-shadow:0 1px 0 #fff;background:#035FD8}
+.stylish:hover{border:4px double #39f;color:#08e;text-decoration:none;background:#39f}
 
 #buttontext {position: relative; top: -15px; position: relative; left: -6.75px;}
 
@@ -484,6 +492,10 @@ tr{
 	right: 21.4em;
 	font-size: 0.9em;
 	z-index: 10;
+}
+
+td{
+    max-width: 8vw;
 }
 
 }

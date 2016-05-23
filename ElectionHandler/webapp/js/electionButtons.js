@@ -574,9 +574,8 @@ function electionButtons() {
 	  		 electionStatus = electionStates;
 	  	 });
 	     
-	     console.log(document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size")));
 	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
-	     document.getElementById('advance').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
+	     document.getElementById('trackDescend').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
 	     
 	     electionConf = JSON.parse(electionConfigRaw);
 		 elections = electionConf.elections;
@@ -612,7 +611,7 @@ function electionButtons() {
 	        rows.removeClass('highlight');
 	        row.addClass('highlight');
 	        
-	        value = $(this).text().trim().split(" ")[0]; 
+	        value = $(this).children()["0"].innerHTML; 
 	        
 			$("#remove").prop('disabled', null);
 			
@@ -921,22 +920,17 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = lastMix+'/'+eleID+'/mix/03/status';
+	 	 var url = protocol + collectingServer+'/'+eleID+'/collectingServer/status';
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';
 	          callback(eleID, stat)
 	        })
-	       .done(function (result) {  // we have some response
-	          var stat = 'pending';
-	     	 if (result.status==='result ready'){
-	         	 stat = 'closed';
-	          }
-	          else {
-	         	 stat = 'open';
-	          }
-	          callback(eleID, stat)
-	        });
+	        .done(function (result) {  // we have some response
+	            var stat = result.status;
+	            callback(eleID, stat)
+	          });
+
 
 	  }
 	
