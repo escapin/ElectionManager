@@ -249,6 +249,7 @@ if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
     
     
 ports = json.loads(sys.argv[1])['usedPorts']
+ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
 increment = json.loads(sys.argv[1])['electionsCreated']
 tStamp = startingTime.replace("-", "").replace(":", "").split()
 sName = tStamp[0] + tStamp[1] + "_" + str(increment)
@@ -297,15 +298,15 @@ jwrite(sElectDir + manifest, "choices", eleChoices)
 jwrite(sElectDir + manifest, "publishListOfVoters", publish)
 
 if "localhost" not in serverAddress[0]:
-    jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + sName + "/", "URI")    #str(ports[0])
-    jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + sName + "/", 0, "URI")   #str(ports[1])
+    jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + str(ELS) + "/", "URI")    #str(ports[0])
+    jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + str(ELS) + "/", 0, "URI")   #str(ports[1])
     for x in range(len(mixServers)):
-        jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + sName + "/", x, "URI")       #str(ports[x+2])   
+        jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + str(ELS) + "/", x, "URI")       #str(ports[x+2])   
 else:
-    jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + "cs/" + sName + "/", "URI")    #str(ports[0])
-    jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + "bb/" + sName + "/", 0, "URI")   #str(ports[1])
+    jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + "cs/" + str(ELS) + "/", "URI")    #str(ports[0])
+    jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + "bb/" + str(ELS) + "/", 0, "URI")   #str(ports[1])
     for x in range(len(mixServers)):
-        jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + "m"+str(x)+"/" + sName + "/", x, "URI")       #str(ports[x+2])
+        jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + "m"+str(x)+"/" + str(ELS) + "/", x, "URI")       #str(ports[x+2])
 
 #get new keys
 try:
@@ -381,7 +382,7 @@ for x in range(len(mixServers)):
     newPIDs.append(mix[x].pid)
 
 #add PIDs to config
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": len(mixServers), "timeStamp": sName, "protect": not mockElection}
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": len(mixServers), "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
@@ -400,7 +401,7 @@ if "localhost" not in serverAddress[0]:
         counter = counter + 1
     bracketIt = nginxData[prevBracket:]
     del nginxData[prevBracket:]
-    comments = ["    # Collecting server " + electionID + " \n", "    location " + "/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n"]
+    comments = ["    # Collecting server " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)
@@ -415,7 +416,7 @@ if "localhost" not in serverAddress[0]:
         counter = counter + 1
     bracketIt = nginxData[prevBracket:]
     del nginxData[prevBracket:]
-    comments = ["    # Bulletin board " + electionID + " \n", "    location " + "/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
+    comments = ["    # Bulletin board " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)
@@ -431,7 +432,7 @@ if "localhost" not in serverAddress[0]:
             counter = counter + 1
         bracketIt = nginxData[prevBracket:]
         del nginxData[prevBracket:]
-        comments = ["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"]
+        comments = ["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"]
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
@@ -474,7 +475,7 @@ else:
     del nginxData[prevBracket:]
     '''
     comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",     #old link
-    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + "vb/" + sName + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
+    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + "vb/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
                 "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
                 "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
     for x in range(len(mixServers)):
@@ -484,10 +485,10 @@ else:
             comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
     '''
     comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
-    comments.extend(["    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
-                    "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"])
+    comments.extend(["    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
+                    "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"])
     for x in range(len(mixServers)):
-        comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + "m"+str(x)+"/" + sName + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
+        comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + "m"+str(x)+"/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
 
     comments.extend(bracketIt)
     nginxData.extend(comments)

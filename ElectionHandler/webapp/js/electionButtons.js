@@ -13,7 +13,7 @@ function electionButtons() {
     var rows;
     var row;
     var value;
-    var tStamp
+    var ELS
 	var task;
     
 	var elecType = "none";
@@ -88,8 +88,8 @@ function electionButtons() {
     	else{
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		console.log(protocol+"admin:"+pass+"@"+collectingServer+"/"+tStamp+"/admin/close");
-    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/"+tStamp+"/admin/close")
+    		console.log(protocol+"admin:"+pass+"@"+collectingServer+"/"+ELS+"/admin/close");
+    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/"+ELS+"/admin/close")
     		 .done(function(data){
     			enableButtons();
     			$('#processing').fadeOut(150);
@@ -101,7 +101,7 @@ function electionButtons() {
     			enableButtons();
     			$('#processing').hide();
     			if(data.status===502){
-    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+tStamp+"/", false);
+    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+ELS+"/", false);
     			}
     			else if(data.status===401){
     				alerting("wrong password", false);
@@ -621,7 +621,7 @@ function electionButtons() {
     				break;
     			}
     		}
-	        tStamp = elections[i]["timeStamp"];
+	        ELS = elections[i]["ELS"];
 
 			$("#remove").prop('disabled', null);
 			
@@ -928,7 +928,7 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = protocol + collectingServer+'/'+tStamp+'/status';
+	 	 var url = protocol + collectingServer+'/'+ELS+'/status';
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';

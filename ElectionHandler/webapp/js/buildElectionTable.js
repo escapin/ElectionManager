@@ -71,7 +71,7 @@ function buildElectionTable(res) {
 		var elecStatus = 'waiting';
 		var startingTime = resolveTime(elections[i].startTime)
 		var endingTime = resolveTime(elections[i].endTime)
-		var tStamp = elections[i].timeStamp
+		var ELS = elections[i].ELS
 		var row$ = $('<tr class="faintHover"/>');
       
 		row$.append($('<td />').html(elections[i].electionID));
@@ -81,13 +81,13 @@ function buildElectionTable(res) {
 		row$.append($('<td id='+elecID+'/>').html(elecStatus));
 		$("#elections").append(row$);
       
-		getElectionStatus(elecID, tStamp, function (eleID, tStamp, stat){
+		getElectionStatus(elecID, ELS, function (eleID, ELS, stat){
 			document.getElementById(eleID).innerHTML = stat;
 		});
         
 	}     
   
-  function getElectionStatus(eleID, tStamp, callback) {
+  function getElectionStatus(eleID, ELS, callback) {
       // Detemine the status of the system: (not-yet) open/closed, 
       // by quering the final mix server.
       // Depending on the state, either the voting tab or the
@@ -98,15 +98,15 @@ function buildElectionTable(res) {
       //
 
  	 var stat = 'what';
- 	 var url = collectingServer+'/'+tStamp+'/status';
+ 	 var url = collectingServer+'/'+ELS+'/status';
       $.get(url)
        .fail(function () { 
           var stat = 'no response';
-          callback(eleID, tStamp, stat)
+          callback(eleID, ELS, stat)
         })
        .done(function (result) {  // we have some response
           var stat = result.status;
-          callback(eleID, tStamp, stat)
+          callback(eleID, ELS, stat)
         });
 
   }
@@ -118,8 +118,8 @@ function buildElectionTable(res) {
   var electionStates = window.setInterval(function() {
  	 for (var i = 0 ; i < elections.length ; i++) {
      	 var elecID = elections[i].electionID;
-     	 var tStamp = elections[i].timeStamp;
-     	 getElectionStatus(elecID, tStamp, function (eleID, tStamp, stat){
+     	 var ELS = elections[i].ELS;
+     	 getElectionStatus(elecID, ELS, function (eleID, ELS, stat){
      		 document.getElementById(eleID).innerHTML = stat;
      	 });
  	 }

@@ -65,11 +65,11 @@ app.post('/election', function(req, res) {
 				usingPorts.push(i);
 				newPorts.push(i);
 			}
-			if(newPorts.length >= 2+numMix){
+			if(newPorts.length >= 3+numMix){
 				break;
 			}
 		}
-	    if (newPorts.length < 2+numMix)
+	    if (newPorts.length < 3+numMix)
 	        res.end("Not enough ports available.");
 	    else{
 	    	//store new ports
@@ -126,11 +126,11 @@ app.post('/election', function(req, res) {
 				usingPorts.push(i);
 				newPorts.push(i);
 			}
-			if(newPorts.length >= 2+numMix){
+			if(newPorts.length >= 3+numMix){
 				break;
 			}
 		}
-	    if (newPorts.length < 2+numMix)
+	    if (newPorts.length < 3+numMix)
 	        res.end("Not enough ports available.");
 	    else{
 	    //store new ports
@@ -266,7 +266,7 @@ function start(){
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
 				"Each election needs at least 3 different servers: a collecting server, a bulletin board, and a mix server.\n" +
 			    "However, the number of mix servers is not fixed: we suggest to use 3 to 5 mix servers for each elections.\n" +
-			    "Assuming you use 3 mix servers, you can run up to *" + Math.floor((usePorts[1]-usePorts[0])/5) + "* elections at the same time " + 
+			    "Assuming you use 3 mix servers, you can run up to *" + Math.floor((usePorts[1]-usePorts[0])/6) + "* elections at the same time " + 
 			    "(if your hardware supports them).\n");
 	}
 	catch(e){
