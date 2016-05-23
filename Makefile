@@ -16,7 +16,7 @@ nginx:
 	python configNginx.py
 
 select:
-	git clone -b master https://github.com/escapin/sElect.git
+	git clone -b dev https://github.com/escapin/sElect.git
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
