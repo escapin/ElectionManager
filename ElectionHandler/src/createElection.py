@@ -197,7 +197,7 @@ electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 defaultManifest = rootDirProject + "/_handlerConfigFiles_/ElectionManifest.json"
 nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
 passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
-
+nginxLog = rootDirProject + "/nginx_config/log"
 
 #get duration and deployment status from handlerConfigFile
 deployment = False
@@ -206,6 +206,7 @@ try:
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
     votingTime = jsonData["electionDurationInHours"]*60*60    #hours to seconds
     mockVoters = jsonData["numberOfMockVoters"]
+    nginxPort = jsonData["nginx-port"]
     if jsonData["deployment"] is True:
         serverAddr = rootDirProject + "/deployment/serverAddresses.json"
         deployment = True
@@ -416,7 +417,7 @@ if "localhost" not in serverAddress[0]:
         counter = counter + 1
     bracketIt = nginxData[prevBracket:]
     del nginxData[prevBracket:]
-    comments = ["    # Bulletin board " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
+    comments = ["    # Bulletin board " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)
@@ -448,6 +449,21 @@ if "localhost" not in serverAddress[0]:
     bracketIt = nginxData[prevBracket:]
     del nginxData[prevBracket:]
     comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+    comments.extend(bracketIt)
+    nginxData.extend(comments)
+    nginxFile.seek(0)
+    
+    prevBracket = 0
+    counter = 0
+    for line in nginxData:
+        if "end voting booth" in line:
+            break
+        counter = counter + 1
+    bracketIt = nginxData[counter:]
+    del nginxData[counter:]
+    comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
+                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name vb."+ serverAddress[3].split("://")[1] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
+                "    location " + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)
@@ -486,13 +502,29 @@ else:
     '''
     comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
     comments.extend(["    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
-                    "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"])
+                    "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n"])
     for x in range(len(mixServers)):
         comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + "m"+str(x)+"/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
 
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)
+    
+    prevBracket = 0
+    counter = 0
+    for line in nginxData:
+        if "end voting booth" in line:
+            break
+        counter = counter + 1
+    bracketIt = nginxData[counter:]
+    del nginxData[counter:]
+    comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
+                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress[3].split("://")[1].split(":")[0] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
+                "    location " + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
+    comments.extend(bracketIt)
+    nginxData.extend(comments)
+    nginxFile.seek(0)    
+    
     nginxFile.writelines(nginxData)
     nginxFile.close()
 
