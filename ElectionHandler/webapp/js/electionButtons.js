@@ -611,7 +611,7 @@ function electionButtons() {
 	        rows.removeClass('highlight');
 	        row.addClass('highlight');
 	        
-	        value = $(this).text().trim().split(" ")[0]; 
+	        value = $(this).children()["0"].innerHTML; 
 	        
 			$("#remove").prop('disabled', null);
 			
