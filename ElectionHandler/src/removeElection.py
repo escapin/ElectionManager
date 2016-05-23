@@ -140,10 +140,19 @@ for line in nginxData:
     counter = counter + 1
 lineEnd = []
 for x in range(len(lineStart)):
-    for y in [2,3,4,5]:
+    brackets = -1
+    for y in range(len(nginxData)-lineStart[x]):
+        if "{" in nginxData[lineStart[x]+y]:
+            if brackets == -1:
+                brackets = 0
+            else:
+                lineStart.remove(lineStart[x]+y)
+            brackets = brackets + 1
         if "}" in nginxData[lineStart[x]+y]:
+            brackets = brackets - 1
+        if brackets == 0:
             lineEnd.append(lineStart[x]+y)
-            break
+            break       
 for x in range(len(lineStart)):
     del nginxData[lineStart[-x-1]:lineEnd[-x-1]+1]
     if nginxData[lineStart[-x-1]] == "\n":
