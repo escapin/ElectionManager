@@ -822,7 +822,7 @@ function electionButtons() {
 	var currentTime = function(){
 		var currentDate = new Date();
 		var month = currentDate.getMonth()+1<10 ? "0"+(currentDate.getMonth()+1) : (currentDate.getMonth()+1);
-		var day = currentDate.getDate()+1<10 ? "0"+currentDate.getDate() : currentDate.getDate();
+		var day = currentDate.getDate()<10 ? "0"+currentDate.getDate() : currentDate.getDate();
 		var hours = currentDate.getHours();	
 		var dt = (hours>=12)?"PM":"AM";
 		hours = (hours%12==0)?12:(hours%12);
@@ -837,7 +837,7 @@ function electionButtons() {
 		var currentDate = new Date();
 		var endDate = new Date(currentDate.setTime(currentDate.getTime()+10*60000));
 		var month = endDate.getMonth()+1<10 ? "0"+(endDate.getMonth()+1) : (endDate.getMonth()+1);
-		var day = endDate.getDate()+1<10 ? "0"+endDate.getDate() : endDate.getDate();
+		var day = endDate.getDate()<10 ? "0"+endDate.getDate() : endDate.getDate();
 		var hours = endDate.getHours();
 		var dt = (hours>=12)?"PM":"AM";
 		hours = (hours%12==0)?12:(hours%12);
@@ -873,7 +873,7 @@ function electionButtons() {
 	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]+"Z");
 	    clientDate = new Date(clientDate.getTime()+clientDate.getTimezoneOffset()*60000*2);
 		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
-		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
+		var day = clientDate.getDate()<10 ? "0"+clientDate.getDate() : clientDate.getDate();
 		var hours = clientDate.getHours()<10 ? "0"+clientDate.getHours() : clientDate.getHours();
 		var mins = clientDate.getMinutes()<10 ? "0"+clientDate.getMinutes() : clientDate.getMinutes();
 
