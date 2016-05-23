@@ -11,7 +11,7 @@ function buildElectionTable(res) {
 	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]+"Z");
 	    // display 03 for March instead of 3 (and months below 10)
 		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
-		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
+		var day = clientDate.getDate()<10 ? "0"+clientDate.getDate() : clientDate.getDate();
 		
 		var hours = clientDate.getHours()	
 		var dt = (hours>=12)?"PM":"AM";
