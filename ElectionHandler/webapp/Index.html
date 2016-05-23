@@ -40,23 +40,23 @@
         <h3> 
             Click on the <em>entry</em> of the election you want to manage (if any):
 	</h3>
-		<div style="width: 90%; max-width: 580px;">
-			<table id="elections"></table>
+		<div style="overflow:auto; width:87%">
+			<table id="elections" style="min-width: 100%;"></table>
 		</div>
 			<form class="pure-form" action="">
 				<fieldset>
 					<div class="pure-g">
-						<div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
+						<div id="trackDescend" class="pure-u-1 pure-u-md-1-3" style="width: 87%;">
 							<input id='advance' type="button" class="pure-button pure-button-primary" value="Create Election"></input>
 							<input id='mock' type="button" class="pure-button pure-button-primary" value="Set up a Mock Election"></input>
 						</div>
-						<div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
+						<div class="pure-u-1 pure-u-md-1-3" style="width: 87%;">
 							<input id='close' type="button" class="pure-button pure-button-primary" value="Close Election"></input> 
 						    <input id='remove' type="button" class="pure-button pure-button-primary" value="Remove Election"></input>
 						</div>
 					</div>
 				</fieldset>
-				<div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
+				<div class="pure-u-1 pure-u-md-1-3" style="width: 60%;">
 						<input id='vote' type="button" class="pure-button pure-button-primary" value="Invite Voters"></input> 
 				</div>
 				<a id="help" href="#" class="stylish"><span id="buttontext">Help</span></a>
@@ -103,22 +103,30 @@
                         type="text" size="50" placeholder="election description">
                     </div>
                     <div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
-                    	<label id="dateStartLabel" for="s-date">
-                    	Starting time: 
-                    	<input type="text" id="s-date" placeholder="starting date" style="width: 26%">
-						</label>
-						<input id="s-time" name="spinner" placeholder="starting time" maxlength="8">
+                    	<div style="float: left; width: 15%; margin-top: 1.5em; margin-right: 0.5em;">
+                    		<label id="dateStartLabel" for="s-date">
+                    			Starting time:                    	
+							</label>
+						</div>
+						<div style="float: left;">						
+							<input type="text" id="s-date" placeholder="starting date" style="width: 50%">
+							<input id="s-time" name="spinner" placeholder="starting time" maxlength="8">
+						</div>
 						<!--<label id="cultENlabel" for="cultEN">
 							<input id="cultEN" type="radio" name="culture" value="en-EN">
 							AM/PM
 						</label>-->			
 					</div>
                     <div class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
-                    	<label id="dateEndLabel" for="s-date">
-                    	Ending time:&nbsp&nbsp 
-						<input type="text" id="e-date" placeholder="ending date" style="width: 26%">
-						</label>
-						<input id="e-time" name="spinner" placeholder="ending time" maxlength="8">
+                    	<div style="float: left; width: 15%; margin-top: 1.5em; margin-right: 0.5em;">
+                    		<label id="dateEndLabel" for="e-date">
+                    			Ending time:&nbsp&nbsp 
+                    		</label>
+                    	</div>
+                    	<div style="float: left;">
+							<input type="text" id="e-date" placeholder="ending date" style="width: 50%">
+							<input id="e-time" name="spinner" placeholder="ending time" maxlength="8">
+						</div>
 						<!--<label id="cultDElabel" for="cultDE">
 							<input id="cultDE" type="radio" name="culture" value="de-DE" checked>
 							24h
@@ -244,7 +252,7 @@
 	  counted. In this way, not even the voting booth needs to be trusted.<br> -->
           </p>  
           <p><b>Set up a Mock Election</b> creates a mock election with predetermined settings (such as title, question, list of choices, and so on), 
-	    which started 1 day ago and will end in 2 days. In this setting, some mock voters already casted their ballots.</p>
+	    which started <em>a day ago</em> and will end <em>in two days</em>. In this setting, some mock voters already casted their ballots.</p>
           <p><b>Close Election</b> closes the selected election. It requires password confirmation, if one was set.</p>   
           <p><b>Remove Election</b> removes the selected election. If the election result needs to be saved on the server, the election must be closed first.
 	    It requires password confirmation, if one was set.</p>

@@ -43,11 +43,11 @@ function buildElectionTable(res) {
 	var electionConf = JSON.parse(electionConfigRaw);	
 	var elections = electionConf.elections;
 	
-	var lastMix = "http://localhost:"+electionConf["nginx-port"];
+	var collectingServer = "http://localhost:"+electionConf["nginx-port"];
 	//don't use port 80 if it's not deployed
-	if(electionConf.deployment === true){
+	if(electionConf.deployment){
 		var sAddresses = JSON.parse(sAddressesRaw);
-		lastMix = sAddresses["server-address"].mix2;
+		collectingServer = sAddresses["server-address"].collectingserver;
 	}
 	 
 	document.getElementById("elections").innerHTML = "";
@@ -84,7 +84,7 @@ function buildElectionTable(res) {
   
   function getElectionStatus(eleID, callback) {
       // Detemine the status of the system: (not-yet) open/closed, 
-      // by quering the final mix server.
+      // by quering the collecting server.
       // Depending on the state, either the voting tab or the
       // verification tab will be opened.
       //
@@ -92,20 +92,14 @@ function buildElectionTable(res) {
       // checking if the final server has ready result.
       //
  	 var stat = 'what';
- 	 var url = lastMix+'/'+eleID+'/mix/03/status';
+ 	 var url = collectingServer+'/'+eleID+'/collectingServer/status';
       $.get(url)
        .fail(function () { 
           var stat = 'no response';
           callback(eleID, stat)
         })
        .done(function (result) {  // we have some response
-          var stat = 'pending';
-     	 if (result.status==='result ready'){
-         	 stat = 'closed';
-          }
-          else {
-         	 stat = 'open';
-          }
+          var stat = result.status;
           callback(eleID, stat)
         });
 
