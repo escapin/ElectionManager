@@ -145,8 +145,6 @@ for x in range(len(lineStart)):
         if "{" in nginxData[lineStart[x]+y]:
             if brackets == -1:
                 brackets = 0
-            else:
-                lineStart.remove(lineStart[x]+y)
             brackets = brackets + 1
         if "}" in nginxData[lineStart[x]+y]:
             brackets = brackets - 1
