@@ -462,7 +462,7 @@ if "localhost" not in serverAddress[0]:
     bracketIt = nginxData[counter:]
     del nginxData[counter:]
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
-                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name vb."+ serverAddress[3].split("://")[1] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
+                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress[2].split("://")[1] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
                 "    location " + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
@@ -476,11 +476,6 @@ else:
     prevBracket = 0
     lastBracket = 0
     counter = 0
-    #for line in nginxData:
-    #    if "}" in line:
-    #        prevBracket = lastBracket
-    #        lastBracket = counter
-    #    counter = counter + 1
     for line in nginxData:
         if "}" in line:
             prevBracket = counter
@@ -489,18 +484,7 @@ else:
         counter = counter + 1
     bracketIt = nginxData[prevBracket:]
     del nginxData[prevBracket:]
-    '''
-    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",     #old link
-    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + "vb/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
-                "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
-                "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
-    for x in range(len(mixServers)):
-        if x < 10:
-            comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/0"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])    
-        else:
-            comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
-    '''
-    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+    comments = []
     comments.extend(["    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
                     "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n"])
     for x in range(len(mixServers)):
@@ -519,7 +503,7 @@ else:
     bracketIt = nginxData[counter:]
     del nginxData[counter:]
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
-                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress[3].split("://")[1].split(":")[0] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
+                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress[2].split("://")[1].split(":")[0] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
                 "    location " + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
