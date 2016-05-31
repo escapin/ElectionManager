@@ -127,9 +127,9 @@ def usePorts():
             if openPort in usingPorts:
                 continue
             newPorts.append(openPort)
-            if len(newPorts) >= 2+len(mixServers):
+            if len(newPorts) >= 2+numMix:
                 break
-        if len(newPorts) < 2+len(mixServers):
+        if len(newPorts) < 2+numMix:
             sys.exit("Not enough ports available.")
         jsonFile.close()
     except IOError:
@@ -141,26 +141,30 @@ def getsAddress():
     try:
         jsonFile = open(electionConfig, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        jsonAddress = {}
         if not deployment:
-            for x in range(4+len(mixServers)):
-                sAddress.append("http://localhost:"+str(jsonData["nginx-port"]))
-            sAddress.append("http://localhost:"+str(jsonData["nginx-port"])+"/auth")
+            for x in range(numMix):
+                jsonAddress["mix"+str(x)] = "http://localhost:"+str(nginxPort)+"/m"+str(x)+"/"+str(ELS)+"/"
+            jsonAddress["collectingserver"] = "http://localhost:"+str(nginxPort)+"/cs/"+str(ELS)+"/"
+            jsonAddress["bulletinboard"] = "http://localhost:"+str(nginxPort)+"/bb/"+str(ELS)+"/"
+            jsonAddress["votingbooth"] = "http://localhost:"+str(nginxPort)+"/"+str(ELS)+"/"
+            jsonAddress["authbooth"] = "http://localhost:"+str(nginxPort)+"/auth/"
             jsonFile.close()
         else:
             jsonFile.close()
             jsonFile = open(serverAddr, 'r')
             jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
             addresses = jsonData["server-address"]
-            sAddress.append(addresses["collectingserver"])
-            sAddress.append(addresses["bulletinboard"])
-            sAddress.append(addresses["votingbooth"])
-            sAddress.append(addresses["authbooth"])
-            for x in range(len(mixServers)):
-                sAddress.append(addresses["mix"+str(x)])
+            jsonAddress["collectingserver"] = addresses["collectingserver"]+"/"+str(ELS)+"/"
+            jsonAddress["bulletinboard"] = addresses["bulletinboard"]+"/"+str(ELS)+"/"
+            jsonAddress["votingbooth"] = addresses["votingbooth"]+"/"+str(ELS)+"/"
+            jsonAddress["authbooth"] = addresses["authbooth"]
+            for x in range(numMix):
+                jsonAddress["mix"+str(x)] = addresses["mix"+str(x)]+"/"+str(ELS)+"/"
         jsonFile.close()
     except IOError:
         sys.exit("serverAddresses.json missing or corrupt")
-    return sAddress
+    return jsonAddress
 
 def getID(num):
     manifestHash = hashManifest()
@@ -206,6 +210,7 @@ try:
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
     votingTime = jsonData["electionDurationInHours"]*60*60    #hours to seconds
     mockVoters = jsonData["numberOfMockVoters"]
+    numMix = jsonData["numberOfMixServers"]
     nginxPort = jsonData["nginx-port"]
     if jsonData["deployment"] is True:
         serverAddr = rootDirProject + "/deployment/serverAddresses.json"
@@ -248,7 +253,6 @@ if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
     password = electionArgs['password']
     mockElection = False
     
-    
 ports = json.loads(sys.argv[1])['usedPorts']
 ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
 increment = json.loads(sys.argv[1])['electionsCreated']
@@ -261,7 +265,7 @@ serverAddress = getsAddress()
 
 #mix server config mixFiles
 mixConf = []
-for x in range(len(mixServers)):
+for x in range(numMix):
     if x < 10:
         mixConf.append("/templates/config_mix0" + str(x) + ".json")
     else:
@@ -273,14 +277,14 @@ keyGeneratorMix_file="genKeys4mixServer.js"
 keyGeneratorCS_file="genKeys4collectingServer.js"
 tools_path = sElectDir + "/tools"
 
-keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(len(mixServers))]).splitlines()
+keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix)]).splitlines()
 
 #write new keys to manifest and config files
 jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["encryptionKey"], "encryption_key")
 jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["verificationKey"], "verification_key")
 jwrite(sElectDir + collectingConf, "signing_key", json.loads(keys[len(keys)-1])["signingKey"])
 jwrite(sElectDir + collectingConf, "decryption_key", json.loads(keys[len(keys)-1])["decryptionKey"])
-for x in range(len(mixServers)):
+for x in range(numMix):
     jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["encryptionKey"], x, "encryption_key")
     jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["verificationKey"], x, "verification_key")
     jwrite(sElectDir + mixConf[x], "encryption_key", json.loads(keys[x])["encryptionKey"])
@@ -298,27 +302,15 @@ jwrite(sElectDir + manifest, "question", elecQuestion)
 jwrite(sElectDir + manifest, "choices", eleChoices)  
 jwrite(sElectDir + manifest, "publishListOfVoters", publish)
 
-if "localhost" not in serverAddress[0]:
-    jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + str(ELS) + "/", "URI")    #str(ports[0])
-    jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + str(ELS) + "/", 0, "URI")   #str(ports[1])
-    for x in range(len(mixServers)):
-        jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + str(ELS) + "/", x, "URI")       #str(ports[x+2])   
-else:
-    jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress[0] + "/" + "cs/" + str(ELS) + "/", "URI")    #str(ports[0])
-    jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress[1] + "/" + "bb/" + str(ELS) + "/", 0, "URI")   #str(ports[1])
-    for x in range(len(mixServers)):
-        jwriteAdv(sElectDir + manifest, "mixServers", serverAddress[x+4] + "/" + "m"+str(x)+"/" + str(ELS) + "/", x, "URI")       #str(ports[x+2])
+jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress["collectingserver"], "URI")
+jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress["bulletinboard"], 0, "URI")
+for x in range(numMix):
+    jwriteAdv(sElectDir + manifest, "mixServers", serverAddress["mix"+str(x)], x, "URI")
 
 #get new keys
-try:
-    jsonFile = open(sElectDir + manifest, 'r')
-    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-    mixServers = jsonData["mixServers"]
-    mixServerEncKey = []
-    for x in range(len(mixServers)):
-        mixServerEncKey.append(mixServers[x]["encryption_key"])
-except IOError:
-    sys.exit("sElect/_sElectConfigFiles_/ElectionManifest.json missing or corrupt")
+mixServerEncKey = []
+for x in range(numMix):
+    mixServerEncKey.append(mixServers[x]["encryption_key"])
     
 #get ID after modifying Manifest
 iDlength = 5
@@ -338,12 +330,12 @@ while(iDlength < 40):
 jwrite(passList, electionID, password)
 
 #modify Server ports
-for x in range(len(mixServers)):     
+for x in range(numMix):     
     jwrite(dstroot + mixConf[x], "port", ports[x+2])
 jwrite(dstroot + collectingConf, "port", ports[0])
 jwrite(dstroot + bulletinConf, "port", ports[1])
 #jwrite(dstroot + votingConf, "port", ports[5])        #not using the VotingBooth server, static path instead
-jwrite(dstroot + votingConf, "authenticate", serverAddress[3])
+jwrite(dstroot + votingConf, "authenticate", serverAddress["votingbooth"])
 jwrite(dstroot + collectingConf, "serverAdminPassword", password)
 
 #change user randomness if not a mock election
@@ -371,25 +363,24 @@ if mockElection:
 else:
     col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
 mix = []
-for x in range(len(mixServers)):
+for x in range(numMix):
     if x < 10:
         mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/0"+str(x))))
     else:
         mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/"+str(x))))
 bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-#newPIDs = [vot.pid, col.pid, m1.pid, m2.pid, m3.pid, bb.pid]
 newPIDs = [col.pid, bb.pid]
-for x in range(len(mixServers)):
+for x in range(numMix):
     newPIDs.append(mix[x].pid)
 
 #add PIDs to config
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": len(mixServers), "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
+newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": numMix, "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
 
 #modify nginx File
-if "localhost" not in serverAddress[0]:
+if "localhost" not in serverAddress["collectingserver"]:
     nginxFile = open(nginxConf, 'r+')
     nginxData = nginxFile.readlines()
     prevBracket = 0
@@ -422,7 +413,7 @@ if "localhost" not in serverAddress[0]:
     nginxData.extend(comments)
     nginxFile.seek(0)
 
-    for x in range(len(mixServers)):
+    for x in range(numMix):
         prevBracket = 0
         counter = 0
         for line in nginxData:
@@ -462,7 +453,7 @@ if "localhost" not in serverAddress[0]:
     bracketIt = nginxData[counter:]
     del nginxData[counter:]
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
-                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name vb."+ serverAddress[3].split("://")[1] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
+                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress["votingbooth"].split("://")[1] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
                 "    location " + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
@@ -476,11 +467,6 @@ else:
     prevBracket = 0
     lastBracket = 0
     counter = 0
-    #for line in nginxData:
-    #    if "}" in line:
-    #        prevBracket = lastBracket
-    #        lastBracket = counter
-    #    counter = counter + 1
     for line in nginxData:
         if "}" in line:
             prevBracket = counter
@@ -489,21 +475,10 @@ else:
         counter = counter + 1
     bracketIt = nginxData[prevBracket:]
     del nginxData[prevBracket:]
-    '''
-    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/votingBooth {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",     #old link
-    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + "vb/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n",
-                "    # Collecting server " + electionID + " \n", "    location " + "/" + electionID + "/collectingServer/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
-                "    # Bulletin board " + electionID + " \n", "    location " + "/" + electionID + "/bulletinBoard/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n"]
-    for x in range(len(mixServers)):
-        if x < 10:
-            comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/0"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])    
-        else:
-            comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + electionID + "/mix/"+str(x)+"/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
-    '''
-    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + electionID + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+    comments = []
     comments.extend(["    # Collecting server " + electionID + " \n", "    location " + "/" + "cs/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n",
                     "    # Bulletin board " + electionID + " \n", "    location " + "/" + "bb/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n"])
-    for x in range(len(mixServers)):
+    for x in range(numMix):
         comments.extend(["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + "m"+str(x)+"/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"])
 
     comments.extend(bracketIt)
@@ -519,7 +494,7 @@ else:
     bracketIt = nginxData[counter:]
     del nginxData[counter:]
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
-                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress[3].split("://")[1].split(":")[0] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
+                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress["votingbooth"].split("://")[1].split(":")[0] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
                 "    location " + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
