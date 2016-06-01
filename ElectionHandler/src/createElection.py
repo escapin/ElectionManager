@@ -310,7 +310,7 @@ for x in range(numMix):
 #get new keys
 mixServerEncKey = []
 for x in range(numMix):
-    mixServerEncKey.append(mixServers[x]["encryption_key"])
+    mixServerEncKey.append(json.loads(keys[x])["encryptionKey"])
     
 #get ID after modifying Manifest
 iDlength = 5
@@ -380,7 +380,7 @@ subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElec
 
 
 #modify nginx File
-if "localhost" not in serverAddress["collectingserver"]:
+if "http://localhost" not in serverAddress["collectingserver"]:
     nginxFile = open(nginxConf, 'r+')
     nginxData = nginxFile.readlines()
     prevBracket = 0
