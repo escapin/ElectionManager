@@ -79,34 +79,43 @@ function electionButtons() {
     		 });
     	}
 	}
-
 	
 	function closeElection(pass) {
 		if(value == null){
     		alerting("no election selected");
     	}
     	else{
+    		closingID = value;
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		console.log(protocol+"admin:"+pass+"@"+collectingServer+"/"+ELS+"/admin/close");
-    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/"+ELS+"/admin/close")
-    		 .done(function(data){
-    			enableButtons();
-    			$('#processing').fadeOut(150);
-    			if(!data.ok){
-    				alerting("election already closed", false);
-    			}
-    		  })
-    		 .fail(function(data){
-    			enableButtons();
-    			$('#processing').hide();
-    			if(data.status===502){
-    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+ELS+"/", false);
-    			}
-    			else if(data.status===401){
-    				alerting("wrong password", false);
-    			}
-    		 });
+    		$.ajax({type: "GET", 
+    				url: protocol+collectingServer+"/"+ELS+"/admin/close",
+    				dataType: 'json',
+    				headers: {"Authorization": "Basic " + btoa("admin" + ":" + pass)},
+    				//beforeSend: function (xhr){ 
+    			    //    xhr.setRequestHeader('Authorization', "Basic " + btoa("admin" + ":" + pass)); 
+    			    //},
+    				success: function(data){
+    	     			enableButtons();
+    	     			$('#processing').fadeOut(150);
+    	     			if(!data.ok){
+    	     				alerting("election already closed", false);
+    	     			}
+    	     			else{
+    	     				showVotingState(closingID);
+    	     			}
+    	     		  },
+    	     		error: function(data){
+    	    			enableButtons();
+    	    			$('#processing').hide();
+    	    			if(data.status===502){
+    	    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+ELS+"/", false);
+    	    			}
+    	    			else if(data.status===401){
+    	    				alerting("wrong password", false);
+    	    			}
+    	     		}
+    	     	});
     		enableButtons();
     	}
 	}
@@ -628,7 +637,7 @@ function electionButtons() {
 			showVotingState(value);
 		    votingStatus = window.setInterval(function() {
 		    	showVotingState(value);
-		     }, 1000);
+		     }, 3000);
 		    
 	        
 	    });
