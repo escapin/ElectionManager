@@ -120,7 +120,7 @@ function buildElectionTable(res) {
      		 document.getElementById(eleID).innerHTML = stat;
      	 });
  	 }
-  }, 1000);
+  }, 3000);
   
   $('#welcome').show();
   
