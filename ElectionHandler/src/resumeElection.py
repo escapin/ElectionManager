@@ -94,5 +94,5 @@ for x in range (len(elecs)):
     for x in range(numMix):
         newPIDs.append(mix[x].pid)
         
-    jwriteAdv(electionConfig, "elections", newPIDs, 0, "processIDs")
+    jwriteAdv(electionConfig, "elections", newPIDs, x, "processIDs")
 
