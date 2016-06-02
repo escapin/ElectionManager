@@ -77,10 +77,10 @@ for x in range (len(elecs)):
     else:
         col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
     mix = []
-    for x in range(numMix):
-        numMixStr = str(x)
-        if x < 10:
-            numMixStr = "0"+str(x)
+    for z in range(numMix):
+        numMixStr = str(z)
+        if z < 10:
+            numMixStr = "0"+str(z)
         if os.path.exists(dstroot+"/mix/"+numMixStr+"/_data_/ballots"+numMixStr+"_output.msg"):
             mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/"+numMixStr)))
         else:
@@ -91,8 +91,8 @@ for x in range (len(elecs)):
         bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
     
     newPIDs = [col.pid, bb.pid]
-    for x in range(numMix):
-        newPIDs.append(mix[x].pid)
-        
+    for z in range(numMix):
+        newPIDs.append(mix[z].pid)
+    print("this is "+str(x))
     jwriteAdv(electionConfig, "elections", newPIDs, x, "processIDs")
 
