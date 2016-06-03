@@ -99,7 +99,7 @@ function buildElectionTable(res) {
       $.get(url)
        .fail(function () { 
           //var stat = 'no response';
-    	  var stat = 'waiting';
+    	  var stat = 'waiting...';
           callback(eleID, ELS, stat)
         })
        .done(function (result) {  // we have some response
