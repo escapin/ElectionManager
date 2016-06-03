@@ -102,6 +102,7 @@ elecs = jsonData["elections"]
 jsonFile.close()
 
 
+oldPort = -1
 for x in range (len(elecs)):
     
     usedPorts = elecs[x]["used-ports"]
@@ -135,7 +136,6 @@ for x in range (len(elecs)):
             mixConf.append("/templates/config_mix" + str(x) + ".json")
             
     
-    oldPort = -1
     if serverByIndex == 0:
         jsonFile = open(dstroot + collectingConf, 'r')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
