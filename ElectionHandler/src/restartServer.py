@@ -72,8 +72,9 @@ def jRemElec(src, value):
                 break
         jsonData["elections"] = elecs
         portsInUse = jsonData["usedPorts"]
-        for x in range(len(remPorts)):
-            portsInUse.remove(remPorts[x])
+        #don't remove the ports here, one is blocked while the others remain unchanged
+        #for x in range(len(remPorts)):
+        #    portsInUse.remove(remPorts[x])
         jsonFile.seek(0)
     except IOError:
         print("file missing")
@@ -93,7 +94,7 @@ electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 
 errPort = int(sys.argv[1])
 newPort = int(sys.argv[2])
-
+print("Attempting to replace port " + str(errPort) + " with " + str(newPort))
 #get elections
 jsonFile = open(electionConfig, 'r')
 jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
@@ -107,17 +108,21 @@ for x in range (len(elecs)):
     if errPort not in usedPorts:
         continue
     
-    jRemElec(electionConfig, electionID)
-    print("Port being searched: " + str(errPort) + " in: "+ str(usedPorts))
+    election = elecs[x]
+    
+    #print("Port being searched: " + str(errPort) + " in: "+ str(usedPorts))
     electionID = elecs[x]["electionID"]
     startingTime = elecs[x]["startTime"]    
     tStamp = startingTime.replace("-", "").replace(":", "").split()
     dstroot = os.path.join(rootDirProject, "elections/" + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
     
+    jRemElec(electionConfig, electionID)
+
+    print("Reconfigurating ports for election " + str(electionID))
     serverByIndex = usedPorts.index(errPort)
-    newPIDs = elecs[x]["processIDs"]
+    newPIDs = election["processIDs"]
     
-    numMix = elecs[x]["mixServers"]
+    numMix = election["mixServers"]
     
     # sElect (partial) mixFiles path
     collectingConf = "/CollectingServer/config.json"
@@ -136,6 +141,8 @@ for x in range (len(elecs)):
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         oldPort = jsonData["port"]
         jsonFile.close()
+        if oldPort != errPort:
+            sys.exit("why the **** are these ports different: " + str(oldPort) + " and " + str(errPort))
         jwrite(dstroot + collectingConf, "port", newPort)
         if os.path.exists(dstroot+"/CollectingServer/_data_/partialResult.msg"):
             proc = subprocess.Popen(["node", "collectingServer.js", "--serveResult"], cwd=(dstroot+"/CollectingServer"))
@@ -146,6 +153,8 @@ for x in range (len(elecs)):
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         oldPort = jsonData["port"]
         jsonFile.close()
+        if oldPort != errPort:
+            sys.exit("why the **** are these ports different: " + str(oldPort) + " and " + str(errPort))
         jwrite(dstroot + bulletinConf, "port", newPort)
         if os.path.exists(dstroot+"/BulletinBoard/_data_/resultMIX"+str(numMix)+".msg"):
             proc = subprocess.Popen(["node", "bb.js", "--serveResult"], cwd=(dstroot+"/BulletinBoard"))
@@ -158,6 +167,8 @@ for x in range (len(elecs)):
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         oldPort = jsonData["port"]
         jsonFile.close()
+        if oldPort != errPort:
+            sys.exit("why the **** are these ports different: " + str(oldPort) + " and " + str(errPort))
         jwrite(dstroot + mixConf[mixServer], "port", newPort)
         if mixServer < 10:
             numMixStr = "0"+str(mixServer)
@@ -166,17 +177,16 @@ for x in range (len(elecs)):
         else:
             proc = subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/"+numMixStr))
     
-    print("Process ID: " + str(proc.pid))
     newPIDs[serverByIndex] = proc.pid
     usedPorts[serverByIndex] = newPort
-    print("Final ports: " + str(usedPorts))
-    print("Final ports: " + str(usedPorts))
+    #print("Final ports: " + str(usedPorts))
+    #print("Final PIDs: " + str(newPIDs))
     #add PIDs to config    
     
-    elecs[x]["processIDs"] = newPIDs
-    elecs[x]["used-ports"] = usedPorts
+    election["processIDs"] = newPIDs
+    election["used-ports"] = usedPorts
 
-    jAddList(electionConfig, "elections", elecs[x])
+    jAddList(electionConfig, "elections", election)
     
     #modify nginx File
     nginxFile = open(nginxConf, 'r+')
@@ -194,8 +204,11 @@ for x in range (len(elecs)):
     #refresh nginx
     subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
     subprocess.call([rootDirProject + "/ElectionHandler/refreshConfig.sh"], cwd=(rootDirProject + "/ElectionHandler"))
+    
+    print("...done.")
 
-
+if oldPort < 0:
+    sys.exit("Port " + str(errPort) + " not found in handlerConfigFile.")
 
 
         
