@@ -134,7 +134,10 @@ app.post('/election', function(req, res) {
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
 				serverQueue.push(errorPort);
 			}
-		    res.end(data);
+		        else{ // an error in a sElect server occurred
+			    res.end("An error occurred while spawning a sElect server. Try again!");
+			    //res.end(data); //only for debugging
+			}
 		});
 
 		session.on('exit', function (code) {
@@ -142,8 +145,9 @@ app.post('/election', function(req, res) {
 		    if(code === 0){
 		    	res.end("created");
 		    }
-		    else{
-		    	res.end("error code" + code)
+		    else{ // an error in createElection.py occurred
+		    	res.end("An error occurred while creating an election. Try again!");
+			//res.end("error code" + code) //only for debugging
 		    }
 		});
 	}
@@ -196,7 +200,10 @@ app.post('/election', function(req, res) {
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
 				serverQueue.push(errorPort);
 			}
-		    res.end(data);
+		        else{ // an error in a sElect server occurred
+			    res.end("An error occurred while spawning a sElect server. Try again!");
+			    //res.end(data); //only for debugging
+			}
 		});
 
 		session.on('exit', function (code) {
@@ -204,8 +211,9 @@ app.post('/election', function(req, res) {
 		    if(code === 0){
 		    	res.end("created");
 		    }
-		    else{
-		    	res.end("error code" + code)
+		    else{ // an error in createElection.py occurred
+		    	res.end("An error occurred while creating an election: error code " + code + ". Try again!");
+			//res.end("error code" + code) //only for debugging
 		    }
 		});
 	}
