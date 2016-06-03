@@ -37,6 +37,12 @@ oldSession.stdout.on('data', function (data) {
 	else if(String(data).indexOf("TLS")>-1){
 		console.log('resume mix stdout: ' + data);
 	}
+	else if(String(data).indexOf("Resuming elections")>-1){
+		console.log('' + data);
+	}
+	else if(String(data).indexOf("...done.")>-1){
+		console.log('' + data);
+	}
 });
 oldSession.stderr.on('data', function (data) {
     console.log('resume stderr: ' + data);
@@ -278,21 +284,30 @@ function respawnServer(errPort){
 	//start new server with different port
     var reSession = spawn('python', ['src/restartServer.py', errPort, newPort]);
     reSession.stdout.on('data', function (data) {
-    	console.log('reSpawn stdout: ' + data);
+    	//console.log('reSpawn stdout: ' + data);
 		if(String(data).indexOf("OTP")>-1){
 			console.log('reSpawn stdout: ' + data);
 		}
 		else if(String(data).indexOf("TLS")>-1){
-			console.log('mix stdout: ' + data);
+			console.log('reSpawn mix stdout: ' + data);
+		}
+		else if(String(data).indexOf("Attempting to replace")>-1){
+			console.log('' + data);
+		}
+		else if(String(data).indexOf("Reconfigurating")>-1){
+			console.log('' + data);
+		}
+		else if(String(data).indexOf("...done.")>-1){
+			console.log('' + data);
 		}
 	});
     reSession.stderr.on('data', function (data) {
+    	console.log('reSpawn stderr: ' + data);
 		if(String(data).indexOf("EADDRINUSE")>-1){
 			var errorPort = String(data).split(":::");
 			errorPort = parseInt(errorPort[1].split("\n")[0]);
 			respawnServer(errorPort);
 		}
-	    console.log('reSpawn stderr: ' + data);
 	});
 }
 
