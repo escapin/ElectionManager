@@ -1,11 +1,12 @@
 #!/bin/bash
 
-echo \* Removing all nginx processes...
+echo
+echo Remove all nginx processes \(requires *superuser* privileges\)
 sudo killall nginx
-echo done!
 
 # start nginx redirecting the traffic to the port 8433
 ./startNginx.sh
+echo
 
 # Run the Election Manager
 cd ..

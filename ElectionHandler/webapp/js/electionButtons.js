@@ -13,6 +13,7 @@ function electionButtons() {
     var rows;
     var row;
     var value;
+    var ELS
 	var task;
     
 	var elecType = "none";
@@ -78,33 +79,43 @@ function electionButtons() {
     		 });
     	}
 	}
-
 	
 	function closeElection(pass) {
 		if(value == null){
     		alerting("no election selected");
     	}
     	else{
+    		closingID = value;
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/"+value+"/collectingServer/admin/close")
-    		 .done(function(data){
-    			enableButtons();
-    			$('#processing').fadeOut(150);
-    			if(!data.ok){
-    				alerting("election already closed", false);
-    			}
-    		  })
-    		 .fail(function(data){
-    			enableButtons();
-    			$('#processing').hide();
-    			if(data.status===502){
-    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+value+"/collectingServer", false);
-    			}
-    			else if(data.status===401){
-    				alerting("wrong password", false);
-    			}
-    		 });
+    		$.ajax({type: "GET", 
+    				url: protocol+collectingServer+"/"+ELS+"/admin/close",
+    				dataType: 'json',
+    				headers: {"Authorization": "Basic " + btoa("admin" + ":" + pass)},
+    				//beforeSend: function (xhr){ 
+    			    //    xhr.setRequestHeader('Authorization', "Basic " + btoa("admin" + ":" + pass)); 
+    			    //},
+    				success: function(data){
+    	     			enableButtons();
+    	     			$('#processing').fadeOut(150);
+    	     			if(!data.ok){
+    	     				alerting("election already closed", false);
+    	     			}
+    	     			else{
+    	     				showVotingState(closingID);
+    	     			}
+    	     		  },
+    	     		error: function(data){
+    	    			enableButtons();
+    	    			$('#processing').hide();
+    	    			if(data.status===502){
+    	    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+ELS+"/", false);
+    	    			}
+    	    			else if(data.status===401){
+    	    				alerting("wrong password", false);
+    	    			}
+    	     		}
+    	     	});
     		enableButtons();
     	}
 	}
@@ -322,17 +333,18 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-    		//window.location.href = votingBooth+"/"+value+"/votingBooth/";
     		getElectionStatus(value, function (eleID, stat){
     			if(stat === "open"){
     				document.getElementById("inviteVoters").style.visibility = "visible";
-    	    		document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		//document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
+    	    		//document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		document.getElementById("votePage").href = votingBooth+":"+ELS+"/vb/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth+":"+ELS+"/vb/";
     			}
     			else if(stat === "closed"){
     				document.getElementById("checkResult").style.visibility = "visible";
-    	    		document.getElementById("resultPage").href = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		document.getElementById("resultPage").href = votingBooth+":"+ELS+"/vb/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+":"+ELS+"/vb/";
     			}
     			else{
     				alerting("Server is not responding");
@@ -347,7 +359,6 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-			//window.location.href = collectingServer+"/"+value+"/collectingServer/admin/close";
 			document.getElementById("electionClose").style.visibility = "visible";
 		}
 	});
@@ -458,11 +469,7 @@ function electionButtons() {
 		document.getElementById("electionDelete").style.visibility = "hidden";
 		verifylayer("remove");
 	});
-	
-	this.winOpen = function(){
-        window.open(collectingServer+"/"+value+"/collectingServer/admin/close");
-    	document.getElementById("electionClose").style.visibility = "hidden";
-    }
+
 	
     ////////////////////////////////////////////////////////////////
     /// Other Handlers
@@ -581,9 +588,8 @@ function electionButtons() {
 		 elections = electionConf.elections;
 	     
 		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
-		 votingBooth = "http://localhost:"+electionConf["nginx-port"];
-		 collectingServer = "http://localhost:"+electionConf["nginx-port"];
-		 lastMix = "http://localhost:"+electionConf["nginx-port"];
+		 votingBooth = "http://localhost";
+		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 		
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
@@ -602,9 +608,10 @@ function electionButtons() {
 			protocol = '';
 			collectingServer = tmp[0]
 		}
+		
 			/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');
-
+	    
 	    rows.on('click', function(e) {
 	        row = $(this);
 	        
@@ -613,6 +620,15 @@ function electionButtons() {
 	        
 	        value = $(this).children()["0"].innerHTML; 
 	        
+	        // read the time stamp for the election address
+	        var i = 0;
+    		for(i = 0; i < elections.length ; i++) {
+    			if(elections[i].electionID == value){
+    				break;
+    			}
+    		}
+	        ELS = elections[i]["ELS"];
+
 			$("#remove").prop('disabled', null);
 			
 			// Show Invite Voters or Check Result button
@@ -621,7 +637,7 @@ function electionButtons() {
 			showVotingState(value);
 		    votingStatus = window.setInterval(function() {
 		    	showVotingState(value);
-		     }, 1000);
+		     }, 3000);
 		    
 	        
 	    });
@@ -893,8 +909,6 @@ function electionButtons() {
 				$("#close").prop('disabled', null);
 	    		document.getElementById("vote").value = "Invite Voters to Vote";
 	    		document.getElementById("vote").style.visibility = "visible";
-			//console.log( $("#removeMsg").html() );
-			//console.log( $("#removeOpen").html() );
 			// inserting the hidden message with id='removeOpen' inside the HTML tag with id='removeMsg'
 			$("#removeMsg").html( $("#removeOpen").html() );
 			}
@@ -920,7 +934,7 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = protocol + collectingServer+'/'+eleID+'/collectingServer/status';
+	 	 var url = protocol + collectingServer+'/'+ELS+'/status';
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';
@@ -930,8 +944,6 @@ function electionButtons() {
 	            var stat = result.status;
 	            callback(eleID, stat)
 	          });
-
-
-	  }
+	}
 	
 }

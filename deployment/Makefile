@@ -10,8 +10,7 @@ nginxFiles:
 
 updateConfig:
 	python configNginx.py
-	python deployConfig.py
-
+	python configDeployment.py
 
 depclean: 
 	-rm -rf nginx_config
