@@ -443,7 +443,7 @@ if "http://localhost" not in serverAddress["collectingserver"]:
                 "    error_log " + nginxLog +"/error.log;\n", "\n", 
                 "    server_name "+ serverAddress["votingbooth"].split("://")[1].split("/")[0] + ";\n", "\n",
                 "    ssl_certificate /home/select/ElectionManager/deployment/cert/subdomains.select.chained.crt;\n",
-                "    ssl_certificate_key /home/select/ElectionManager/deployment/nginx_config/log/../../cert/subdomains.select.key;\n",
+                "    ssl_certificate_key /home/select/ElectionManager/deployment/cert/subdomains.select.unencrypted.key;\n",
                 "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                 "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                 "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
