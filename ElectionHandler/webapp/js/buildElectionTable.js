@@ -98,7 +98,8 @@ function buildElectionTable(res) {
  	 var url = collectingServer+'/'+ELS+'/status';
       $.get(url)
        .fail(function () { 
-          var stat = 'no response';
+          //var stat = 'no response';
+    	  var stat = 'waiting';
           callback(eleID, ELS, stat)
         })
        .done(function (result) {  // we have some response
