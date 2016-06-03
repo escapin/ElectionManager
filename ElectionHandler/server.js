@@ -29,23 +29,26 @@ mkdirp.sync(DATA_DIR);
 var numMix = 0;
 
 /**Resume previous elections **/
+ERRLOG_FILE = DATA_DIR + '/err.log';
+
 var oldSession = spawn('python', ['src/resumeElection.py']);
 oldSession.stdout.on('data', function (data) {
 	if(String(data).indexOf("OTP")>-1){
-		console.log('resume stdout: ' + data);
+		var time =  new Date();
+		console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 	}
 	else if(String(data).indexOf("TLS")>-1){
-		console.log('resume mix stdout: ' + data);
+		var time =  new Date();
+		console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 	}
 	else if(String(data).indexOf("Resuming elections")>-1){
 		console.log('' + data);
 	}
-	else if(String(data).indexOf("...done.")>-1){
-		console.log('' + data);
-	}
 });
 oldSession.stderr.on('data', function (data) {
-    console.log('resume stderr: ' + data);
+	//TODO: log the error in ERRLOG_FILE
+	//fs.writeFile(ERRLOG_FILE, data, {encoding:'utf8'});
+	console.log('resume stderr: ' + data);
 	if(String(data).indexOf("EADDRINUSE")>-1){
 		var errorPort = String(data).split(":::");
 		errorPort = parseInt(errorPort[1].split("\n")[0]);
@@ -115,10 +118,12 @@ app.post('/election', function(req, res) {
 		session = spawn('python', ['src/createElection.py', ports, parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
-				console.log('complete stdout: ' + data);
+				var time =  new Date();
+				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 			}
 			else if(String(data).indexOf("TLS")>-1){
-				console.log('complete mix stdout: ' + data);
+				var time =  new Date();
+				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
 		});
 		session.stderr.on('data', function (data) {
@@ -175,10 +180,12 @@ app.post('/election', function(req, res) {
 	    session = spawn('python', ['src/createElection.py', ports]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
-				console.log('simple stdout: ' + data);
+				var time =  new Date();
+				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 			}
 			else if(String(data).indexOf("TLS")>-1){
-				console.log('simple mix stdout: ' + data);
+				var time =  new Date();
+				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
 		});
 		session.stderr.on('data', function (data) {
@@ -284,13 +291,15 @@ function respawnServer(errPort){
 	//start new server with different port
     var reSession = spawn('python', ['src/restartServer.py', errPort, newPort]);
     reSession.stdout.on('data', function (data) {
-    	//console.log('reSpawn stdout: ' + data);
-		if(String(data).indexOf("OTP")>-1){
-			console.log('reSpawn stdout: ' + data);
-		}
-		else if(String(data).indexOf("TLS")>-1){
-			console.log('reSpawn mix stdout: ' + data);
-		}
+    	//console.log('reSpawn STDOUT:\n\t' + data);
+    	if(String(data).indexOf("OTP")>-1){
+    		var time =  new Date();
+    		console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
+    	}
+    	else if(String(data).indexOf("TLS")>-1){
+    		var time =  new Date();
+    		console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
+    	}
 		else if(String(data).indexOf("Attempting to replace")>-1){
 			console.log('' + data);
 		}
