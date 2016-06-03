@@ -438,7 +438,7 @@ if "http://localhost" not in serverAddress["collectingserver"]:
     bracketIt = nginxData[counter:]
     del nginxData[counter:]
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", 
-                "    listen " + str(ELS) + "ssl;\n", "\n", 
+                "    listen " + str(ELS) + " ssl;\n", "\n", 
                 "    access_log " + nginxLog +"/access.log;\n", 
                 "    error_log " + nginxLog +"/error.log;\n", "\n", 
                 "    server_name "+ serverAddress["votingbooth"].split("://")[1] +";\n", "\n",
