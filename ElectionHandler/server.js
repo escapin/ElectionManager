@@ -6,6 +6,7 @@ var fs = require('fs');
 var http = require('http');
 var mkdirp = require('mkdirp');
 var net = require('net');
+var async = require('async');
 
 //var https = require('https');
 //var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
@@ -52,7 +53,7 @@ oldSession.stderr.on('data', function (data) {
 	if(String(data).indexOf("EADDRINUSE")>-1){
 		var errorPort = String(data).split(":::");
 		errorPort = parseInt(errorPort[1].split("\n")[0]);
-		respawnServer(errorPort);
+		serverQueue.push(errorPort);
 	}
 });
 
@@ -131,7 +132,7 @@ app.post('/election', function(req, res) {
 			if(String(data).indexOf("EADDRINUSE")>-1){
 				var errorPort = String(data).split(":::");
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
-				respawnServer(errorPort);
+				serverQueue.push(errorPort);
 			}
 		    res.end(data);
 		});
@@ -193,7 +194,7 @@ app.post('/election', function(req, res) {
 			if(String(data).indexOf("EADDRINUSE")>-1){
 				var errorPort = String(data).split(":::");
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
-				respawnServer(errorPort);
+				serverQueue.push(errorPort);
 			}
 		    res.end(data);
 		});
@@ -263,8 +264,8 @@ var portInUse = function(port){
 	return false;
 };
 
-
-function respawnServer(errPort){
+//respawn function if a port is closed (EADDRINUSE error)
+function respawnServer(errPort, done){
 	console.log("\nPort " + errPort + " in use, attempting to start server on different port:")
 
 	// get available ports and mark them as used, sync 
@@ -306,8 +307,8 @@ function respawnServer(errPort){
 		else if(String(data).indexOf("Reconfigurating")>-1){
 			console.log('' + data);
 		}
-		else if(String(data).indexOf("...done.")>-1){
-			console.log('' + data);
+		if(String(data).indexOf("...done.")>-1){
+			done();
 		}
 	});
     reSession.stderr.on('data', function (data) {
@@ -315,10 +316,18 @@ function respawnServer(errPort){
 		if(String(data).indexOf("EADDRINUSE")>-1){
 			var errorPort = String(data).split(":::");
 			errorPort = parseInt(errorPort[1].split("\n")[0]);
-			respawnServer(errorPort);
+			serverQueue.push(errorPort);
+		}
+		else if(String(data).indexOf("handlerConfigFile")>-1){
+			done();
+		}
+		else if(String(data).indexOf(".py")>-1){
+			done();
 		}
 	});
 }
+//add function to async queue, in order to avoid writing to a file symultaneously
+var serverQueue = async.queue(respawnServer, 1);
 
 // Test if the file with stored passwords exists and is a valid json file
 try{
