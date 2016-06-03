@@ -64,6 +64,8 @@ jsonFile.close()
 #resume elections which haven't been removed and update PIDs
 for x in range (len(elecs)):
     
+    if x == 0:
+        print("Resuming elections...")
     electionID = elecs[x]["electionID"]
     startingTime = elecs[x]["startTime"]    
     numMix = elecs[x]["mixServers"]
@@ -93,6 +95,7 @@ for x in range (len(elecs)):
     newPIDs = [col.pid, bb.pid]
     for z in range(numMix):
         newPIDs.append(mix[z].pid)
-    print("this is "+str(x))
+    #print(str(x+1) + ". started " + str(electionID))
     jwriteAdv(electionConfig, "elections", newPIDs, x, "processIDs")
 
+print("...done.")
