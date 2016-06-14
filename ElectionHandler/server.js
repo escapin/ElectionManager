@@ -32,6 +32,10 @@ var numMix = 0;
 /**Resume previous elections **/
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
+
+//TODO: Async queue (only) the python script, since it writes
+//		the new process ID's to the handlerConfigFile (which
+//		is done by other processes as well).
 var oldSession = spawn('python', ['src/resumeElection.py']);
 oldSession.stdout.on('data', function (data) {
 	if(String(data).indexOf("OTP")>-1){
@@ -62,7 +66,11 @@ app.post('/election', function(req, res) {
 	var value = req.body.ID;
 	var pass = req.body.password;
 	
-	
+	//TODO: Async queue creating an election so the writing
+	//		to the handlerConfigFile is done before another
+	//		instance tries to read it (may change read-/writeFileSync
+	//		to asyncronous afterwards, since it will be done when
+	//		queue exits).
 	var session = null;
 	if (task === "complete"){
 		
@@ -276,6 +284,8 @@ var portInUse = function(port){
 function respawnServer(errPort, done){
 	console.log("\nPort " + errPort + " in use, attempting to start server on different port:")
 
+	//TODO: reading/writing to file can be asyncronous here,
+	//		since we're in an async queue
 	// get available ports and mark them as used, sync 
 	var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 	var rangePorts = handlerConfigFile["available-ports"];
