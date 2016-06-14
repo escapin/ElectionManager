@@ -101,6 +101,8 @@ app.post('/election', function(req, res) {
 	//		instance tries to read it (may change read-/writeFileSync
 	//		to asyncronous afterwards, since it will be done when
 	//		queue exits).
+	// 		Better?: Alternatively push the writing to the python
+	//		script, since it already writes to handlerConfigFile
 	var session = null;
 	if (task === "complete"){
 		
