@@ -11,7 +11,7 @@ function buildElectionTable(res) {
 	    var clientDate = new Date(date[0]+"-"+date[1]+"-"+date[2]+"T"+dateTime[1]+"Z");
 	    // display 03 for March instead of 3 (and months below 10)
 		var month = clientDate.getMonth()+1<10 ? "0"+(clientDate.getMonth()+1) : (clientDate.getMonth()+1);
-		var day = clientDate.getDate()+1<10 ? "0"+clientDate.getDate() : clientDate.getDate();
+		var day = clientDate.getDate()<10 ? "0"+clientDate.getDate() : clientDate.getDate();
 		
 		var hours = clientDate.getHours()	
 		var dt = (hours>=12)?"PM":"AM";
@@ -52,7 +52,7 @@ function buildElectionTable(res) {
 	}
 	 
 	document.getElementById("elections").innerHTML = "";
-		 
+	 
 	var head$ = $('<tr/>');
 	head$.append($('<th style="text-align:center"/>').html(" Election IDs "));
 	head$.append($('<th style="text-align:center"/>').html(" Election Title "));
@@ -86,7 +86,7 @@ function buildElectionTable(res) {
   
   function getElectionStatus(eleID, ELS, callback) {
       // Detemine the status of the system: (not-yet) open/closed, 
-      // by quering the final mix server.
+      // by quering the collecting server.
       // Depending on the state, either the voting tab or the
       // verification tab will be opened.
       //
@@ -98,7 +98,8 @@ function buildElectionTable(res) {
  	 var url = collectingServer+'/'+ELS+'/status';
       $.get(url)
        .fail(function () { 
-          var stat = 'no response';
+          //var stat = 'no response';
+    	  var stat = 'waiting...';
           callback(eleID, ELS, stat)
         })
        .done(function (result) {  // we have some response

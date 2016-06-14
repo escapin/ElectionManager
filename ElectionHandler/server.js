@@ -27,6 +27,36 @@ var path = 'webapp/';
 DATA_DIR = './_data_';
 mkdirp.sync(DATA_DIR);
 
+
+/***********************/
+//morgan logging
+var morgan = require('morgan');
+//change date token format
+//ex. 2011-10-05T14:48:00.000Z
+morgan.token('date', function () {
+	return new Date().toISOString()
+});
+//morgan.token('task', function (req, res) { return req.body.task });
+LOGGING_DIR = DATA_DIR + '/log';
+//create the folder where the data will be stored
+mkdirp.sync(LOGGING_DIR);
+var morganLogStream = fs.createWriteStream(LOGGING_DIR + '/morgan-access.log', {flags: 'a'});
+var logger = morgan('combined', {stream: morganLogStream});
+app.use(logger);
+
+//bunyan logging
+var bunyanLogStream = fs.createWriteStream(LOGGING_DIR + '/express-bunyan.log', {flags: 'a'});
+app.use(require('express-bunyan-logger')({
+  name: 'logger',
+  streams: [{
+      level: 'info',
+      stream: bunyanLogStream
+      }]
+  }));
+/***********************/
+
+
+// parameter keeping track of the number of mix servers
 var numMix = 0;
 
 /**Resume previous elections **/
