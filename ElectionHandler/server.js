@@ -35,7 +35,7 @@ var numMix = 0;
 /**Resume previous elections **/
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
-
+/**
 //TODO: Async queue (only) the python script, since it writes
 //		the new process ID's to the handlerConfigFile (which
 //		is done by other processes as well).
@@ -63,63 +63,123 @@ oldSession.stderr.on('data', function (data) {
 		serverQueue.push(errorPort);
 	}
 });
+**/
 
 app.post('/election', function(req, res) {
 	var task = req.body.task;
 	var value = req.body.ID;
 	var pass = req.body.password;
 	
-	//TODO: Async queue creating an election so the writing
-	//		to the handlerConfigFile is done before another
-	//		instance tries to read it (may change read-/writeFileSync
-	//		to asyncronous afterwards, since it will be done when
-	//		queue exits).
-	// 		Better?: Alternatively push the writing to the python
-	//		script, since it already writes to handlerConfigFile
-	var session = null;
-	if (task === "complete"){
+	pythonQueue.push(req, function(data){
+		res.end(data);
+	});
+	
+});
 		
-		// get increment in case of dublicate names
-		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
-		var incr = handlerConfigFile["electionsCreated"]+1;
-		handlerConfigFile["electionsCreated"] = incr;
-	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
-		
-		// get available ports and mark them as used, sync 
-		var rangePorts = handlerConfigFile["available-ports"];
-	    var usingPorts = handlerConfigFile["usedPorts"];
-	    var newPorts = [];
-		
-	    /**
-	    for(var i = rangePorts[0]; i <= rangePorts[1]; i++){
-			if(usingPorts.indexOf(i) < 0){
-				usingPorts.push(i);
-				newPorts.push(i);
-			}
-			if(newPorts.length >= 3+numMix){
-				break;
-			}
+var portInUse = function(port){
+	var ghost = net.createServer();
+	ghost.listen(port, function(err){
+		ghost.once('close', function(){
+			return false;
+		});
+		ghost.close();
+	});
+	ghost.on('error', function(err){
+		if(err.code !== 'EADDRINUSE'){
+			return err;
 		}
-		**/
-	    for(var i = rangePorts[0]; i <= rangePorts[1]; i++){
-	    	if(usingPorts.indexOf(i) < 0 && !portInUse(i)){
-    			usingPorts.push(i);
-				newPorts.push(i);
+		return true;
+	})
+	ghost.close()
+	return false;
+};
+
+function spawnServer(req, callback){
+	var task = req.body.task;
+	
+	if(task === "retry"){
+		var errPort = req.errPort
+		
+		console.log("\nPort " + errPort + " in use, attempting to start server on different port:")
+		var newPort = "placeholder";
+		//start new server with different port
+	    var reSession = spawn('python', ['src/restartServer.py', errPort, newPort]);
+	    reSession.stdout.on('data', function (data) {
+	    	//console.log('reSpawn STDOUT:\n\t' + data);
+	    	if(String(data).indexOf("OTP")>-1){
+	    		var time =  new Date();
+	    		console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 	    	}
-	    	if(newPorts.length >= 3+numMix){
-				break;
+	    	else if(String(data).indexOf("TLS")>-1){
+	    		var time =  new Date();
+	    		console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
+	    	}
+			else if(String(data).indexOf("Attempting to replace")>-1){
+				console.log('' + data);
 			}
-	    }
-	    
-	    if (newPorts.length < 3+numMix)
-	        res.end("Not enough ports available.");
-	    else{
-	    	//store new ports
-	    	handlerConfigFile["usedPorts"] = usingPorts;
-	    	fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
-	    }
-	    var ports = JSON.stringify({usedPorts: newPorts, electionsCreated: incr});
-	 
+			else if(String(data).indexOf("Reconfigurating")>-1){
+				console.log('' + data);
+			}
+			if(String(data).indexOf("...done.")>-1){
+				callback();
+			}
+		});
+	    reSession.stderr.on('data', function (data) {
+	    	//TODO: log the error in ERRLOG_FILE
+			//fs.writeFile(ERRLOG_FILE, data, {encoding:'utf8'});
+	    	console.log('reSpawn stderr: ' + data);
+			if(String(data).indexOf("EADDRINUSE")>-1){
+				var errorPort = String(data).split(":::");
+				errorPort = parseInt(errorPort[1].split("\n")[0]);
+				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
+			}
+			else if(String(data).indexOf("handlerConfigFile")>-1){
+				callback();
+			}
+			else if(String(data).indexOf(".py")>-1){
+				callback();
+			}
+		});
+	}
+	else if(task === "resume"){
+		var oldSession = spawn('python', ['src/resumeElection.py']);
+		oldSession.stdout.on('data', function (data) {
+			if(String(data).indexOf("OTP")>-1){
+				var time =  new Date();
+				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
+			}
+			else if(String(data).indexOf("TLS")>-1){
+				var time =  new Date();
+				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
+			}
+			else if(String(data).indexOf("Resuming elections")>-1){
+				console.log('' + data);
+			}
+			if(String(data).indexOf("...done.")>-1){
+				callback();
+			}
+		});
+		oldSession.stderr.on('data', function (data) {
+			//TODO: log the error in ERRLOG_FILE
+			//fs.writeFile(ERRLOG_FILE, data, {encoding:'utf8'});
+			console.log('resume stderr: ' + data);
+			if(String(data).indexOf("EADDRINUSE")>-1){
+				var errorPort = String(data).split(":::");
+				errorPort = parseInt(errorPort[1].split("\n")[0]);
+				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
+			}
+			else if(String(data).indexOf("handlerConfigFile")>-1){
+				callback();
+			}
+			else if(String(data).indexOf(".py")>-1){
+				callback();
+			}
+		});
+	}
+	else if(task === "complete"){
+		var value = req.body.ID;
+		var pass = req.body.password;
+		var ports = "placeholder";
 	    
 	    
 	    //hash password
@@ -145,57 +205,28 @@ app.post('/election', function(req, res) {
 			if(String(data).indexOf("EADDRINUSE")>-1){
 				var errorPort = String(data).split(":::");
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
-				serverQueue.push(errorPort);
-			}
-		        else{ // an error in a sElect server occurred
-			    res.end("An error occurred while spawning a sElect server. Try again!");
-			    //res.end(data); //only for debugging
+				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
 			}
 		});
 
 		session.on('exit', function (code) {
 		    console.log('complete child process exited with code ' + code);
 		    if(code === 0){
-		    	res.end("created");
+		    	callback("created");
 		    }
 		    else{ // an error in createElection.py occurred
-		    	res.end("An error occurred while creating an election. Try again!");
+		    	callback("An error occurred while creating an election. Try again!");
 			//res.end("error code" + code) //only for debugging
 		    }
 		});
 	}
-	else if (task === "simple") {
-		
-		// get increment in case of dublicate names
-		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
-		var incr = handlerConfigFile["electionsCreated"]+1;
-		handlerConfigFile["electionsCreated"] = incr;
-	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
-		
-		// get available ports and mark them as used, sync 
-		var rangePorts = handlerConfigFile["available-ports"];
-	    var usingPorts = handlerConfigFile["usedPorts"];
-	    var newPorts = [];
-	    for(var i = rangePorts[0]; i <= rangePorts[1]; i++){
-	    	if(usingPorts.indexOf(i) < 0 && !portInUse(i)){
-    			usingPorts.push(i);
-				newPorts.push(i);
-	    	}
-	    	if(newPorts.length >= 3+numMix){
-				break;
-			}
-	    }
-	    if (newPorts.length < 3+numMix)
-	        res.end("Not enough ports available.");
-	    else{
-	    //store new ports
-	    handlerConfigFile["usedPorts"] = usingPorts;
-	    fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
-	    }
-	    var ports = JSON.stringify({usedPorts: newPorts, electionsCreated: incr});
+	else if(task === "simple"){
+		var value = req.body.ID;
+		var pass = req.body.password;
+		var ports = "placeholder";
 
 		//call the python script to start the servers
-	    session = spawn('python', ['src/createElection.py', ports]);
+	    var session = spawn('python', ['src/createElection.py', ports]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
@@ -211,26 +242,25 @@ app.post('/election', function(req, res) {
 			if(String(data).indexOf("EADDRINUSE")>-1){
 				var errorPort = String(data).split(":::");
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
-				serverQueue.push(errorPort);
-			}
-		        else{ // an error in a sElect server occurred
-			    res.end("An error occurred while spawning a sElect server. Try again!");
-			    //res.end(data); //only for debugging
+				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
 			}
 		});
 
 		session.on('exit', function (code) {
 		    console.log('simple child process exited with code ' + code);
 		    if(code === 0){
-		    	res.end("created");
+		    	callback("created");
 		    }
 		    else{ // an error in createElection.py occurred
-		    	res.end("An error occurred while creating an election: error code " + code + ". Try again!");
+		    	callback("An error occurred while creating an election: error code " + code + ". Try again!");
 			//res.end("error code" + code) //only for debugging
 		    }
 		});
 	}
-	else if (task === "remove") {
+	else if(task === "remove"){
+		var value = req.body.ID;
+		var pass = req.body.password;
+		
 		var passList = JSON.parse(fs.readFileSync("_data_/pwd.json"));
 		var match = passList[value];
 		var hash = match;
@@ -252,105 +282,27 @@ app.post('/election', function(req, res) {
 		});
 		session.stderr.on('data', function (data) {
 		    console.log('remove stderr: ' + data);
-		    res.end(data);
 		});
 
 		session.on('exit', function (code) {
 		    console.log('remove child process exited with code ' + code);
 		    if(code === 0){
-		    	res.end("removed");
+		    	callback("removed");
 		    }
 		    else{
-		    	res.end("error code" + code)
+		    	callback("error code" + code)
 		    }
 		});
 	}
-});
-
-var portInUse = function(port){
-	var ghost = net.createServer();
-	ghost.listen(port, function(err){
-		ghost.once('close', function(){
-			return false;
-		});
-		ghost.close();
-	});
-	ghost.on('error', function(err){
-		if(err.code !== 'EADDRINUSE'){
-			return err;
-		}
-		return true;
-	})
-	ghost.close()
-	return false;
-};
-
-//respawn function if a port is closed (EADDRINUSE error)
-function respawnServer(errPort, done){
-	console.log("\nPort " + errPort + " in use, attempting to start server on different port:")
-
-	//TODO: reading/writing to file can be asyncronous here,
-	//		since we're in an async queue
-	// get available ports and mark them as used, sync 
-	var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
-	var rangePorts = handlerConfigFile["available-ports"];
-    var usingPorts = handlerConfigFile["usedPorts"];
-    var newPort = -1;
-    for(var i = rangePorts[0]; i <= rangePorts[1]; i++){
-    	if(usingPorts.indexOf(i) < 0 && !portInUse(i)){
-    		newPort = i;
-    		break;
-    	}
-    }
-	if(newPort < 0){
-		console.log("Not enough ports available.");
-		return;
-	}
-	//remove blocked Port from list of ports being used
-	usingPorts.push(newPort);
-	handlerConfigFile["usedPorts"] = usingPorts;
-	fs.writeFileSync("../_handlerConfigFiles_/handlerConfigFile.json", JSON.stringify(handlerConfigFile, null, 4), {spaces:4});
-	console.log("Trying port " + newPort)
-
-	//start new server with different port
-    var reSession = spawn('python', ['src/restartServer.py', errPort, newPort]);
-    reSession.stdout.on('data', function (data) {
-    	//console.log('reSpawn STDOUT:\n\t' + data);
-    	if(String(data).indexOf("OTP")>-1){
-    		var time =  new Date();
-    		console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
-    	}
-    	else if(String(data).indexOf("TLS")>-1){
-    		var time =  new Date();
-    		console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
-    	}
-		else if(String(data).indexOf("Attempting to replace")>-1){
-			console.log('' + data);
-		}
-		else if(String(data).indexOf("Reconfigurating")>-1){
-			console.log('' + data);
-		}
-		if(String(data).indexOf("...done.")>-1){
-			done();
-		}
-	});
-    reSession.stderr.on('data', function (data) {
-    	console.log('reSpawn stderr: ' + data);
-		if(String(data).indexOf("EADDRINUSE")>-1){
-			var errorPort = String(data).split(":::");
-			errorPort = parseInt(errorPort[1].split("\n")[0]);
-			serverQueue.push(errorPort);
-		}
-		else if(String(data).indexOf("handlerConfigFile")>-1){
-			done();
-		}
-		else if(String(data).indexOf(".py")>-1){
-			done();
-		}
-	});
 }
-//add function to async queue, in order to avoid writing to a file symultaneously
-var serverQueue = async.queue(respawnServer, 1);
+var pythonQueue = async.queue(spawnServer, 1);
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+////////Start the server up
+
+//Resume running/closed (not removed) elections
+pythonQueue.push({body: {task: "resume"}, errPort: -1});
+
 
 // Test if the file with stored passwords exists and is a valid json file
 try{
@@ -416,7 +368,7 @@ function start(){
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
 				"Each election needs at least 3 different servers: a collecting server, a bulletin board, and a mix server.\n" +
 			    "However, the number of mix servers is not fixed: we suggest to use 3 to 5 mix servers for each elections.\n" +
-			    "Assuming you use 3 mix servers, you can run up to *" + Math.floor((usePorts[1]-usePorts[0])/6) + "* elections at the same time " + 
+			    "Assuming you use 3 mix servers, you can run up to *" + Math.floor((usePorts[1]-(usePorts[0]+1))/6) + "* elections at the same time " + 
 			    "(if your hardware supports them).\n");
 	}
 	catch(e){
