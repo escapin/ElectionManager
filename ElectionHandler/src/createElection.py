@@ -161,6 +161,12 @@ def getsAddress():
             jsonAddress["authbooth"] = addresses["authbooth"]
             for x in range(numMix):
                 jsonAddress["mix"+str(x)] = addresses["mix"+str(x)]+"/"+str(ELS)+"/"
+            
+            onSSL = jsonData["ssl"]
+            if onSSL:
+                sslKey = jsonData["ssl-key"]
+                sslCrt = jsonData["ssl-crt"]
+                
         jsonFile.close()
     except IOError:
         sys.exit("serverAddresses.json missing or corrupt")
@@ -217,7 +223,7 @@ try:
         deployment = True
     jsonFile.close()
 except IOError:
-    sys.exit("handlerConfigFile.json missing or corrupt (electionDurationInHours)")
+    sys.exit("handlerConfigFile.json missing or corrupt")
 
 #read default data from sElect/templates/ElectionManifest.json
 try:
@@ -261,6 +267,8 @@ sName = tStamp[0] + tStamp[1] + "_" + str(increment)
 
 
 #where the servers are placed
+onSSL = False
+sslKey = ""
 serverAddress = getsAddress()
 
 #mix server config mixFiles
@@ -437,16 +445,23 @@ if "http://localhost" not in serverAddress["collectingserver"]:
         counter = counter + 1
     bracketIt = nginxData[counter:]
     del nginxData[counter:]
+    
+    listePort = "    listen " + str(ELS)
+    if onSSL:
+        listePort = listePort + " ssl"
+    listePort = listePort + ";\n"
+    
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", 
-                "    listen " + str(ELS) + " ssl;\n", "\n", 
+                listePort, "\n", 
                 "    access_log " + nginxLog +"/access.log;\n", 
                 "    error_log " + nginxLog +"/error.log;\n", "\n",
                 "    server_name "+ serverAddress["votingbooth"].split("://")[1].split("/")[0] + ";\n", "\n"]
-    comments.extend(["    ssl_certificate /home/select/ElectionManager/deployment/cert/subdomains.select.chained.crt;\n",
-                "    ssl_certificate_key /home/select/ElectionManager/deployment/cert/subdomains.select.unencrypted.key;\n",
-                "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
-                "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
-                "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+    if onSSL:
+        comments.extend(["    ssl_certificate " + sslCrt + ";\n",
+                    "    ssl_certificate_key " + sslKey + ";\n",
+                    "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                    "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                    "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
     comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"])
     comments.extend(bracketIt)
     nginxData.extend(comments)
