@@ -1,15 +1,13 @@
 {    
     "deployment": false,
-    "handler-port":8442,
-	"nginx-port": 8443,
-    "available-ports": [
-        49160,
-        49799
-    ],
-    "usedPorts": [], 
-    "electionsCreated": 0, 
     "electionDurationInHours": 72,
     "numberOfMockVoters": 4,
     "numberOfMixServers": 3,
-    "elections": []
+    "maxNumberOfElections": 50,
+    "handler-port":8442,
+	"nginx-port": 8443,
+    "available-ports": [49160, 65530],
+    "electionsCreated": 0,
+    "elections": [],
+	"usedPorts": []
 }
