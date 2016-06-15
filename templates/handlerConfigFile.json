@@ -4,7 +4,7 @@
 	"nginx-port": 8443,
     "available-ports": [
         49160,
-        65530
+        49799
     ],
     "usedPorts": [], 
     "electionsCreated": 0, 
