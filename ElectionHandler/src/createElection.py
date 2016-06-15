@@ -113,7 +113,7 @@ def addSec(tm, secs):
     fulldate = tm + datetime.timedelta(seconds=secs)
     return fulldate
 
-def usePorts():
+def usePorts(num):
     newPorts = []
     try:
         jsonFile = open(electionConfig, 'r')
@@ -127,10 +127,10 @@ def usePorts():
             if openPort in usingPorts:
                 continue
             newPorts.append(openPort)
-            if len(newPorts) >= 2+numMix:
+            if len(newPorts) >= num:
                 break
-        if len(newPorts) < 2+numMix:
-            sys.exit("Not enough ports available.")
+        if len(newPorts) < num:
+            sys.exit("Maximum number of elections reached.")
         jsonFile.close()
     except IOError:
         sys.exit("handlerConfigFile.json missing or corrupt")
@@ -259,11 +259,12 @@ if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
     password = electionArgs['password']
     mockElection = False
     
-ports = json.loads(sys.argv[1])['usedPorts']
+#ports = json.loads(sys.argv[1])['usedPorts']
+ports = usePorts(3+numMix)
 ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
-increment = json.loads(sys.argv[1])['electionsCreated']
+#increment = json.loads(sys.argv[1])['electionsCreated']
 tStamp = startingTime.replace("-", "").replace(":", "").split()
-sName = tStamp[0] + tStamp[1] + "_" + str(increment)
+sName = tStamp[0] + tStamp[1]# + "_" + str(increment)
 
 
 #where the servers are placed
@@ -382,6 +383,8 @@ for x in range(numMix):
     newPIDs.append(mix[x].pid)
 
 #add PIDs to config
+for x in range(len(ports)):
+    jAddList(electionConfig, "usedPorts", ports[x])
 newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": numMix, "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
@@ -503,7 +506,7 @@ else:
     del nginxData[counter:]
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
                 "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress["votingbooth"].split("://")[1].split(":")[0] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
-                "    location " + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
+                "    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)    
