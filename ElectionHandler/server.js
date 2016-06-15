@@ -32,7 +32,6 @@ mkdirp.sync(DATA_DIR);
 // parameter keeping track of the number of mix servers
 var numMix = 0;
 
-/**Resume previous elections **/
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
 /**
@@ -70,6 +69,7 @@ app.post('/election', function(req, res) {
 	var value = req.body.ID;
 	var pass = req.body.password;
 	
+	// add the the async queue the task to be performed
 	pythonQueue.push(req, function(data){
 		res.end(data);
 	});
@@ -94,9 +94,22 @@ var portInUse = function(port){
 	return false;
 };
 
+
+/**
+ * Dispatcher which calls the proper python script depending on the task to perform.
+ * Each task has to be run sequentially (asynchronously).
+ */
+
 function spawnServer(req, callback){
 	var task = req.body.task;
 	
+	/**
+	 * the "retry" task is only called in case "EADDRINUSE" error
+	 * happens during the spawning of a servers.
+	 * In the old version of nodejs, there exists a documented bug where nodejs
+	 * return "EADDRINUSE" even if the port is actually free.
+	 * This method copes with this issue.
+	 */
 	if(task === "retry"){
 		var errPort = req.errPort
 		
@@ -295,12 +308,16 @@ function spawnServer(req, callback){
 		});
 	}
 }
+
+// the async queue with the dispatcher (worker) function as parameter.
+// Since no tasks can be performed in parallel, only one
+// dispatcher can run at any time
 var pythonQueue = async.queue(spawnServer, 1);
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////////Start the server up
 
-//Resume running/closed (not removed) elections
+// Resume running/closed (not removed) elections
 pythonQueue.push({body: {task: "resume"}, errPort: -1});
 
 
