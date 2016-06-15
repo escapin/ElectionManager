@@ -277,7 +277,7 @@ keyGeneratorMix_file="genKeys4mixServer.js"
 keyGeneratorCS_file="genKeys4collectingServer.js"
 tools_path = sElectDir + "/tools"
 
-keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix)]).splitlines()
+keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix+1)]).splitlines()
 
 #write new keys to manifest and config files
 jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["encryptionKey"], "encryption_key")
