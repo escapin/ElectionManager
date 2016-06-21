@@ -599,7 +599,6 @@ function electionButtons() {
 		
 		if(changed && (typeof electionConfigRaw === 'undefined' || electionConfigRaw === preload)){
 			setTimeout(reload_js("js/ElectionConfigFile.js"), 100);
-			console.logt('not ready yet');
 			return;
 		}
 		 window.clearInterval(electionStatus);
