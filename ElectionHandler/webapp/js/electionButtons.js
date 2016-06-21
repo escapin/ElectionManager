@@ -20,8 +20,9 @@ function electionButtons() {
 	var buttonEnable = null;
 	var votingStatus = null;
 	var electionStatus = null;
+	var preload;
 	/* Ensure the table is always up to date */
-	window.onload = function(){reloading();}
+	window.onload = function(){reloading(false);}
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/// PAGE 1
@@ -35,7 +36,7 @@ function electionButtons() {
 			enableButtons();
 			if (data == "created") {
 				value = null;
-				reloading();
+				reloading(true);
 				$('#processing').hide();
 			}
 			else{
@@ -64,7 +65,7 @@ function electionButtons() {
     			if (data == "removed") {
     				window.clearInterval(votingStatus);
     				value = null;
-    				reloading();
+    				reloading(true);
     				$('#processing').hide();
     			}
     			else{
@@ -169,7 +170,7 @@ function electionButtons() {
 			enableButtons();
 			if (data == "created") {
 				value = null;
-				reloading();
+				reloading(true);
 				$('#processing').hide();
 				$('#advanced').fadeOut(150);
 				$('welcome').show();
@@ -287,7 +288,7 @@ function electionButtons() {
 			enableButtons();
 			if (data == "created") {
 				value = null;
-				reloading();
+				reloading(true);
 				$('#complete').hide(150);
 				$('#processing').hide();
 			}
@@ -441,7 +442,7 @@ function electionButtons() {
 	        window.clearInterval(i);
 		}
 		if($('#do-reload').html()==="true"){
-			reloading();
+			reloading(false);
 		}
 	});
 
@@ -487,7 +488,19 @@ function electionButtons() {
 	/* Reload a sourcefile */
     function reload_js(src) {
         $('script[src="' + src + '"]').remove();
-        $('<script>').attr('src', src).appendTo('head');
+        //$('<script>').attr('src', src).appendTo('head');
+        var script = document.createElement('script');
+        script.src = src;
+        script.id = 'rawConfig';
+        document.head.appendChild(script);
+        verify_js(src);
+    }
+    function verify_js(src){
+    	script = document.getElementById('rawConfig');
+    	script.onload = function() {
+    		eval(script);
+            reInit(true);
+        };
     }
 	
     /* Return true if integer */
@@ -567,15 +580,28 @@ function electionButtons() {
 	}
 	
 	/* Load configs and enable selecting rows */
-	function reloading(){
+	function reloading(changed){
 		value = null;
 		$("#vote").prop('disabled', true);
 		$("#close").prop('disabled', true);
 		$("#remove").prop('disabled', true);
 		document.getElementById("vote").style.visibility = "hidden";
 		
-		reload_js("js/ElectionConfigFile.js");
-
+		if(changed){
+			preload = electionConfigRaw;
+			reload_js("js/ElectionConfigFile.js");
+		}
+		else{
+			reInit(false);
+		}
+	}
+	function reInit(changed){
+		
+		if(changed && (typeof electionConfigRaw === 'undefined' || electionConfigRaw === preload)){
+			setTimeout(reload_js("js/ElectionConfigFile.js"), 100);
+			console.logt('not ready yet');
+			return;
+		}
 		 window.clearInterval(electionStatus);
 	     buildElectionTable(function (electionStates){
 	  		 electionStatus = electionStates;
