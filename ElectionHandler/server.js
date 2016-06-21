@@ -31,38 +31,11 @@ mkdirp.sync(DATA_DIR);
 
 // parameter keeping track of the number of mix servers
 var numMix = 0;
+var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+var maxElections = handlerConfigFile.maxElections;
+var createdElections = handlerConfigFile.electionsCreated;
 
 ERRLOG_FILE = DATA_DIR + '/err.log';
-
-/**
-//TODO: Async queue (only) the python script, since it writes
-//		the new process ID's to the handlerConfigFile (which
-//		is done by other processes as well).
-var oldSession = spawn('python', ['src/resumeElection.py']);
-oldSession.stdout.on('data', function (data) {
-	if(String(data).indexOf("OTP")>-1){
-		var time =  new Date();
-		console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
-	}
-	else if(String(data).indexOf("TLS")>-1){
-		var time =  new Date();
-		console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
-	}
-	else if(String(data).indexOf("Resuming elections")>-1){
-		console.log('' + data);
-	}
-});
-oldSession.stderr.on('data', function (data) {
-	//TODO: log the error in ERRLOG_FILE
-	//fs.writeFile(ERRLOG_FILE, data, {encoding:'utf8'});
-	console.log('resume stderr: ' + data);
-	if(String(data).indexOf("EADDRINUSE")>-1){
-		var errorPort = String(data).split(":::");
-		errorPort = parseInt(errorPort[1].split("\n")[0]);
-		serverQueue.push(errorPort);
-	}
-});
-**/
 
 app.post('/election', function(req, res) {
 	var task = req.body.task;
@@ -75,7 +48,15 @@ app.post('/election', function(req, res) {
 	});
 	
 });
+app.get('/election', function(req, res) {
+	console.log('accessing');
+	res.send({ready: true});
+});
 		
+/**
+ * Create a ghost server and let it listen
+ * to a port to check if the port is in use.
+ */
 var portInUse = function(port){
 	var ghost = net.createServer();
 	ghost.listen(port, function(err){
@@ -93,6 +74,28 @@ var portInUse = function(port){
 	ghost.close()
 	return false;
 };
+
+var prevTime = new Date();
+var prevProc = "";
+function logError(data, callback){
+	var time =  new Date();
+	if(time.getTime() - prevTime.getTime() > 1000 || data.proc != prevProc){
+		prevTime = time;
+		prevProc = data.proc;
+		data.err = "\n[ " + time + " ]:\n" + "error  at process: " + data.proc + "\n\n" + data.err; 
+		console.log("[ " + time + " ]:\n an error occured, logged in " + ERRLOG_FILE + "\n");
+	}
+	fs.appendFile(ERRLOG_FILE, data.err, {encoding:'utf8'}, function(error){
+		if(error){
+			console.log("writing to "+ERRLOG_FILE+" failed while trying to write: " + data);
+			callback(error);
+		}
+		else{
+			callback();
+		}
+	});
+}
+var logErrQueue = async.queue(logError, 1);
 
 
 /**
@@ -138,10 +141,13 @@ function spawnServer(req, callback){
 			}
 		});
 	    reSession.stderr.on('data', function (data) {
-	    	//TODO: log the error in ERRLOG_FILE
-			//fs.writeFile(ERRLOG_FILE, data, {encoding:'utf8'});
-	    	console.log('reSpawn stderr: ' + data);
-			if(String(data).indexOf("EADDRINUSE")>-1){
+	    	//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+	    	var dat = {err: data, proc: 'respawn'};
+	    	logErrQueue.push(dat);
+
+	    	if(String(data).indexOf("EADDRINUSE")>-1){
 				var errorPort = String(data).split(":::");
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
 				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
@@ -173,9 +179,12 @@ function spawnServer(req, callback){
 			}
 		});
 		oldSession.stderr.on('data', function (data) {
-			//TODO: log the error in ERRLOG_FILE
-			//fs.writeFile(ERRLOG_FILE, data, {encoding:'utf8'});
-			console.log('resume stderr: ' + data);
+			//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+			var dat = {err: data, proc: 'resume'};
+	    	logErrQueue.push(dat);
+	    	
 			if(String(data).indexOf("EADDRINUSE")>-1){
 				var errorPort = String(data).split(":::");
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
@@ -214,8 +223,13 @@ function spawnServer(req, callback){
 			}
 		});
 		session.stderr.on('data', function (data) {
-		    console.log('complete stderr: ' + data);
-			if(String(data).indexOf("EADDRINUSE")>-1){
+			//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+			var dat = {err: data, proc: 'complete'};
+	    	logErrQueue.push(dat);
+
+	    	if(String(data).indexOf("EADDRINUSE")>-1){
 				var errorPort = String(data).split(":::");
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
 				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
@@ -251,8 +265,13 @@ function spawnServer(req, callback){
 			}
 		});
 		session.stderr.on('data', function (data) {
-		    console.log('simple stderr: ' + data);
-			if(String(data).indexOf("EADDRINUSE")>-1){
+			//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+			var dat = {err: data, proc: 'simple'};
+	    	logErrQueue.push(dat);
+
+	    	if(String(data).indexOf("EADDRINUSE")>-1){
 				var errorPort = String(data).split(":::");
 				errorPort = parseInt(errorPort[1].split("\n")[0]);
 				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
@@ -294,7 +313,11 @@ function spawnServer(req, callback){
 			console.log('remove stdout: ' + data);
 		});
 		session.stderr.on('data', function (data) {
-		    console.log('remove stderr: ' + data);
+			//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+			var dat = {err: data, proc: 'remove'};
+	    	logErrQueue.push(dat);
 		});
 
 		session.on('exit', function (code) {
