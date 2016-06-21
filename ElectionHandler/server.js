@@ -311,6 +311,13 @@ function spawnServer(req, callback){
 		var pass = req.body.password;
 		
 		var passList = JSON.parse(fs.readFileSync("_data_/pwd.json"));
+		if(!passList.hasOwnProperty(value)){
+			//means the election already has been removed by another request,
+			//therefore browser should act as if it had been removed by 
+			//its own request.
+			callback("removed");
+			return;
+		}
 		var match = passList[value];
 		var hash = match;
 		if(match !== ""){
