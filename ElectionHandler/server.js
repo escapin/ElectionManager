@@ -32,20 +32,32 @@ mkdirp.sync(DATA_DIR);
 // parameter keeping track of the number of mix servers
 var numMix = 0;
 var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
-var maxElections = handlerConfigFile.maxElections;
+var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
 
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
 app.post('/election', function(req, res) {
 	var task = req.body.task;
-	var value = req.body.ID;
-	var pass = req.body.password;
 	
-	// add the the async queue the task to be performed
-	pythonQueue.push(req, function(data){
-		res.end(data);
-	});
+	if((task === "complete" || task === "simple") && createdElections < maxElections) {
+		// add the the async queue the task to be performed
+		pythonQueue.push(req, function(data){
+			res.end(data);
+		});
+	}
+	else if(task === "complete" || task === "simple"){
+		 res.end("Max Number of Elections handled by the server reached. Remove an election (if possible) or wait until an authorized user does it.");
+	}
+	else if(task === "remove"){
+		// add the the async queue the task to be performed
+		pythonQueue.push(req, function(data){
+			res.end(data);
+		});
+	}
+	else{
+		res.end("Specify wether to create a mock Election or a ccustomized Election");
+	}
 	
 });
 app.get('/election', function(req, res) {
@@ -105,7 +117,10 @@ var logErrQueue = async.queue(logError, 1);
 
 function spawnServer(req, callback){
 	var task = req.body.task;
-	
+	if((task === "complete" || task === "simple") && createdElections >= maxElections){
+		 callback("Max Number of Elections handled by the server reached. Remove an election (if possible) or wait until an authorized user does it.");
+		 return;
+	}
 	/**
 	 * the "retry" task is only called in case "EADDRINUSE" error
 	 * happens during the spawning of a servers.
@@ -239,6 +254,7 @@ function spawnServer(req, callback){
 		session.on('exit', function (code) {
 		    console.log('complete child process exited with code ' + code);
 		    if(code === 0){
+		    	createdElections = createdElections + 1;
 		    	callback("created");
 		    }
 		    else{ // an error in createElection.py occurred
@@ -281,6 +297,7 @@ function spawnServer(req, callback){
 		session.on('exit', function (code) {
 		    console.log('simple child process exited with code ' + code);
 		    if(code === 0){
+		    	createdElections = createdElections + 1;
 		    	callback("created");
 		    }
 		    else{ // an error in createElection.py occurred
@@ -323,6 +340,7 @@ function spawnServer(req, callback){
 		session.on('exit', function (code) {
 		    console.log('remove child process exited with code ' + code);
 		    if(code === 0){
+		    	createdElections = createdElections - 1;
 		    	callback("removed");
 		    }
 		    else{
