@@ -217,6 +217,7 @@ try:
     votingTime = jsonData["electionDurationInHours"]*60*60    #hours to seconds
     mockVoters = jsonData["numberOfMockVoters"]
     numMix = jsonData["numberOfMixServers"]
+    createdElections = jsonData["electionsCreated"]
     nginxPort = jsonData["nginx-port"]
     if jsonData["deployment"] is True:
         serverAddr = rootDirProject + "/deployment/serverAddresses.json"
@@ -514,7 +515,7 @@ else:
     nginxFile.writelines(nginxData)
     nginxFile.close()
 
-
+jwrite(electionConfig, "electionsCreated", createdElections+1)
 #refresh nginx 
 #TODO: fix /usr/sbin nginx issue
 subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))

@@ -102,7 +102,7 @@ electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 nginxConf = rootDirProject + "/nginx_config/nginx_select.conf"
 passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
-
+    
 #get ElectionID
 electionID = sys.argv[1]
 password = sys.argv[2]
@@ -159,6 +159,17 @@ nginxFile.seek(0)
 nginxFile.writelines(nginxData)
 nginxFile.truncate()
 nginxFile.close()
+
+try:
+    jsonFile = open(electionConfig, 'r+')
+    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+    jsonData["electionsCreated"] = jsonData["electionsCreated"]-1
+    jsonFile.seek(0)
+    json.dump(jsonData, jsonFile, indent = 4)
+    jsonFile.truncate()
+    jsonFile.close()
+except IOError:
+    sys.exit("handlerConfigFile.json missing or corrupt")
 
 #refresh nginx
 subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
