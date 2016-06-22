@@ -56,7 +56,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else{
-		res.end("Specify wether to create a mock Election or a ccustomized Election");
+		res.end("Specify wether to create a mock Election or a customized Election");
 	}
 	
 });
