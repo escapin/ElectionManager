@@ -65,7 +65,7 @@ function buildElectionTable(res) {
 	
 	for (var i = 0 ; i < elections.length ; i++) {
 		var elecID = elections[i].electionID;
-		var elecStatus = 'waiting';
+		var elecStatus = 'waiting...';
 		var startingTime = resolveTime(elections[i].startTime)
 		var endingTime = resolveTime(elections[i].endTime)
 		var ELS = elections[i].ELS
@@ -78,9 +78,9 @@ function buildElectionTable(res) {
 		row$.append($('<td id='+elecID+'/>').html(elecStatus));
 		$("#elections").append(row$);
       
-		getElectionStatus(elecID, ELS, function (eleID, ELS, stat){
+		setTimeout(getElectionStatus(elecID, ELS, function (eleID, ELS, stat){
 			document.getElementById(eleID).innerHTML = stat;
-		});
+		}),3000);
         
 	}     
   

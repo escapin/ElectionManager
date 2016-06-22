@@ -82,6 +82,28 @@ def jRemElec(src, value):
     jsonFile.truncate()
     jsonFile.close()
     
+def usePorts(num):
+    newPorts = []
+    try:
+        jsonFile = open(electionConfig, 'r')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        rangePorts = jsonData["available-ports"]
+        elecs = jsonData["elections"]
+        usingPorts = jsonData["usedPorts"]
+        #for x in range (len(elecs)):
+        #    usingPorts.extend(elecs[x]["used-ports"]) 
+        for openPort in range(rangePorts[0], rangePorts[1]):
+            if openPort in usingPorts:
+                continue
+            newPorts.append(openPort)
+            if len(newPorts) >= num:
+                break
+        if len(newPorts) < num:
+            sys.exit("Maximum number of elections reached.")
+        jsonFile.close()
+    except IOError:
+        sys.exit("handlerConfigFile.json missing or corrupt")
+    return newPorts
 
 # the root dir is three folders back
 rootDirProject = os.path.realpath(__file__)
@@ -93,7 +115,9 @@ nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
 electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
 
 errPort = int(sys.argv[1])
-newPort = int(sys.argv[2])
+#newPort = int(sys.argv[2])
+newPort = usePorts(1)[0]
+
 print("Attempting to replace port " + str(errPort) + " with " + str(newPort))
 #get elections
 jsonFile = open(electionConfig, 'r')
@@ -185,7 +209,8 @@ for x in range (len(elecs)):
     
     election["processIDs"] = newPIDs
     election["used-ports"] = usedPorts
-
+    
+    jAddList(electionConfig, "usedPorts", newPort)
     jAddList(electionConfig, "elections", election)
     
     #modify nginx File

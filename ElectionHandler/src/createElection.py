@@ -113,7 +113,7 @@ def addSec(tm, secs):
     fulldate = tm + datetime.timedelta(seconds=secs)
     return fulldate
 
-def usePorts():
+def usePorts(num):
     newPorts = []
     try:
         jsonFile = open(electionConfig, 'r')
@@ -127,10 +127,10 @@ def usePorts():
             if openPort in usingPorts:
                 continue
             newPorts.append(openPort)
-            if len(newPorts) >= 2+numMix:
+            if len(newPorts) >= num:
                 break
-        if len(newPorts) < 2+numMix:
-            sys.exit("Not enough ports available.")
+        if len(newPorts) < num:
+            sys.exit("Maximum number of elections reached.")
         jsonFile.close()
     except IOError:
         sys.exit("handlerConfigFile.json missing or corrupt")
@@ -161,6 +161,12 @@ def getsAddress():
             jsonAddress["authbooth"] = addresses["authbooth"]
             for x in range(numMix):
                 jsonAddress["mix"+str(x)] = addresses["mix"+str(x)]+"/"+str(ELS)+"/"
+            
+            onSSL = jsonData["ssl"]
+            if onSSL:
+                sslKey = jsonData["ssl-key"]
+                sslCrt = jsonData["ssl-crt"]
+                
         jsonFile.close()
     except IOError:
         sys.exit("serverAddresses.json missing or corrupt")
@@ -211,13 +217,14 @@ try:
     votingTime = jsonData["electionDurationInHours"]*60*60    #hours to seconds
     mockVoters = jsonData["numberOfMockVoters"]
     numMix = jsonData["numberOfMixServers"]
+    createdElections = jsonData["electionsCreated"]
     nginxPort = jsonData["nginx-port"]
     if jsonData["deployment"] is True:
         serverAddr = rootDirProject + "/deployment/serverAddresses.json"
         deployment = True
     jsonFile.close()
 except IOError:
-    sys.exit("handlerConfigFile.json missing or corrupt (electionDurationInHours)")
+    sys.exit("handlerConfigFile.json missing or corrupt")
 
 #read default data from sElect/templates/ElectionManifest.json
 try:
@@ -253,14 +260,17 @@ if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
     password = electionArgs['password']
     mockElection = False
     
-ports = json.loads(sys.argv[1])['usedPorts']
+#ports = json.loads(sys.argv[1])['usedPorts']
+ports = usePorts(3+numMix)
 ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
-increment = json.loads(sys.argv[1])['electionsCreated']
+#increment = json.loads(sys.argv[1])['electionsCreated']
 tStamp = startingTime.replace("-", "").replace(":", "").split()
-sName = tStamp[0] + tStamp[1] + "_" + str(increment)
+sName = tStamp[0] + tStamp[1]# + "_" + str(increment)
 
 
 #where the servers are placed
+onSSL = False
+sslKey = ""
 serverAddress = getsAddress()
 
 #mix server config mixFiles
@@ -277,7 +287,7 @@ keyGeneratorMix_file="genKeys4mixServer.js"
 keyGeneratorCS_file="genKeys4collectingServer.js"
 tools_path = sElectDir + "/tools"
 
-keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix)]).splitlines()
+keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix+1)]).splitlines()
 
 #write new keys to manifest and config files
 jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["encryptionKey"], "encryption_key")
@@ -374,6 +384,8 @@ for x in range(numMix):
     newPIDs.append(mix[x].pid)
 
 #add PIDs to config
+for x in range(len(ports)):
+    jAddList(electionConfig, "usedPorts", ports[x])
 newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": numMix, "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
@@ -437,16 +449,23 @@ if "http://localhost" not in serverAddress["collectingserver"]:
         counter = counter + 1
     bracketIt = nginxData[counter:]
     del nginxData[counter:]
+    
+    listePort = "    listen " + str(ELS)
+    if onSSL:
+        listePort = listePort + " ssl"
+    listePort = listePort + ";\n"
+    
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", 
-                "    listen " + str(ELS) + " ssl;\n", "\n", 
+                listePort, "\n", 
                 "    access_log " + nginxLog +"/access.log;\n", 
                 "    error_log " + nginxLog +"/error.log;\n", "\n",
                 "    server_name "+ serverAddress["votingbooth"].split("://")[1].split("/")[0] + ";\n", "\n"]
-    comments.extend(["    ssl_certificate /home/select/ElectionManager/deployment/cert/subdomains.select.chained.crt;\n",
-                "    ssl_certificate_key /home/select/ElectionManager/deployment/cert/subdomains.select.unencrypted.key;\n",
-                "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
-                "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
-                "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+    if onSSL:
+        comments.extend(["    ssl_certificate " + sslCrt + ";\n",
+                    "    ssl_certificate_key " + sslKey + ";\n",
+                    "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                    "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                    "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
     comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"])
     comments.extend(bracketIt)
     nginxData.extend(comments)
@@ -488,7 +507,7 @@ else:
     del nginxData[counter:]
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
                 "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress["votingbooth"].split("://")[1].split(":")[0] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
-                "    location " + "/" + "vb" + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
+                "    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)    
@@ -496,7 +515,7 @@ else:
     nginxFile.writelines(nginxData)
     nginxFile.close()
 
-
+jwrite(electionConfig, "electionsCreated", createdElections+1)
 #refresh nginx 
 #TODO: fix /usr/sbin nginx issue
 subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))

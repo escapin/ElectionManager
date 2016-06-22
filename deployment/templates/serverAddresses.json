@@ -8,5 +8,8 @@
         "bulletinboard": "http://localhost/bb", 
         "collectingserver": "http://localhost/cs", 
         "votingbooth": "http://localhost"
-    }
+    },
+    "ssl": false,
+    "ssl-key": "PATH/TO/unencrypted.key",
+    "ssl-crt": "PATH/TO/chained.crt"
 }
