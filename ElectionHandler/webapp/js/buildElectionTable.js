@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////Builds the HTML Table from ElectionIDs
 
-function buildElectionTable(res) {
+function buildElectionTable(elections, res) {
 	
 	// expected time format is 'yy-mm-dd h:min [options not used yet]' in UTC+000 
 	var resolveTime = function(time){
@@ -42,7 +42,6 @@ function buildElectionTable(res) {
     //////////////////////////////////////////////////////////////////////////////
     /// Build the election table
 	var electionConf = JSON.parse(electionConfigRaw);	
-	var elections = electionConf.elections;
 	
 	var collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 	//don't use port 80 if it's not deployed

@@ -34,13 +34,15 @@ function electionButtons() {
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
-			if (data == "created") {
+			data = JSON.parse(data);
+			if (data.task == "created") {
+				elections = data.elections;
 				value = null;
 				reloading(true);
 				$('#processing').hide();
 			}
 			else{
-				alerting(data);
+				alerting(data.error);
 				$('#processing').hide();
 			}
 		  })
@@ -62,14 +64,16 @@ function electionButtons() {
     		 .done(function(data){
     			$('#processing').fadeOut(150);
     			enableButtons();
-    			if (data == "removed") {
+    			data = JSON.parse(data);
+    			if (data.task == "removed") {
     				window.clearInterval(votingStatus);
+    				elections = data.elections;
     				value = null;
     				reloading(true);
     				$('#processing').hide();
     			}
     			else{
-    				alerting(data);
+    				alerting(data.error);
     				$('#processing').hide();
     			}
     		  })
@@ -120,6 +124,87 @@ function electionButtons() {
     		enableButtons();
     	}
 	}
+	
+    function advancedElection() {
+    	disableButtons();
+		var ename = $('#e-name').val();
+		var edesc = $('#e-desc').val();
+		var startingTime = $('#start-time').val();
+		var endingTime = $('#end-time').val();
+		$('#processing').fadeIn(150);
+		$.post(electionManager+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
+		 .done(function(data){
+			$('#processing').fadeOut(150);
+			enableButtons();
+			data = JSON.parse(data);
+			if (data.task == "created") {
+				elections = data.elections;
+				value = null;
+				reloading(true);
+				$('#processing').hide();
+				$('#advanced').fadeOut(150);
+				$('welcome').show();
+			}
+			else{
+				alerting(data.error);
+				$('#processing').hide();
+			}
+		  })
+		 .fail(function(){
+			 enableButtons();
+			 $('#processing').hide();
+			 alerting('cannot connect to ElectionHandler at '+ electionManager);
+		 });
+    }
+    
+    function completeElection(pass, rand) {
+    	window.clearInterval(buttonEnable);
+    	disableButtons();
+    	var listVoters = document.getElementById("listVoters").checked;
+    	changeCulture("de-DE");
+		var ename = $('#e-name').val();
+		var edesc = $('#e-desc').val();
+    	var sdate = $('#s-date').val();
+    	var edate = $('#e-date').val();
+        var stime = $('#s-time').val();
+        var etime = $('#e-time').val();
+        changeCulture("en-EN");
+        var startingTime = resolveTimeUTC(sdate + " " + stime) + " UTC+0000";
+        var endingTime = resolveTimeUTC(edate + " " + etime) + " UTC+0000";
+		var equestion = $('#e-question').val();
+		var electionCh = {};
+		var echoices = [];
+		for(i = 1; i <= nchoices; i++){
+			echoices.push($('#choice'+i).val());
+		}
+		electionCh.choices = echoices;
+		$('#processing').fadeIn(150);
+		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
+		 .done(function(data){
+			$('#processing').fadeOut(150);
+			enableButtons();
+			data = JSON.parse(data);
+			if (data.task == "created") {
+				elections = data.elections;
+				value = null;
+				reloading(true);
+				$('#complete').hide(150);
+				$('#processing').hide();
+			}
+			else{
+				alerting(data.error, false);
+				$('#processing').hide();
+			    buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
+			}
+		  })
+		 .fail(function(){
+			 enableButtons();
+			 $('#processing').hide();
+			 alerting('cannot connect to ElectionHandler at '+ electionManager, false);
+			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
+		 });
+    }
+    
     
     //////////////////////////////////////////////////////////////////////////////
     /// PAGE 2
@@ -155,37 +240,6 @@ function electionButtons() {
             }
         };
     }	
-    
-    
-    function advancedElection() {
-    	disableButtons();
-		var ename = $('#e-name').val();
-		var edesc = $('#e-desc').val();
-		var startingTime = $('#start-time').val();
-		var endingTime = $('#end-time').val();
-		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
-		 .done(function(data){
-			$('#processing').fadeOut(150);
-			enableButtons();
-			if (data == "created") {
-				value = null;
-				reloading(true);
-				$('#processing').hide();
-				$('#advanced').fadeOut(150);
-				$('welcome').show();
-			}
-			else{
-				alerting(data);
-				$('#processing').hide();
-			}
-		  })
-		 .fail(function(){
-			 enableButtons();
-			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ electionManager);
-		 });
-    }
 	
     
     ////////////////////////////////////////////////////////////////////////////////
@@ -259,52 +313,7 @@ function electionButtons() {
             }
         };
     }
-	
-    function completeElection(pass, rand) {
-    	window.clearInterval(buttonEnable);
-    	disableButtons();
-    	var listVoters = document.getElementById("listVoters").checked;
-    	changeCulture("de-DE");
-		var ename = $('#e-name').val();
-		var edesc = $('#e-desc').val();
-    	var sdate = $('#s-date').val();
-    	var edate = $('#e-date').val();
-        var stime = $('#s-time').val();
-        var etime = $('#e-time').val();
-        changeCulture("en-EN");
-        var startingTime = resolveTimeUTC(sdate + " " + stime) + " UTC+0000";
-        var endingTime = resolveTimeUTC(edate + " " + etime) + " UTC+0000";
-		var equestion = $('#e-question').val();
-		var electionCh = {};
-		var echoices = [];
-		for(i = 1; i <= nchoices; i++){
-			echoices.push($('#choice'+i).val());
-		}
-		electionCh.choices = echoices;
-		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
-		 .done(function(data){
-			$('#processing').fadeOut(150);
-			enableButtons();
-			if (data == "created") {
-				value = null;
-				reloading(true);
-				$('#complete').hide(150);
-				$('#processing').hide();
-			}
-			else{
-				alerting(data, false);
-				$('#processing').hide();
-			    buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
-			}
-		  })
-		 .fail(function(){
-			 enableButtons();
-			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ electionManager, false);
-			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
-		 });
-    }
+
     
     ////////////////////////////////////////////////////////////////
     /// Button Handlers
@@ -592,25 +601,25 @@ function electionButtons() {
 			reload_js("js/ElectionConfigFile.js");
 		}
 		else{
+			electionConf = JSON.parse(electionConfigRaw);
+			elections = electionConf.elections;
 			reInit(false);
 		}
 	}
 	function reInit(changed){
 		
-		if(changed && (typeof electionConfigRaw === 'undefined' || electionConfigRaw === preload)){
-			setTimeout(reload_js("js/ElectionConfigFile.js"), 100);
-			return;
-		}
+		//if(changed && (typeof electionConfigRaw === 'undefined' || electionConfigRaw === preload)){
+		//	setTimeout(reload_js("js/ElectionConfigFile.js"), 100);
+		//	return;
+		//}
 		 window.clearInterval(electionStatus);
-	     buildElectionTable(function (electionStates){
+	     buildElectionTable(elections, function (electionStates){
 	  		 electionStatus = electionStates;
 	  	 });
 	     
 	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
 	     document.getElementById('trackDescend').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
 	     
-	     electionConf = JSON.parse(electionConfigRaw);
-		 elections = electionConf.elections;
 	     
 		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
 		 votingBooth = "http://localhost";

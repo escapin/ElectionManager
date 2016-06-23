@@ -104,6 +104,22 @@ def jAddList(src, key, value):
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.truncate()
     jsonFile.close()
+    
+def jAddListAndReturn(src, key, value):
+    try:
+        jsonFile = open(src, 'r+')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        iDs = jsonData[key]
+        iDs.append(value)
+        jsonData[key] = iDs
+        jsonFile.seek(0)
+    except IOError:
+        jsonFile = open(src, 'w')
+        jsonData = {key: value}
+    json.dump(jsonData, jsonFile, indent = 4)
+    jsonFile.truncate()
+    jsonFile.close()
+    return jsonData
 
 def getTime():
     utcTime = datetime.datetime.utcnow()
@@ -204,6 +220,7 @@ for i in range(3):
 # absolute paths
 sElectDir = rootDirProject + "/sElect"
 electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
+electionInfo = rootDirProject + "/_handlerConfigFiles_/electionInfo.json"
 defaultManifest = rootDirProject + "/_handlerConfigFiles_/ElectionManifest.json"
 nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
 passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
@@ -387,9 +404,10 @@ for x in range(numMix):
 for x in range(len(ports)):
     jAddList(electionConfig, "usedPorts", ports[x])
 newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": numMix, "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
+eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "protect": not mockElection}
 jAddList(electionConfig, "elections", newElection)
+eleInfo = jAddListAndReturn(electionInfo, "elections", eleInfo)
 subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
-
 
 #modify nginx File
 if "http://localhost" not in serverAddress["collectingserver"]:
@@ -450,13 +468,13 @@ if "http://localhost" not in serverAddress["collectingserver"]:
     bracketIt = nginxData[counter:]
     del nginxData[counter:]
     
-    listePort = "    listen " + str(ELS)
+    listenPort = "    listen " + str(ELS)
     if onSSL:
-        listePort = listePort + " ssl"
-    listePort = listePort + ";\n"
+        listenPort = listenPort + " ssl"
+    listenPort = listenPort + ";\n"
     
     comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", 
-                listePort, "\n", 
+                listenPort, "\n", 
                 "    access_log " + nginxLog +"/access.log;\n", 
                 "    error_log " + nginxLog +"/error.log;\n", "\n",
                 "    server_name "+ serverAddress["votingbooth"].split("://")[1].split("/")[0] + ";\n", "\n"]
@@ -519,4 +537,5 @@ jwrite(electionConfig, "electionsCreated", createdElections+1)
 #refresh nginx 
 #TODO: fix /usr/sbin nginx issue
 subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
+print("electionInfo.json:\n"+json.dumps(eleInfo))
 

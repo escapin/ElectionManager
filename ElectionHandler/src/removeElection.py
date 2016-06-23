@@ -46,6 +46,24 @@ def jRemElec(src, value):
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.truncate()
     jsonFile.close()
+    
+def jRemElecAndReturn(src, value):
+    try:
+        jsonFile = open(src, 'r+')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        elecs = jsonData["elections"]
+        for x in range(len(elecs)):
+            if elecs[x]["electionID"] == value:
+                remElec = elecs.pop(x)
+                break
+        jsonData["elections"] = elecs
+        jsonFile.seek(0)
+    except IOError:
+        print("file missing")
+    json.dump(jsonData, jsonFile, indent = 4)
+    jsonFile.truncate()
+    jsonFile.close()
+    return jsonData
 
 def getProcIDs(src, key, value):
     procID = []
@@ -99,6 +117,7 @@ for i in range(3):
     rootDirProject=os.path.split(rootDirProject)[0]
              
 electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
+electionInfo = rootDirProject + "/_handlerConfigFiles_/electionInfo.json"
 nginxConf = rootDirProject + "/nginx_config/nginx_select.conf"
 passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
@@ -127,6 +146,8 @@ for x in nPIDs:
 
 #modify electionconfig File
 jRemElec(electionConfig, electionID)
+eleInfo = jRemElecAndReturn(electionInfo, electionID)
+
 
 #modify nginx File
 nginxFile = open(nginxConf, 'r+')
@@ -175,3 +196,4 @@ except IOError:
 subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
 subprocess.call([rootDirProject + "/ElectionHandler/refreshConfig.sh"], cwd=(rootDirProject + "/ElectionHandler"))
 removePass(passList, electionID)
+print("electionInfo.json:\n"+json.dumps(eleInfo))

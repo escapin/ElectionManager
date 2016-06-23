@@ -61,6 +61,7 @@ var numMix = 0;
 var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
+var electionInfo;
 
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
@@ -263,6 +264,14 @@ function spawnServer(req, callback){
 				var time =  new Date();
 				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
+			else if(String(data).indexOf("electionInfo.json:\n")>-1){
+				eleInfo = String(data).split("electionInfo.json:\n")
+				eleInfo = eleInfo[eleInfo.length-1];
+				eleInfo = JSON.parse(eleInfo);
+				eleInfo.task = "created";
+				eleInfo = JSON.stringify(eleInfo);
+				callback(eleInfo);
+			}
 		});
 		session.stderr.on('data', function (data) {
 			//log the error in ERRLOG_FILE, async queue
@@ -277,7 +286,13 @@ function spawnServer(req, callback){
 				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
 			}
 		});
-
+		session.on('exit', function (code) {
+		    console.log('complete child process exited with code ' + code);
+		    if(code !== 0){
+		    	callback('{"error": "An error occurred while creating an election: error code ' + code + '. Try again!"}');
+		    }
+		});
+		/**
 		session.on('exit', function (code) {
 		    console.log('complete child process exited with code ' + code);
 		    if(code === 0){
@@ -289,6 +304,7 @@ function spawnServer(req, callback){
 			//res.end("error code" + code) //only for debugging
 		    }
 		});
+		**/
 	}
 	else if(task === "simple"){
 		var value = req.body.ID;
@@ -306,6 +322,14 @@ function spawnServer(req, callback){
 				var time =  new Date();
 				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
+			else if(String(data).indexOf("electionInfo.json:\n")>-1){
+				eleInfo = String(data).split("electionInfo.json:\n")
+				eleInfo = eleInfo[eleInfo.length-1];
+				eleInfo = JSON.parse(eleInfo);
+				eleInfo.task = "created";
+				eleInfo = JSON.stringify(eleInfo);
+				callback(eleInfo);
+			}
 		});
 		session.stderr.on('data', function (data) {
 			//log the error in ERRLOG_FILE, async queue
@@ -320,7 +344,13 @@ function spawnServer(req, callback){
 				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
 			}
 		});
-
+		session.on('exit', function (code) {
+		    console.log('simple child process exited with code ' + code);
+		    if(code !== 0){
+		    	callback('{"error": "An error occurred while creating an election: error code ' + code + '. Try again!"}');
+		    }
+		});
+		/**
 		session.on('exit', function (code) {
 		    console.log('simple child process exited with code ' + code);
 		    if(code === 0){
@@ -332,6 +362,7 @@ function spawnServer(req, callback){
 			//res.end("error code" + code) //only for debugging
 		    }
 		});
+		**/
 	}
 	else if(task === "remove"){
 		var value = req.body.ID;
@@ -361,7 +392,17 @@ function spawnServer(req, callback){
 		//call the python script to shutdown the servers
 		session = spawn('python', ['src/removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
-			console.log('remove stdout: ' + data);
+			if(String(data).indexOf("electionInfo.json:\n">-1)){
+				eleInfo = String(data).split("electionInfo.json:\n")
+				eleInfo = eleInfo[eleInfo.length-1];
+				eleInfo = JSON.parse(eleInfo);
+				eleInfo.task = "removed";
+				eleInfo = JSON.stringify(eleInfo);
+				callback(eleInfo);
+			}
+			else{
+				console.log('remove stdout: ' + data);
+			}
 		});
 		session.stderr.on('data', function (data) {
 			//log the error in ERRLOG_FILE, async queue
@@ -370,7 +411,13 @@ function spawnServer(req, callback){
 			var dat = {err: data, proc: 'remove'};
 	    	logErrQueue.push(dat);
 		});
-
+		session.on('exit', function (code) {
+		    console.log('remove child process exited with code ' + code);
+		    if(code !== 0){
+		    	callback('{"error": "An error occurred while removing an election: error code ' + code + '. Try again!"}');
+		    }
+		});
+		/**
 		session.on('exit', function (code) {
 		    console.log('remove child process exited with code ' + code);
 		    if(code === 0){
@@ -378,9 +425,10 @@ function spawnServer(req, callback){
 		    	callback("removed");
 		    }
 		    else{
-		    	callback("error code" + code)
+		    	callback("An error occurred while removing an election: error code " + code + ". Try again!");
 		    }
 		});
+		**/
 	}
 }
 
