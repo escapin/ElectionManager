@@ -286,8 +286,9 @@ sName = tStamp[0] + tStamp[1]# + "_" + str(increment)
 
 
 #where the servers are placed
-onSSL = False
-sslKey = ""
+nSSL = True
+sslKey = "/home/select/ElectionManager/deployment/cert/subdomains.select.unencrypted.key"
+sslCrt = "/home/select/ElectionManager/deployment/cert/subdomains.select.chained.crt"
 serverAddress = getsAddress()
 
 #mix server config mixFiles
@@ -459,35 +460,22 @@ if "http://localhost" not in serverAddress["collectingserver"]:
         nginxData.extend(comments)
         nginxFile.seek(0)
 
+    
     prevBracket = 0
     counter = 0
     for line in nginxData:
+        if "}" in line:
+            prevBracket = counter
         if "end voting booth" in line:
             break
         counter = counter + 1
-    bracketIt = nginxData[counter:]
-    del nginxData[counter:]
-    
-    listenPort = "    listen " + str(ELS)
-    if onSSL:
-        listenPort = listenPort + " ssl"
-    listenPort = listenPort + ";\n"
-    
-    comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", 
-                listenPort, "\n", 
-                "    access_log " + nginxLog +"/access.log;\n", 
-                "    error_log " + nginxLog +"/error.log;\n", "\n",
-                "    server_name "+ serverAddress["votingbooth"].split("://")[1].split("/")[0] + ";\n", "\n"]
-    if onSSL:
-        comments.extend(["    ssl_certificate " + sslCrt + ";\n",
-                    "    ssl_certificate_key " + sslKey + ";\n",
-                    "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
-                    "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
-                    "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
-    comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"])
+    bracketIt = nginxData[prevBracket:]
+    del nginxData[prevBracket:]
+    comments = ["    # Voting Booth" + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)
+    
     
     nginxFile.writelines(nginxData)
     nginxFile.close()
