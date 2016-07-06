@@ -1,6 +1,6 @@
 # Election Manager
 
-An Election Manager for sElect.  It allows to create, customize, and
+An Election Manager for sElect.  It allows one to create, customize, and
 remove **secure** and **verifiable** elections powered by sElect.
 
 
