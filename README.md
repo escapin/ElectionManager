@@ -1,6 +1,6 @@
 # Election Manager
 
-An Election Manager for sElect.  It allows to create, customize, and
+An Election Manager for sElect.  It allows one to create, customize, and
 remove **secure** and **verifiable** elections powered by sElect.
 
 
@@ -29,17 +29,16 @@ unique ID, a given title, and a starting/ending time. Moreover, each
 election is either *open* - the election is currently running and
 eligible voters can cast their votes -
 or *closed* - the election is over and the final result is ready and available
-(*not responding* indicates a problem communicating with the server outputting
-the election result).
+(*not responding* indicates a problem communicating with the server collecting the ballots).
 
 
 ## Usage
 
 The web interface contains the following options to manage elections:
 
-**Create Election** allows to create customized elections: Elements
-such as title, description, starting/ending time, question, and 
-list of choices can be set. Moreover, two more options can be selected:
+**Create Election** allows one to create customized elections: Attributes 
+such as title, description, starting/ending time, election question, 
+and list of choices can be set. Moreover, two more options can be selected:
 
 * _Publish list of voters_: This option shows the email addresses of
   the voters who have voted in this election (but not what they have voted
@@ -54,20 +53,23 @@ list of choices can be set. Moreover, two more options can be selected:
 and will end in two days. In this setting, some mock voters already casted their ballots.
 
 **Close Election** closes the selected election. It requires password 
-confirmation, if one was set.
+confirmation, if the password was set.
 
-**Remove Election** removes the selected election. If the election result
-needs to be saved on the server, the election must be closed first.
-It requires password confirmation, if one was set.
+**Remove Election** removes the selected election. If the election result needs 
+to be saved on the server, the election must have been previously closed. 
+It requires password confirmation, if the password was set.
 
 
-A) When the election is open, **Invite Voters to Vote** shows a link to the voting booth of the selected election,
-in order to allow eligible voters to cast their ballots.
+A) When the election is open, **Invite Voters to Vote** shows a link to the 
+voting booth web-page. To allow eligible voters to cast their ballot, invite them 
+to visit this web-page.
 
-B) Once the election is closed, **Check Election Result** shows a link to the _same_ voting booth used by the voters
-to cast their ballot, in order to allow them to check the election result. 
-This act triggers the *fully automated verification* procedure to investigate whether
-the voter's choice has been actually counted.
+B) Once the election is closed, **Check Election Result** shows a link to the same 
+voting booth web-page. To allow voters to check the election result, invite them to 
+visit this web-page, namely the _same_ web-page they used to vote.
+
+This act triggers the *fully automated verification* procedure to investigate whether the 
+voter's choice has been actually counted.
 
 
 ## Development Environment
@@ -79,12 +81,13 @@ make devenv
 ```
 
 It creates a locally runnable configuration for the
-web interface, it downloads the sElect system and creates the
-development environment for it. This operation can be reverted by
+web interface, it downloads the sElect system and creates its
+development environment. This operation can be reverted by
 `make devclean`.
 
 
-The election manager and the nginx sessions used to handle the elections created can be started by:
+The election manager and the nginx sessions used to handle the elections 
+created can be started by:
 
 ```
 ./run.sh
@@ -92,7 +95,7 @@ The election manager and the nginx sessions used to handle the elections created
 
 When starting the server for the first time, the user will be prompted
 to enter the administrator password used to manage any election (even
-those one protected by a different password).
+those protected by an user-password).
 
 
 ##### It is now possible to access the election manager by typing ``localhost:8443`` in the address bar of a browser.
@@ -106,7 +109,6 @@ The nginx sessions created can be stopped by
 
 ### Notes
 
-* The date and time on the web page are displayed in the user's machine 
-  timezone, whereas the UTC timezone is used on the server side.
-* Since the system is designed to run on https, running the system 
-  on http allows the transmission of passwords as plaintext.
+* At client side date and time are displayed in the user's machine 
+  timezone, whereas at server side the UTC timezone is used.
+* Passwords are transmitted in plaintext to the server, unless the system runs on https.
