@@ -5,6 +5,8 @@ var read = require('read');
 var fs = require('fs');
 var http = require('http');
 var mkdirp = require('mkdirp');
+var net = require('net');
+var async = require('async');
 
 //var https = require('https');
 //var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
@@ -26,92 +28,354 @@ DATA_DIR = './_data_';
 mkdirp.sync(DATA_DIR);
 
 
-/**Resume previous elections **/
-var oldSession = spawn('python', ['src/resumeElection.py']);
-oldSession.stdout.on('data', function (data) {
-	if(String(data).indexOf("OTP")>-1){
-		console.log('stdout: ' + data);
-	}
-	else if(String(data).indexOf("TLS")>-1){
-		console.log('mix stdout: ' + data);
-	}
+/***********************/
+//morgan logging
+var morgan = require('morgan');
+//change date token format
+//ex. 2011-10-05T14:48:00.000Z
+morgan.token('date', function () {
+	return new Date().toISOString()
 });
-oldSession.stderr.on('data', function (data) {
-    console.log('stderr: ' + data);
-});
+//morgan.token('task', function (req, res) { return req.body.task });
+LOGGING_DIR = DATA_DIR + '/log';
+//create the folder where the data will be stored
+mkdirp.sync(LOGGING_DIR);
+var morganLogStream = fs.createWriteStream(LOGGING_DIR + '/morgan-access.log', {flags: 'a'});
+var logger = morgan('combined', {stream: morganLogStream});
+app.use(logger);
+
+//bunyan logging
+var bunyanLogStream = fs.createWriteStream(LOGGING_DIR + '/express-bunyan.log', {flags: 'a'});
+app.use(require('express-bunyan-logger')({
+name: 'logger',
+streams: [{
+    level: 'info',
+    stream: bunyanLogStream
+    }]
+}));
+/***********************/
+
+
+// parameter keeping track of the number of mix servers
+var numMix = 0;
+var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+var maxElections = handlerConfigFile.maxNumberOfElections;
+var createdElections = handlerConfigFile.electionsCreated;
+var electionInfo;
+
+ERRLOG_FILE = DATA_DIR + '/err.log';
 
 app.post('/election', function(req, res) {
 	var task = req.body.task;
-	var value = req.body.ID;
-	var etitle = req.body.title;
-	var edesc = req.body.description;
-	var startingTime = req.body.startTime;
-	var endingTime = req.body.endTime;
-	var equestion = req.body.question;
-	var echoices = req.body["choices[]"];
-	var pass = req.body.password;
-	var rand = req.body.random;
-	var listVoters = req.body.publishVoters;
 	
-	var session = null;
-	if (task === "complete"){
+	if((task === "complete" || task === "simple") && createdElections < maxElections) {
+		// add the the async queue the task to be performed
+		pythonQueue.push(req, function(data){
+			res.end(data);
+		});
+	}
+	else if(task === "complete" || task === "simple"){
+		 res.end("Max Number of Elections handled by the server reached. Remove an election (if possible) or wait until an authorized user does it.");
+	}
+	else if(task === "remove"){
+		// add the the async queue the task to be performed
+		pythonQueue.push(req, function(data){
+			res.end(data);
+		});
+	}
+	else{
+		res.end("Specify wether to create a mock Election or a customized Election");
+	}
+	
+});
+app.get('/election', function(req, res) {
+	console.log('accessing');
+	res.send({ready: true});
+});
+		
+/**
+ * Create a ghost server and let it listen
+ * to a port to check if the port is in use.
+ */
+var portInUse = function(port){
+	var ghost = net.createServer();
+	ghost.listen(port, function(err){
+		ghost.once('close', function(){
+			return false;
+		});
+		ghost.close();
+	});
+	ghost.on('error', function(err){
+		if(err.code !== 'EADDRINUSE'){
+			return err;
+		}
+		return true;
+	})
+	ghost.close()
+	return false;
+};
+
+var prevTime = new Date();
+var prevProc = "";
+function logError(data, callback){
+	var time =  new Date();
+	if(time.getTime() - prevTime.getTime() > 1000 || data.proc != prevProc){
+		prevTime = time;
+		prevProc = data.proc;
+		data.err = "\n[ " + time + " ]:\n" + "error  at process: " + data.proc + "\n\n" + data.err; 
+		console.log("[ " + time + " ]:\n an error occured, logged in " + ERRLOG_FILE + "\n");
+	}
+	fs.appendFile(ERRLOG_FILE, data.err, {encoding:'utf8'}, function(error){
+		if(error){
+			console.log("writing to "+ERRLOG_FILE+" failed while trying to write: " + data);
+			callback(error);
+		}
+		else{
+			callback();
+		}
+	});
+}
+var logErrQueue = async.queue(logError, 1);
+
+
+/**
+ * Dispatcher which calls the proper python script depending on the task to perform.
+ * Each task has to be run sequentially (asynchronously).
+ */
+
+function spawnServer(req, callback){
+	var task = req.body.task;
+	if((task === "complete" || task === "simple") && createdElections >= maxElections){
+		 callback("Max Number of Elections handled by the server reached. Remove an election (if possible) or wait until an authorized user does it.");
+		 return;
+	}
+	/**
+	 * the "retry" task is only called in case "EADDRINUSE" error
+	 * happens during the spawning of a servers.
+	 * In the old version of nodejs, there exists a documented bug where nodejs
+	 * return "EADDRINUSE" even if the port is actually free.
+	 * This method copes with this issue.
+	 */
+	if(task === "retry"){
+		var errPort = req.errPort
+		
+		console.log("\nPort " + errPort + " in use, attempting to start server on different port:")
+		var newPort = "placeholder";
+		//start new server with different port
+	    var reSession = spawn('python', ['src/restartServer.py', errPort, newPort]);
+	    reSession.stdout.on('data', function (data) {
+	    	//console.log('reSpawn STDOUT:\n\t' + data);
+	    	if(String(data).indexOf("OTP")>-1){
+	    		var time =  new Date();
+	    		console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
+	    	}
+	    	else if(String(data).indexOf("TLS")>-1){
+	    		var time =  new Date();
+	    		console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
+	    	}
+			else if(String(data).indexOf("Attempting to replace")>-1){
+				console.log('' + data);
+			}
+			else if(String(data).indexOf("Reconfigurating")>-1){
+				console.log('' + data);
+			}
+			if(String(data).indexOf("...done.")>-1){
+				callback();
+			}
+		});
+	    reSession.stderr.on('data', function (data) {
+	    	//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+	    	var dat = {err: data, proc: 'respawn'};
+	    	logErrQueue.push(dat);
+
+	    	if(String(data).indexOf("EADDRINUSE")>-1){
+				var errorPort = String(data).split(":::");
+				errorPort = parseInt(errorPort[1].split("\n")[0]);
+				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
+			}
+			else if(String(data).indexOf("handlerConfigFile")>-1){
+				callback();
+			}
+			else if(String(data).indexOf(".py")>-1){
+				callback();
+			}
+		});
+	}
+	else if(task === "resume"){
+		var oldSession = spawn('python', ['src/resumeElection.py']);
+		oldSession.stdout.on('data', function (data) {
+			if(String(data).indexOf("OTP")>-1){
+				var time =  new Date();
+				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
+			}
+			else if(String(data).indexOf("TLS")>-1){
+				var time =  new Date();
+				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
+			}
+			else if(String(data).indexOf("Resuming elections")>-1){
+				console.log('' + data);
+			}
+			if(String(data).indexOf("...done.")>-1){
+				callback();
+			}
+		});
+		oldSession.stderr.on('data', function (data) {
+			//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+			var dat = {err: data, proc: 'resume'};
+	    	logErrQueue.push(dat);
+	    	
+			if(String(data).indexOf("EADDRINUSE")>-1){
+				var errorPort = String(data).split(":::");
+				errorPort = parseInt(errorPort[1].split("\n")[0]);
+				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
+			}
+			else if(String(data).indexOf("handlerConfigFile")>-1){
+				callback();
+			}
+			else if(String(data).indexOf(".py")>-1){
+				callback();
+			}
+		});
+	}
+	else if(task === "complete"){
+		var value = req.body.ID;
+		var pass = req.body.password;
+		var ports = "placeholder";
+	    
+	    
+	    //hash password
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		req.body.password = hash;
 		var parameters = JSON.stringify(req.body);
 
-		session = spawn('python', ['src/createElection.py', parameters]);
+		//call the python script to start the servers
+		session = spawn('python', ['src/createElection.py', ports, parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
-				console.log('stdout: ' + data);
+				var time =  new Date();
+				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 			}
 			else if(String(data).indexOf("TLS")>-1){
-				console.log('mix stdout: ' + data);
+				var time =  new Date();
+				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
+			}
+			else if(String(data).indexOf("electionInfo.json:\n")>-1){
+				eleInfo = String(data).split("electionInfo.json:\n")
+				eleInfo = eleInfo[eleInfo.length-1];
+				eleInfo = JSON.parse(eleInfo);
+				eleInfo.task = "created";
+				eleInfo = JSON.stringify(eleInfo);
+				callback(eleInfo);
 			}
 		});
 		session.stderr.on('data', function (data) {
-		    console.log('stderr: ' + data);
-		    res.end(data);
-		});
+			//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+			var dat = {err: data, proc: 'complete'};
+	    	logErrQueue.push(dat);
 
+	    	if(String(data).indexOf("EADDRINUSE")>-1){
+				var errorPort = String(data).split(":::");
+				errorPort = parseInt(errorPort[1].split("\n")[0]);
+				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
+			}
+		});
 		session.on('exit', function (code) {
-		    console.log('child process exited with code ' + code);
-		    if(code === 0){
-		    	res.end("created");
-		    }
-		    else{
-		    	res.end("error code" + code)
+		    console.log('complete child process exited with code ' + code);
+		    if(code !== 0){
+		    	callback('{"error": "An error occurred while creating an election: error code ' + code + '. Try again!"}');
 		    }
 		});
+		/**
+		session.on('exit', function (code) {
+		    console.log('complete child process exited with code ' + code);
+		    if(code === 0){
+		    	createdElections = createdElections + 1;
+		    	callback("created");
+		    }
+		    else{ // an error in createElection.py occurred
+		    	callback("An error occurred while creating an election. Try again!");
+			//res.end("error code" + code) //only for debugging
+		    }
+		});
+		**/
 	}
-	else if (task === "simple") {
-		session = spawn('python', ['src/createElection.py']);
+	else if(task === "simple"){
+		var value = req.body.ID;
+		var pass = req.body.password;
+		var ports = "placeholder";
+
+		//call the python script to start the servers
+	    var session = spawn('python', ['src/createElection.py', ports]);
+		session.stdout.on('data', function (data) {
+			if(String(data).indexOf("OTP")>-1){
+				var time =  new Date();
+				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
+			}
+			else if(String(data).indexOf("TLS")>-1){
+				var time =  new Date();
+				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
+			}
+			else if(String(data).indexOf("electionInfo.json:\n")>-1){
+				eleInfo = String(data).split("electionInfo.json:\n")
+				eleInfo = eleInfo[eleInfo.length-1];
+				eleInfo = JSON.parse(eleInfo);
+				eleInfo.task = "created";
+				eleInfo = JSON.stringify(eleInfo);
+				callback(eleInfo);
+			}
+		});
+		session.stderr.on('data', function (data) {
+			//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+			var dat = {err: data, proc: 'simple'};
+	    	logErrQueue.push(dat);
+
+	    	if(String(data).indexOf("EADDRINUSE")>-1){
+				var errorPort = String(data).split(":::");
+				errorPort = parseInt(errorPort[1].split("\n")[0]);
+				pythonQueue.push({body: {task: "retry"}, errPort: errorPort});
+			}
+		});
+		session.on('exit', function (code) {
+		    console.log('simple child process exited with code ' + code);
+		    if(code !== 0){
+		    	callback('{"error": "An error occurred while creating an election: error code ' + code + '. Try again!"}');
+		    }
+		});
+		/**
+		session.on('exit', function (code) {
+		    console.log('simple child process exited with code ' + code);
+		    if(code === 0){
+		    	createdElections = createdElections + 1;
+		    	callback("created");
+		    }
+		    else{ // an error in createElection.py occurred
+		    	callback("An error occurred while creating an election: error code " + code + ". Try again!");
+			//res.end("error code" + code) //only for debugging
+		    }
+		});
+		**/
+	}
+	else if(task === "remove"){
+		var value = req.body.ID;
+		var pass = req.body.password;
 		
-		session.stdout.on('data', function (data) {
-			if(String(data).indexOf("OTP")>-1){
-				console.log('stdout: ' + data);
-			}
-			else if(String(data).indexOf("TLS")>-1){
-				console.log('mix stdout: ' + data);
-			}
-		});
-		session.stderr.on('data', function (data) {
-		    console.log('stderr: ' + data);
-		    res.end(data);
-		});
-
-		session.on('exit', function (code) {
-		    console.log('child process exited with code ' + code);
-		    if(code === 0){
-		    	res.end("created");
-		    }
-		    else{
-		    	res.end("error code" + code)
-		    }
-		});
-	}
-	else if (task === "remove") {
 		var passList = JSON.parse(fs.readFileSync("_data_/pwd.json"));
+		if(!passList.hasOwnProperty(value)){
+			//means the election already has been removed by another request,
+			//therefore browser should act as if it had been removed by 
+			//its own request.
+			callback("removed");
+			return;
+		}
 		var match = passList[value];
 		var hash = match;
 		if(match !== ""){
@@ -125,26 +389,59 @@ app.post('/election', function(req, res) {
 		}
 		pass = hash;
 		
+		//call the python script to shutdown the servers
 		session = spawn('python', ['src/removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
-			console.log('stdout: ' + data);
+			if(String(data).indexOf("electionInfo.json:\n">-1)){
+				eleInfo = String(data).split("electionInfo.json:\n")
+				eleInfo = eleInfo[eleInfo.length-1];
+				eleInfo = JSON.parse(eleInfo);
+				eleInfo.task = "removed";
+				eleInfo = JSON.stringify(eleInfo);
+				callback(eleInfo);
+			}
+			else{
+				console.log('remove stdout: ' + data);
+			}
 		});
 		session.stderr.on('data', function (data) {
-		    console.log('stderr: ' + data);
-		    res.end(data);
+			//log the error in ERRLOG_FILE, async queue
+	    	//to make sure it's not being written to 
+	    	//simultaneously
+			var dat = {err: data, proc: 'remove'};
+	    	logErrQueue.push(dat);
 		});
-
 		session.on('exit', function (code) {
-		    console.log('child process exited with code ' + code);
+		    console.log('remove child process exited with code ' + code);
+		    if(code !== 0){
+		    	callback('{"error": "An error occurred while removing an election: error code ' + code + '. Try again!"}');
+		    }
+		});
+		/**
+		session.on('exit', function (code) {
+		    console.log('remove child process exited with code ' + code);
 		    if(code === 0){
-		    	res.end("removed");
+		    	createdElections = createdElections - 1;
+		    	callback("removed");
 		    }
 		    else{
-		    	res.end("error code" + code)
+		    	callback("An error occurred while removing an election: error code " + code + ". Try again!");
 		    }
 		});
+		**/
 	}
-});
+}
+
+// the async queue with the dispatcher (worker) function as parameter.
+// Since no tasks can be performed in parallel, only one
+// dispatcher can run at any time
+var pythonQueue = async.queue(spawnServer, 1);
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+////////Start the server up
+
+// Resume running/closed (not removed) elections
+pythonQueue.push({body: {task: "resume"}, errPort: -1});
 
 
 // Test if the file with stored passwords exists and is a valid json file
@@ -198,11 +495,21 @@ function start(){
 	    console.log('Serving on, port :%d', server.address().port);
 	});
 	try{
-		handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var manifest = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/ElectionManifest.json"));
+		var mixServers = manifest["mixServers"];
+		numMix = mixServers.length;
+	}
+	catch(e){
+		console.log("../_handlerConfigFiles_/ElectionManifest.json is missing or corrupt ([mixServers] field not found)");
+	}
+	try{
+		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
 		var usePorts = handlerConfigFile["available-ports"];
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
-				"Therefore you can run up to " + Math.floor((usePorts[1]-usePorts[0])/5) + " elections at the same time," +
-						"\nbecause it runs 5 different servers for each election.\n");
+				"Each election needs at least 3 different servers: a collecting server, a bulletin board, and a mix server.\n" +
+			    "However, the number of mix servers is not fixed: we suggest to use 3 to 5 mix servers for each elections.\n" +
+			    "Assuming you use 3 mix servers, you can run up to *" + Math.floor((usePorts[1]-(usePorts[0]+1))/6) + "* elections at the same time " + 
+			    "(if your hardware supports them).\n");
 	}
 	catch(e){
 		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");

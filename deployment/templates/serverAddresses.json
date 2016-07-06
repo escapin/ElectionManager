@@ -1,12 +1,15 @@
 {
 	"electionHandler": "http://localhost/electionManager",
 	"server-address": {
-        "mix1": "http://localhost", 
-        "mix2": "http://localhost", 
-        "mix0": "http://localhost", 
+        "mix1": "http://localhost/m1", 
+        "mix2": "http://localhost/m2", 
+        "mix0": "http://localhost/m0", 
         "authbooth": "http://localhost/auth", 
-        "bulletinboard": "http://localhost", 
-        "collectingserver": "http://localhost", 
+        "bulletinboard": "http://localhost/bb", 
+        "collectingserver": "http://localhost/cs", 
         "votingbooth": "http://localhost"
-    }
+    },
+    "ssl": false,
+    "ssl-key": "PATH/TO/unencrypted.key",
+    "ssl-crt": "PATH/TO/chained.crt"
 }

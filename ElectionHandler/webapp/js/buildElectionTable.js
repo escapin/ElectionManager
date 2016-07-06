@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////Builds the HTML Table from ElectionIDs
 
-function buildElectionTable(res) {
+function buildElectionTable(elections, res) {
 	
 	// expected time format is 'yy-mm-dd h:min [options not used yet]' in UTC+000 
 	var resolveTime = function(time){
@@ -38,12 +38,12 @@ function buildElectionTable(res) {
     	});
     }
 	
+    
     //////////////////////////////////////////////////////////////////////////////
     /// Build the election table
 	var electionConf = JSON.parse(electionConfigRaw);	
-	var elections = electionConf.elections;
 	
-	var collectingServer = "http://localhost:"+electionConf["nginx-port"];
+	var collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 	//don't use port 80 if it's not deployed
 	if(electionConf.deployment){
 		var sAddresses = JSON.parse(sAddressesRaw);
@@ -64,7 +64,7 @@ function buildElectionTable(res) {
 	
 	for (var i = 0 ; i < elections.length ; i++) {
 		var elecID = elections[i].electionID;
-		var elecStatus = 'waiting';
+		var elecStatus = 'waiting...';
 		var startingTime = resolveTime(elections[i].startTime)
 		var endingTime = resolveTime(elections[i].endTime)
 		var ELS = elections[i].ELS
@@ -77,14 +77,13 @@ function buildElectionTable(res) {
 		row$.append($('<td id='+elecID+'/>').html(elecStatus));
 		$("#elections").append(row$);
       
-		getElectionStatus(elecID, function (eleID, stat){
+		setTimeout(getElectionStatus(elecID, ELS, function (eleID, ELS, stat){
 			document.getElementById(eleID).innerHTML = stat;
-		});
-      
+		}),3000);
+        
 	}     
   
-  
-  function getElectionStatus(eleID, callback) {
+  function getElectionStatus(eleID, ELS, callback) {
       // Detemine the status of the system: (not-yet) open/closed, 
       // by quering the collecting server.
       // Depending on the state, either the voting tab or the
@@ -93,16 +92,18 @@ function buildElectionTable(res) {
       // The state is detemined in a (too?) simple way, by
       // checking if the final server has ready result.
       //
+
  	 var stat = 'what';
- 	 var url = collectingServer+'/'+eleID+'/collectingServer/status';
+ 	 var url = collectingServer+'/'+ELS+'/status';
       $.get(url)
        .fail(function () { 
-          var stat = 'no response';
-          callback(eleID, stat)
+          //var stat = 'no response';
+    	  var stat = 'waiting...';
+          callback(eleID, ELS, stat)
         })
        .done(function (result) {  // we have some response
           var stat = result.status;
-          callback(eleID, stat)
+          callback(eleID, ELS, stat)
         });
 
   }
@@ -114,14 +115,26 @@ function buildElectionTable(res) {
   var electionStates = window.setInterval(function() {
  	 for (var i = 0 ; i < elections.length ; i++) {
      	 var elecID = elections[i].electionID;
-     	 getElectionStatus(elecID, function (eleID, stat){
+     	 var ELS = elections[i].ELS;
+     	 getElectionStatus(elecID, ELS, function (eleID, ELS, stat){
      		 document.getElementById(eleID).innerHTML = stat;
      	 });
  	 }
-  }, 1000);
+  }, 3000);
   
   $('#welcome').show();
   
   res(electionStates);
   
 }
+String.prototype.width = function(font) {
+	  var f = font || '12px arial',
+	      o = $('<div>' + this + '</div>')
+	            .css({'position': 'absolute', 'float': 'left', 'white-space': 'nowrap', 'visibility': 'hidden', 'font': f})
+	            .appendTo($('body')),
+	      w = o.width();
+
+	  o.remove();
+
+	  return w;
+	}	

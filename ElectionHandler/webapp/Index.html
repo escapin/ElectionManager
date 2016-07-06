@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
 <title>ElectionManager</title>
-<script src="js/ElectionConfigFile.js"></script>
+<script src="js/ElectionConfigFile.js" id="rawConfig"></script>
 <script src="js/jquery-1.11.1.min.js"></script>
 <script src="js/electionButtons.js"></script>
 <script src="js/buildElectionTable.js"></script>
@@ -245,12 +246,7 @@
           <p>
           <b>Create Election</b> allows one to create customized elections: Attributes such as title, description, starting/ending time, 
 	  election question, and list of choices can be set.
-<!--	  Moreover, two more options can be selected:<br><br>
-          <i>Publish list of voters:</i> This option shows the email addresses of the voters who have voted in this election 
-	  (but not what they have voted for), once the election is closed.<br>
-          <i>User providing verification code:</i> The voter will provide part of the verification code to check whether her vote has been properly 
-	  counted. In this way, not even the voting booth needs to be trusted.<br> -->
-          </p>  
+	  </p>  
           <p><b>Set up a Mock Election</b> creates a mock election from a predetermined template (the election's attributes are already set) 
 	    which started <em>a day ago</em> and will end <em>in two days</em>. In this setting, some mock voters have already casted their ballots.</p>
           <p><b>Close Election</b> closes the selected election. It requires password confirmation, if the password was set.</p>   
@@ -259,9 +255,6 @@
           <p>A) When the election is open, <b>Invite Voters to Vote</b> shows a link to the Voting Booth web-page. To allow eligible voters to cast their ballot, invite them to visit this web-page.</p>  
           <p>B) Once the election is closed, <b>Check Election Result</b> shows a link to the <em>same</em> Voting Booth web-page. To allow voters to check the election result, invite them to visit 
 	    this web-page, namely the <em>same</em> web-page they used to vote.
-<!--	    <br>
-	    This act triggers the <em>fully automated verification</em> procedure to investigate whether the voter's choice has been actually counted.</p>  
--->
           </p>
           <input id='closehelp' style="margin-left: 43%;" type="button" class="pure-button pure-button-primary" value="Ok"></input>
 

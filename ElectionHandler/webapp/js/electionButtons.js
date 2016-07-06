@@ -13,14 +13,16 @@ function electionButtons() {
     var rows;
     var row;
     var value;
+    var ELS
 	var task;
     
 	var elecType = "none";
 	var buttonEnable = null;
 	var votingStatus = null;
 	var electionStatus = null;
+	var preload;
 	/* Ensure the table is always up to date */
-	window.onload = function(){reloading();}
+	window.onload = function(){reloading(false);}
 	
 	//////////////////////////////////////////////////////////////////////////////
 	/// PAGE 1
@@ -32,13 +34,15 @@ function electionButtons() {
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
-			if (data == "created") {
+			data = JSON.parse(data);
+			if (data.task == "created") {
+				elections = data.elections;
 				value = null;
-				reloading();
+				reloading(true);
 				$('#processing').hide();
 			}
 			else{
-				alerting(data);
+				alerting(data.error);
 				$('#processing').hide();
 			}
 		  })
@@ -60,14 +64,16 @@ function electionButtons() {
     		 .done(function(data){
     			$('#processing').fadeOut(150);
     			enableButtons();
-    			if (data == "removed") {
+    			data = JSON.parse(data);
+    			if (data.task == "removed") {
     				window.clearInterval(votingStatus);
+    				elections = data.elections;
     				value = null;
-    				reloading();
+    				reloading(true);
     				$('#processing').hide();
     			}
     			else{
-    				alerting(data);
+    				alerting(data.error);
     				$('#processing').hide();
     			}
     		  })
@@ -78,36 +84,127 @@ function electionButtons() {
     		 });
     	}
 	}
-
 	
 	function closeElection(pass) {
 		if(value == null){
     		alerting("no election selected");
     	}
     	else{
+    		closingID = value;
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		$.get(protocol+"admin:"+pass+"@"+collectingServer+"/"+value+"/collectingServer/admin/close")
-    		 .done(function(data){
-    			enableButtons();
-    			$('#processing').fadeOut(150);
-    			if(!data.ok){
-    				alerting("election already closed", false);
-    			}
-    		  })
-    		 .fail(function(data){
-    			enableButtons();
-    			$('#processing').hide();
-    			if(data.status===502){
-    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+value+"/collectingServer", false);
-    			}
-    			else if(data.status===401){
-    				alerting("wrong password", false);
-    			}
-    		 });
+    		$.ajax({type: "GET", 
+    				url: protocol+collectingServer+"/"+ELS+"/admin/close",
+    				dataType: 'json',
+    				headers: {"Authorization": "Basic " + btoa("admin" + ":" + pass)},
+    				//beforeSend: function (xhr){ 
+    			    //    xhr.setRequestHeader('Authorization', "Basic " + btoa("admin" + ":" + pass)); 
+    			    //},
+    				success: function(data){
+    	     			enableButtons();
+    	     			$('#processing').fadeOut(150);
+    	     			if(!data.ok){
+    	     				alerting("election already closed", false);
+    	     			}
+    	     			else{
+    	     				showVotingState(closingID);
+    	     			}
+    	     		  },
+    	     		error: function(data){
+    	    			enableButtons();
+    	    			$('#processing').hide();
+    	    			if(data.status===502){
+    	    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+ELS+"/", false);
+    	    			}
+    	    			else if(data.status===401){
+    	    				alerting("wrong password", false);
+    	    			}
+    	     		}
+    	     	});
     		enableButtons();
     	}
 	}
+	
+    function advancedElection() {
+    	disableButtons();
+		var ename = $('#e-name').val();
+		var edesc = $('#e-desc').val();
+		var startingTime = $('#start-time').val();
+		var endingTime = $('#end-time').val();
+		$('#processing').fadeIn(150);
+		$.post(electionManager+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
+		 .done(function(data){
+			$('#processing').fadeOut(150);
+			enableButtons();
+			data = JSON.parse(data);
+			if (data.task == "created") {
+				elections = data.elections;
+				value = null;
+				reloading(true);
+				$('#processing').hide();
+				$('#advanced').fadeOut(150);
+				$('welcome').show();
+			}
+			else{
+				alerting(data.error);
+				$('#processing').hide();
+			}
+		  })
+		 .fail(function(){
+			 enableButtons();
+			 $('#processing').hide();
+			 alerting('cannot connect to ElectionHandler at '+ electionManager);
+		 });
+    }
+    
+    function completeElection(pass, rand) {
+    	window.clearInterval(buttonEnable);
+    	disableButtons();
+    	var listVoters = document.getElementById("listVoters").checked;
+    	changeCulture("de-DE");
+		var ename = $('#e-name').val();
+		var edesc = $('#e-desc').val();
+    	var sdate = $('#s-date').val();
+    	var edate = $('#e-date').val();
+        var stime = $('#s-time').val();
+        var etime = $('#e-time').val();
+        changeCulture("en-EN");
+        var startingTime = resolveTimeUTC(sdate + " " + stime) + " UTC+0000";
+        var endingTime = resolveTimeUTC(edate + " " + etime) + " UTC+0000";
+		var equestion = $('#e-question').val();
+		var electionCh = {};
+		var echoices = [];
+		for(i = 1; i <= nchoices; i++){
+			echoices.push($('#choice'+i).val());
+		}
+		electionCh.choices = echoices;
+		$('#processing').fadeIn(150);
+		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
+		 .done(function(data){
+			$('#processing').fadeOut(150);
+			enableButtons();
+			data = JSON.parse(data);
+			if (data.task == "created") {
+				elections = data.elections;
+				value = null;
+				reloading(true);
+				$('#complete').hide(150);
+				$('#processing').hide();
+			}
+			else{
+				alerting(data.error, false);
+				$('#processing').hide();
+			    buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
+			}
+		  })
+		 .fail(function(){
+			 enableButtons();
+			 $('#processing').hide();
+			 alerting('cannot connect to ElectionHandler at '+ electionManager, false);
+			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
+		 });
+    }
+    
     
     //////////////////////////////////////////////////////////////////////////////
     /// PAGE 2
@@ -143,37 +240,6 @@ function electionButtons() {
             }
         };
     }	
-    
-    
-    function advancedElection() {
-    	disableButtons();
-		var ename = $('#e-name').val();
-		var edesc = $('#e-desc').val();
-		var startingTime = $('#start-time').val();
-		var endingTime = $('#end-time').val();
-		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
-		 .done(function(data){
-			$('#processing').fadeOut(150);
-			enableButtons();
-			if (data == "created") {
-				value = null;
-				reloading();
-				$('#processing').hide();
-				$('#advanced').fadeOut(150);
-				$('welcome').show();
-			}
-			else{
-				alerting(data);
-				$('#processing').hide();
-			}
-		  })
-		 .fail(function(){
-			 enableButtons();
-			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ electionManager);
-		 });
-    }
 	
     
     ////////////////////////////////////////////////////////////////////////////////
@@ -247,52 +313,7 @@ function electionButtons() {
             }
         };
     }
-	
-    function completeElection(pass, rand) {
-    	window.clearInterval(buttonEnable);
-    	disableButtons();
-    	var listVoters = document.getElementById("listVoters").checked;
-    	changeCulture("de-DE");
-		var ename = $('#e-name').val();
-		var edesc = $('#e-desc').val();
-    	var sdate = $('#s-date').val();
-    	var edate = $('#e-date').val();
-        var stime = $('#s-time').val();
-        var etime = $('#e-time').val();
-        changeCulture("en-EN");
-        var startingTime = resolveTimeUTC(sdate + " " + stime) + " UTC+0000";
-        var endingTime = resolveTimeUTC(edate + " " + etime) + " UTC+0000";
-		var equestion = $('#e-question').val();
-		var electionCh = {};
-		var echoices = [];
-		for(i = 1; i <= nchoices; i++){
-			echoices.push($('#choice'+i).val());
-		}
-		electionCh.choices = echoices;
-		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
-		 .done(function(data){
-			$('#processing').fadeOut(150);
-			enableButtons();
-			if (data == "created") {
-				value = null;
-				reloading();
-				$('#complete').hide(150);
-				$('#processing').hide();
-			}
-			else{
-				alerting(data, false);
-				$('#processing').hide();
-			    buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
-			}
-		  })
-		 .fail(function(){
-			 enableButtons();
-			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ electionManager, false);
-			 buttonEnable = window.setInterval(enableWhenNotEmptyChoices($('#compl-create')), 100);
-		 });
-    }
+
     
     ////////////////////////////////////////////////////////////////
     /// Button Handlers
@@ -322,17 +343,18 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-    		//window.location.href = votingBooth+"/"+value+"/votingBooth/";
     		getElectionStatus(value, function (eleID, stat){
     			if(stat === "open"){
     				document.getElementById("inviteVoters").style.visibility = "visible";
-    	    		document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		//document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
+    	    		//document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS;
+    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS;
     			}
     			else if(stat === "closed"){
     				document.getElementById("checkResult").style.visibility = "visible";
-    	    		document.getElementById("resultPage").href = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS;
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS;
     			}
     			else{
     				alerting("Server is not responding");
@@ -347,7 +369,6 @@ function electionButtons() {
     		alerting("no election selected");
     	}
     	else{
-			//window.location.href = collectingServer+"/"+value+"/collectingServer/admin/close";
 			document.getElementById("electionClose").style.visibility = "visible";
 		}
 	});
@@ -430,7 +451,7 @@ function electionButtons() {
 	        window.clearInterval(i);
 		}
 		if($('#do-reload').html()==="true"){
-			reloading();
+			reloading(false);
 		}
 	});
 
@@ -458,11 +479,7 @@ function electionButtons() {
 		document.getElementById("electionDelete").style.visibility = "hidden";
 		verifylayer("remove");
 	});
-	
-	this.winOpen = function(){
-        window.open(collectingServer+"/"+value+"/collectingServer/admin/close");
-    	document.getElementById("electionClose").style.visibility = "hidden";
-    }
+
 	
     ////////////////////////////////////////////////////////////////
     /// Other Handlers
@@ -480,7 +497,19 @@ function electionButtons() {
 	/* Reload a sourcefile */
     function reload_js(src) {
         $('script[src="' + src + '"]').remove();
-        $('<script>').attr('src', src).appendTo('head');
+        //$('<script>').attr('src', src).appendTo('head');
+        var script = document.createElement('script');
+        script.src = src;
+        script.id = 'rawConfig';
+        document.head.appendChild(script);
+        verify_js(src);
+    }
+    function verify_js(src){
+    	script = document.getElementById('rawConfig');
+    	script.onload = function() {
+    		eval(script);
+            reInit(true);
+        };
     }
 	
     /* Return true if integer */
@@ -560,30 +589,41 @@ function electionButtons() {
 	}
 	
 	/* Load configs and enable selecting rows */
-	function reloading(){
+	function reloading(changed){
 		value = null;
 		$("#vote").prop('disabled', true);
 		$("#close").prop('disabled', true);
 		$("#remove").prop('disabled', true);
 		document.getElementById("vote").style.visibility = "hidden";
 		
-		reload_js("js/ElectionConfigFile.js");
-
+		if(changed){
+			preload = electionConfigRaw;
+			reload_js("js/ElectionConfigFile.js");
+		}
+		else{
+			electionConf = JSON.parse(electionConfigRaw);
+			elections = electionConf.elections;
+			reInit(false);
+		}
+	}
+	function reInit(changed){
+		
+		//if(changed && (typeof electionConfigRaw === 'undefined' || electionConfigRaw === preload)){
+		//	setTimeout(reload_js("js/ElectionConfigFile.js"), 100);
+		//	return;
+		//}
 		 window.clearInterval(electionStatus);
-	     buildElectionTable(function (electionStates){
+	     buildElectionTable(elections, function (electionStates){
 	  		 electionStatus = electionStates;
 	  	 });
 	     
 	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
 	     document.getElementById('trackDescend').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
 	     
-	     electionConf = JSON.parse(electionConfigRaw);
-		 elections = electionConf.elections;
 	     
 		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
-		 votingBooth = "http://localhost:"+electionConf["nginx-port"];
-		 collectingServer = "http://localhost:"+electionConf["nginx-port"];
-		 lastMix = "http://localhost:"+electionConf["nginx-port"];
+		 votingBooth = "http://localhost";
+		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 		
 		//don't use port 80 if it's not deployed
 		 if(electionConf.deployment === true){
@@ -602,9 +642,10 @@ function electionButtons() {
 			protocol = '';
 			collectingServer = tmp[0]
 		}
+		
 			/* Create 'click' event handler for rows */
 	    rows = $('tr').not(':first');
-
+	    
 	    rows.on('click', function(e) {
 	        row = $(this);
 	        
@@ -613,6 +654,15 @@ function electionButtons() {
 	        
 	        value = $(this).children()["0"].innerHTML; 
 	        
+	        // read the time stamp for the election address
+	        var i = 0;
+    		for(i = 0; i < elections.length ; i++) {
+    			if(elections[i].electionID == value){
+    				break;
+    			}
+    		}
+	        ELS = elections[i]["ELS"];
+
 			$("#remove").prop('disabled', null);
 			
 			// Show Invite Voters or Check Result button
@@ -621,7 +671,7 @@ function electionButtons() {
 			showVotingState(value);
 		    votingStatus = window.setInterval(function() {
 		    	showVotingState(value);
-		     }, 1000);
+		     }, 3000);
 		    
 	        
 	    });
@@ -893,8 +943,6 @@ function electionButtons() {
 				$("#close").prop('disabled', null);
 	    		document.getElementById("vote").value = "Invite Voters to Vote";
 	    		document.getElementById("vote").style.visibility = "visible";
-			//console.log( $("#removeMsg").html() );
-			//console.log( $("#removeOpen").html() );
 			// inserting the hidden message with id='removeOpen' inside the HTML tag with id='removeMsg'
 			$("#removeMsg").html( $("#removeOpen").html() );
 			}
@@ -920,7 +968,7 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = protocol + collectingServer+'/'+eleID+'/collectingServer/status';
+	 	 var url = protocol + collectingServer+'/'+ELS+'/status';
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';
@@ -930,8 +978,6 @@ function electionButtons() {
 	            var stat = result.status;
 	            callback(eleID, stat)
 	          });
-
-
-	  }
+	}
 	
 }
