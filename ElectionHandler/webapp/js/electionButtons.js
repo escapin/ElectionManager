@@ -348,13 +348,13 @@ function electionButtons() {
     				document.getElementById("inviteVoters").style.visibility = "visible";
     	    		//document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
     	    		//document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS;
-    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS;
+    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS+"/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS+"/";
     			}
     			else if(stat === "closed"){
     				document.getElementById("checkResult").style.visibility = "visible";
-    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS;
-    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS;
+    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS+"/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS+"/";
     			}
     			else{
     				alerting("Server is not responding");
