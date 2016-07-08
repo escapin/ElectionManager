@@ -471,7 +471,7 @@ if "http://localhost" not in serverAddress["collectingserver"]:
         counter = counter + 1
     bracketIt = nginxData[prevBracket:]
     del nginxData[prevBracket:]
-    comments = ["    # Voting Booth" + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
+    comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)
