@@ -348,13 +348,13 @@ function electionButtons() {
     				document.getElementById("inviteVoters").style.visibility = "visible";
     	    		//document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
     	    		//document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS;
-    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS;
+    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS +"/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS +"/";
     			}
     			else if(stat === "closed"){
     				document.getElementById("checkResult").style.visibility = "visible";
-    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS;
-    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS;
+    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS+"/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS+"/";
     			}
     			else{
     				alerting("Server is not responding");
@@ -622,7 +622,7 @@ function electionButtons() {
 	     
 	     
 		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
-		 votingBooth = "http://localhost";
+		 votingBooth = "http://localhost:"+electionConf["nginx-port"];
 		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 		
 		//don't use port 80 if it's not deployed
