@@ -1,20 +1,19 @@
 import os
 import json
+import collections
 import shutil
 from shutil import ignore_patterns
-import collections
 import errno
 import datetime
+import time
 import sys
-import hashlib
-import codecs
 import subprocess
 from subprocess import check_output
-import time
 import random
 import string
 import re
-import timeit
+import jwrite
+import electionops
 
 def copy(src, dest):
     try:
@@ -25,101 +24,6 @@ def copy(src, dest):
             shutil.copy(src, dest)
         else:
             print("Directory not copied. Error: %s" % e)
-            
-def link(dest):
-    os.mkdir(dstroot+"/mix/00")
-    os.mkdir(dstroot+"/mix/01")
-    os.mkdir(dstroot+"/mix/02")
-    os.symlink(dstroot+"/MixServer/run.sh", dstroot+"/mix/00/run.sh")
-    os.symlink(dstroot+"/MixServer/cleanData.sh", dstroot+"/mix/00/cleanData.sh")
-    os.symlink(dstroot+"/MixServer/mixServer.js", dstroot+"/mix/00/mixServer.js")
-    os.symlink(dstroot+"/templates/config_mix00.json", dstroot+"/mix/00/config.json")
-    
-    os.symlink(dstroot+"/MixServer/run.sh", dstroot+"/mix/01/run.sh")
-    os.symlink(dstroot+"/MixServer/cleanData.sh", dstroot+"/mix/01/cleanData.sh")
-    os.symlink(dstroot+"/MixServer/mixServer.js", dstroot+"/mix/01/mixServer.js")
-    os.symlink(dstroot+"/templates/config_mix01.json", dstroot+"/mix/01/config.json")
-    
-    os.symlink(dstroot+"/MixServer/run.sh", dstroot+"/mix/02/run.sh")
-    os.symlink(dstroot+"/MixServer/cleanData.sh", dstroot+"/mix/02/cleanData.sh")
-    os.symlink(dstroot+"/MixServer/mixServer.js", dstroot+"/mix/02/mixServer.js")
-    os.symlink(dstroot+"/templates/config_mix02.json", dstroot+"/mix/02/config.json")
-    
-    os.remove(dstroot + votingManifest)
-    os.symlink(dstroot + manifest, dstroot + votingManifest)
-
-def copyFast(src, dest):
-    if sys.platform.startswith("win"):
-        os.system("xcopy /s " + src + " " + dest)
-    else:
-        os.system("cp -rf " + src + " " + dest)
-
-def jwrite(src, key, value):
-    try:
-        jsonFile = open(src, 'r+')
-        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        jsonData[key] = value
-        jsonFile.seek(0)
-    except IOError:
-        jsonFile = open(src, 'w')
-        jsonData = {key: value}
-    json.dump(jsonData, jsonFile, indent = 4)
-    jsonFile.truncate()
-    jsonFile.close()
-    
-def jwriteAdv(src, key, value, pos="", key2=""):
-    if pos is "" and key2 is "":
-        jwrite(src, key, value)
-    else:
-        try:
-            jsonFile = open(src, 'r+')
-            jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-            if key2 is "":
-                jsonData[key][pos] = value
-            else:
-                jsonData[key][pos][key2] = value
-            jsonFile.seek(0)
-        except IOError:
-            jsonFile = open(src, 'w')
-            if key2 is "":
-                jsonData = {key: {pos: value}}
-            else:
-                jsonData = {key: {key2: value}}
-            jsonData = {key: value}
-        json.dump(jsonData, jsonFile, indent = 4)
-        jsonFile.truncate()
-        jsonFile.close()
-        
-def jAddList(src, key, value):
-    try:
-        jsonFile = open(src, 'r+')
-        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        iDs = jsonData[key]
-        iDs.append(value)
-        jsonData[key] = iDs
-        jsonFile.seek(0)
-    except IOError:
-        jsonFile = open(src, 'w')
-        jsonData = {key: value}
-    json.dump(jsonData, jsonFile, indent = 4)
-    jsonFile.truncate()
-    jsonFile.close()
-    
-def jAddListAndReturn(src, key, value):
-    try:
-        jsonFile = open(src, 'r+')
-        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        iDs = jsonData[key]
-        iDs.append(value)
-        jsonData[key] = iDs
-        jsonFile.seek(0)
-    except IOError:
-        jsonFile = open(src, 'w')
-        jsonData = {key: value}
-    json.dump(jsonData, jsonFile, indent = 4)
-    jsonFile.truncate()
-    jsonFile.close()
-    return jsonData
 
 def getTime():
     utcTime = datetime.datetime.utcnow()
@@ -129,93 +33,135 @@ def addSec(tm, secs):
     fulldate = tm + datetime.timedelta(seconds=secs)
     return fulldate
 
-def usePorts(num):
-    newPorts = []
-    try:
-        jsonFile = open(electionConfig, 'r')
-        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        rangePorts = jsonData["available-ports"]
-        elecs = jsonData["elections"]
-        usingPorts = []
-        for x in range (len(elecs)):
-            usingPorts.extend(elecs[x]["used-ports"]) 
-        for openPort in range(rangePorts[0], rangePorts[1]):
-            if openPort in usingPorts:
-                continue
-            newPorts.append(openPort)
-            if len(newPorts) >= num:
-                break
-        if len(newPorts) < num:
-            sys.exit("Maximum number of elections reached.")
-        jsonFile.close()
-    except IOError:
-        sys.exit("handlerConfigFile.json missing or corrupt")
-    return newPorts
 
-def getsAddress():
-    sAddress = []
-    try:
-        jsonFile = open(electionConfig, 'r')
-        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        jsonAddress = {}
-        if not deployment:
-            for x in range(numMix):
-                jsonAddress["mix"+str(x)] = "http://localhost:"+str(nginxPort)+"/m"+str(x)+"/"+str(ELS)+"/"
-            jsonAddress["collectingserver"] = "http://localhost:"+str(nginxPort)+"/cs/"+str(ELS)+"/"
-            jsonAddress["bulletinboard"] = "http://localhost:"+str(nginxPort)+"/bb/"+str(ELS)+"/"
-            jsonAddress["votingbooth"] = "http://localhost:"+str(nginxPort)+"/"+str(ELS)+"/"
-            jsonAddress["authbooth"] = "http://localhost:"+str(nginxPort)+"/auth/"
-            jsonFile.close()
+def updateKeys():
+    #update encryption keys
+    pattern="[0-9]+"
+    keyGeneratorMix_file="genKeys4mixServer.js"
+    keyGeneratorCS_file="genKeys4collectingServer.js"
+    tools_path = sElectDir + "/tools"
+    
+    keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix+1)]).splitlines()
+    
+    #write new keys to manifest and config files
+    jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["encryptionKey"], "encryption_key")
+    jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["verificationKey"], "verification_key")
+    jwrite.jwrite(sElectDir + collectingConf, "signing_key", json.loads(keys[len(keys)-1])["signingKey"])
+    jwrite.jwrite(sElectDir + collectingConf, "decryption_key", json.loads(keys[len(keys)-1])["decryptionKey"])
+    for x in range(numMix):
+        jwrite.jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["encryptionKey"], x, "encryption_key")
+        jwrite.jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["verificationKey"], x, "verification_key")
+        jwrite.jwrite(sElectDir + mixConf[x], "encryption_key", json.loads(keys[x])["encryptionKey"])
+        jwrite.jwrite(sElectDir + mixConf[x], "verification_key", json.loads(keys[x])["verificationKey"])
+        jwrite.jwrite(sElectDir + mixConf[x], "signing_key", json.loads(keys[x])["signingKey"])
+        jwrite.jwrite(sElectDir + mixConf[x], "decryption_key", json.loads(keys[x])["decryptionKey"])
+    
+    #get new keys
+    mixServerEncKey = []
+    for x in range(numMix):
+        mixServerEncKey.append(json.loads(keys[x])["encryptionKey"])
+    return mixServerEncKey
+
+def writeManifest():
+    #modify ElectionManifest, if no arguments are given, this is a mock election
+    jwrite.jwrite(sElectDir + manifest, "startTime", startingTime)
+    jwrite.jwrite(sElectDir + manifest, "endTime", endingTime)
+    jwrite.jwrite(sElectDir + manifest, "title", elecTitle)
+    jwrite.jwrite(sElectDir + manifest, "description", elecDescr)
+    jwrite.jwrite(sElectDir + manifest, "question", elecQuestion)
+    jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)  
+    jwrite.jwrite(sElectDir + manifest, "publishListOfVoters", publish)
+    jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress["collectingserver"], "URI")
+    jwrite.jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress["bulletinboard"], 0, "URI")
+    for x in range(numMix):
+        jwrite.jwriteAdv(sElectDir + manifest, "mixServers", serverAddress["mix"+str(x)], x, "URI")
+
+
+def sElectCopy(iDlength):
+    #get ID after modifying Manifest
+    while(iDlength < 40):
+        electionID = electionops.getID(sElectDir + manifest, iDlength)
+        dstroot = os.path.join(rootDirProject, "elections/" + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
+        try:
+            copy(sElectDir, dstroot)
+            electionops.link(dstroot, manifest, votingManifest)
+            break
+        except:
+            iDlength = iDlength+1
+    return (dstroot, electionID) 
+        
+        
+def sElectConfig():
+    #modify Server ports
+    for x in range(numMix):     
+        jwrite.jwrite(dstroot + mixConf[x], "port", ports[x+2])
+    jwrite.jwrite(dstroot + collectingConf, "port", ports[0])
+    jwrite.jwrite(dstroot + bulletinConf, "port", ports[1])
+    jwrite.jwrite(dstroot + votingConf, "authenticate", serverAddress["votingbooth"])
+    jwrite.jwrite(dstroot + collectingConf, "serverAdminPassword", password)
+    
+    #change user randomness if not a mock election
+    if not mockElection:
+        jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", random)
+    
+
+def createBallots():
+    #create Ballots
+    if mockElection:
+        os.mkdir(dstroot+"/CollectingServer/_data_")
+        mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
+        ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
+        for x in range(mockVoters):
+            userEmail = "user"+str(x)+"@uni-trier.de"
+            userRandom = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
+            userChoice = random.randint(0,(len(eleChoices)-1))
+            ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), electionops.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/ElectionHandler/src"))
+        ballots.wait()
+
+
+def sElectStart():
+    #start all node servers
+    subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
+    #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
+    if mockElection:
+        col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
+    else:
+        col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
+    mix = []
+    for x in range(numMix):
+        if x < 10:
+            mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/0"+str(x))))
         else:
-            jsonFile.close()
-            jsonFile = open(serverAddr, 'r')
-            jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-            addresses = jsonData["server-address"]
-            jsonAddress["collectingserver"] = addresses["collectingserver"]+"/"+str(ELS)+"/"
-            jsonAddress["bulletinboard"] = addresses["bulletinboard"]+"/"+str(ELS)+"/"
-            jsonAddress["votingbooth"] = addresses["votingbooth"]+"/"+str(ELS)+"/"
-            jsonAddress["authbooth"] = addresses["authbooth"]
-            for x in range(numMix):
-                jsonAddress["mix"+str(x)] = addresses["mix"+str(x)]+"/"+str(ELS)+"/"
-            
-            onSSL = jsonData["ssl"]
-            if onSSL:
-                sslKey = jsonData["ssl-key"]
-                sslCrt = jsonData["ssl-crt"]
-                
-        jsonFile.close()
-    except IOError:
-        sys.exit("serverAddresses.json missing or corrupt")
-    return jsonAddress
-
-def getID(num):
-    manifestHash = hashManifest()
-    elecID = manifestHash[:num]
-    print(manifestHash)
-    return elecID
-
-def hashManifest():
-    manifest_raw = codecs.open(sElectDir + manifest, 'r', encoding='utf8').read()
-    manifest_raw = manifest_raw.replace("\n", '').replace("\r", '').strip()
-    m = hashlib.sha256()
-    m.update(manifest_raw)
-    return m.hexdigest()
-
-# sElect (partial) mixFiles path
-manifest = "/_sElectConfigFiles_/ElectionManifest.json"
-collectingConf = "/CollectingServer/config.json"
-bulletinConf = "/BulletinBoard/config.json"
-votingManifest = "/VotingBooth/ElectionManifest.json"     
-votingConf = "/VotingBooth/config.json"  
+            mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/"+str(x))))
+    bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
+    newPIDs = [col.pid, bb.pid]
+    for x in range(numMix):
+        newPIDs.append(mix[x].pid)   
+    return newPIDs
 
 
-
-
+def writeConfig():
+    #add the password
+    jwrite.jwrite(passList, electionID, password)
+    
+    #add PIDs to config
+    for x in range(len(ports)):
+        jwrite.jAddList(electionConfig, "usedPorts", ports[x])
+    
+    #write all election details
+    newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": numMix, "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
+    jwrite.jAddList(electionConfig, "elections", newElection)
+    subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
+    
+    #write minimal election details
+    eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "protect": not mockElection}
+    eleInfo = jwrite.jAddListAndReturn(electionInfo, "elections", eleInfo)
+    return eleInfo
+    
 # the root dir is three folders back
 rootDirProject = os.path.realpath(__file__)
 for i in range(3):
     rootDirProject=os.path.split(rootDirProject)[0]
-#print rootDirProject
 
 # absolute paths
 sElectDir = rootDirProject + "/sElect"
@@ -226,8 +172,17 @@ nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
 passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
 nginxLog = rootDirProject + "/nginx_config/log"
 
+# sElect (partial) mixFiles path
+manifest = "/_sElectConfigFiles_/ElectionManifest.json"
+collectingConf = "/CollectingServer/config.json"
+bulletinConf = "/BulletinBoard/config.json"
+votingManifest = "/VotingBooth/ElectionManifest.json"     
+votingConf = "/VotingBooth/config.json"  
+mixConf = []
+
 #get duration and deployment status from handlerConfigFile
 deployment = False
+serverAddr = False
 try:
     jsonFile = open(electionConfig, 'r')
     jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
@@ -276,139 +231,33 @@ if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
     random = True if random == "true" else False
     password = electionArgs['password']
     mockElection = False
-    
-#ports = json.loads(sys.argv[1])['usedPorts']
-ports = usePorts(3+numMix)
-ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
-#increment = json.loads(sys.argv[1])['electionsCreated']
-tStamp = startingTime.replace("-", "").replace(":", "").split()
-sName = tStamp[0] + tStamp[1]# + "_" + str(increment)
-
-
-#where the servers are placed
-nSSL = True
-sslKey = "/home/select/ElectionManager/deployment/cert/subdomains.select.unencrypted.key"
-sslCrt = "/home/select/ElectionManager/deployment/cert/subdomains.select.chained.crt"
-serverAddress = getsAddress()
 
 #mix server config mixFiles
-mixConf = []
 for x in range(numMix):
     if x < 10:
         mixConf.append("/templates/config_mix0" + str(x) + ".json")
     else:
         mixConf.append("/templates/config_mix" + str(x) + ".json")
 
-#update keys
-pattern="[0-9]+"
-keyGeneratorMix_file="genKeys4mixServer.js"
-keyGeneratorCS_file="genKeys4collectingServer.js"
-tools_path = sElectDir + "/tools"
 
-keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix+1)]).splitlines()
-
-#write new keys to manifest and config files
-jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["encryptionKey"], "encryption_key")
-jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["verificationKey"], "verification_key")
-jwrite(sElectDir + collectingConf, "signing_key", json.loads(keys[len(keys)-1])["signingKey"])
-jwrite(sElectDir + collectingConf, "decryption_key", json.loads(keys[len(keys)-1])["decryptionKey"])
-for x in range(numMix):
-    jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["encryptionKey"], x, "encryption_key")
-    jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["verificationKey"], x, "verification_key")
-    jwrite(sElectDir + mixConf[x], "encryption_key", json.loads(keys[x])["encryptionKey"])
-    jwrite(sElectDir + mixConf[x], "verification_key", json.loads(keys[x])["verificationKey"])
-    jwrite(sElectDir + mixConf[x], "signing_key", json.loads(keys[x])["signingKey"])
-    jwrite(sElectDir + mixConf[x], "decryption_key", json.loads(keys[x])["decryptionKey"])
+#get server URI's
+ports = electionops.usePorts(electionConfig, 3+numMix)
+ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
+serverAddress = electionops.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
+tStamp = startingTime.replace("-", "").replace(":", "").split()
+sName = tStamp[0] + tStamp[1]
 
 
-#modify ElectionManifest, if no arguments are given, this is a mock election
-jwrite(sElectDir + manifest, "startTime", startingTime)
-jwrite(sElectDir + manifest, "endTime", endingTime)
-jwrite(sElectDir + manifest, "title", elecTitle)
-jwrite(sElectDir + manifest, "description", elecDescr)
-jwrite(sElectDir + manifest, "question", elecQuestion)
-jwrite(sElectDir + manifest, "choices", eleChoices)  
-jwrite(sElectDir + manifest, "publishListOfVoters", publish)
-
-jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress["collectingserver"], "URI")
-jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress["bulletinboard"], 0, "URI")
-for x in range(numMix):
-    jwriteAdv(sElectDir + manifest, "mixServers", serverAddress["mix"+str(x)], x, "URI")
-
-#get new keys
-mixServerEncKey = []
-for x in range(numMix):
-    mixServerEncKey.append(json.loads(keys[x])["encryptionKey"])
-    
-#get ID after modifying Manifest
-iDlength = 5
-while(iDlength < 40):
-    electionID = getID(iDlength)
-    dstroot = os.path.join(rootDirProject, "elections/" + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
-
-    try:
-        copy(sElectDir, dstroot)
-        link(dstroot)
-        break
-    except:
-        iDlength = iDlength+1
-        #sys.exit("ElectionID already exists.")
-
-#add the password
-jwrite(passList, electionID, password)
-
-#modify Server ports
-for x in range(numMix):     
-    jwrite(dstroot + mixConf[x], "port", ports[x+2])
-jwrite(dstroot + collectingConf, "port", ports[0])
-jwrite(dstroot + bulletinConf, "port", ports[1])
-#jwrite(dstroot + votingConf, "port", ports[5])        #not using the VotingBooth server, static path instead
-jwrite(dstroot + votingConf, "authenticate", serverAddress["votingbooth"])
-jwrite(dstroot + collectingConf, "serverAdminPassword", password)
-
-#change user randomness if not a mock election
-if not mockElection:
-    jwrite(dstroot + votingConf, "userChosenRandomness", random)
-
-#create Ballots
-if mockElection:
-    os.mkdir(dstroot+"/CollectingServer/_data_")
-    mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
-    ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
-    for x in range(mockVoters):
-        userEmail = "user"+str(x)+"@uni-trier.de"
-        userRandom = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
-        userChoice = random.randint(0,(len(eleChoices)-1))
-        ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), hashManifest(), mixServerEncKeyString], cwd=(rootDirProject+"/ElectionHandler/src"))
-        ballots.wait()
+mixServerEncKey = updateKeys()
+writeManifest()
+dstroot, electionID = sElectCopy(7)
+sElectConfig()
+createBallots()
+newPIDs = sElectStart()
+eleInfo = writeConfig()
 
 
-#start all node servers
-subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
-#vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
-if mockElection:
-    col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
-else:
-    col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
-mix = []
-for x in range(numMix):
-    if x < 10:
-        mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/0"+str(x))))
-    else:
-        mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/"+str(x))))
-bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-newPIDs = [col.pid, bb.pid]
-for x in range(numMix):
-    newPIDs.append(mix[x].pid)
 
-#add PIDs to config
-for x in range(len(ports)):
-    jAddList(electionConfig, "usedPorts", ports[x])
-newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": numMix, "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
-eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "protect": not mockElection}
-jAddList(electionConfig, "elections", newElection)
-eleInfo = jAddListAndReturn(electionInfo, "elections", eleInfo)
-subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
 
 #modify nginx File
 if "http://localhost" not in serverAddress["collectingserver"]:
@@ -506,14 +355,15 @@ else:
     prevBracket = 0
     counter = 0
     for line in nginxData:
-        if "end voting booth" in line:
+        if "}" in line:
+            prevBracket = counter
+        if "end main server" in line:
             break
         counter = counter + 1
-    bracketIt = nginxData[counter:]
-    del nginxData[counter:]
-    comments = ["  # Voting Booth " + electionID + " \n", "  server {\n", "    listen " + str(ELS) + ";\n", "\n", "    access_log " + nginxLog +"/access.log;\n", 
-                "    error_log " + nginxLog +"/error.log;\n", "\n", "    server_name "+ serverAddress["votingbooth"].split("://")[1].split(":")[0] +";\n", "\n", "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n",
-                "    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"]
+    bracketIt = nginxData[prevBracket:]
+    del nginxData[prevBracket:]
+    comments = ["    # Voting Booth " + electionID + " \n", 
+                "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
     comments.extend(bracketIt)
     nginxData.extend(comments)
     nginxFile.seek(0)    
@@ -521,9 +371,13 @@ else:
     nginxFile.writelines(nginxData)
     nginxFile.close()
 
-jwrite(electionConfig, "electionsCreated", createdElections+1)
+
+jwrite.jwrite(electionConfig, "electionsCreated", createdElections+1)
+
 #refresh nginx 
 #TODO: fix /usr/sbin nginx issue
 subprocess.call(["/usr/sbin/nginx", "-c", nginxConf,"-s", "reload"], stderr=open(os.devnull, 'w'))
+
+#prints election details to server.js
 print("electionInfo.json:\n"+json.dumps(eleInfo))
 
