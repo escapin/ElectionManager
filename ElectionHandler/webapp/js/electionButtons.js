@@ -179,7 +179,7 @@ function electionButtons() {
 		}
 		electionCh.choices = echoices;
 		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
+		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishListOfVoters: listVoters})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();

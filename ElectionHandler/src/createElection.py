@@ -148,8 +148,11 @@ def getInput():
         elecTitle = electionArgs['title']
         elecDescr = electionArgs['description']
         elecQuestion = electionArgs['question']
-        eleChoices = electionArgs['choices[]']
-        publish = electionArgs['publishVoters']
+        try:
+            eleChoices = electionArgs['choices[]']
+        except:
+            eleChoices = electionArgs['choices']
+        publish = electionArgs['publishListOfVoters']
         publish = True if publish == "true" else False
         random = electionArgs['random']
         random = True if random == "true" else False
@@ -243,13 +246,13 @@ def sElectCopy(iDlength):
         
 def writesElectConfigs():
     #modify Server ports
-    for x in range(numMix):     
-        jwrite.jwrite(dstroot + mixConf[x], "port", ports[x+2])
     jwrite.jwrite(dstroot + collectingConf, "port", ports[0])
     jwrite.jwrite(dstroot + bulletinConf, "port", ports[1])
     jwrite.jwrite(dstroot + votingConf, "authenticate", serverAddress["votingbooth"])
     jwrite.jwrite(dstroot + collectingConf, "serverAdminPassword", password)
-    
+    for x in range(numMix):     
+        jwrite.jwrite(dstroot + mixConf[x], "port", ports[x+2])
+        
     #change user randomness if not a mock election
     if not mockElection:
         jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", random)
