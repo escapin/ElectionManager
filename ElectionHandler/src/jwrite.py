@@ -50,7 +50,7 @@ def jAddList(src, key, value):
         jsonFile.seek(0)
     except IOError:
         jsonFile = open(src, 'w')
-        jsonData = {key: value}
+        jsonData = {key: [value]}
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.truncate()
     jsonFile.close()
@@ -66,7 +66,7 @@ def jAddListAndReturn(src, key, value):
         jsonFile.seek(0)
     except IOError:
         jsonFile = open(src, 'w')
-        jsonData = {key: value}
+        jsonData = {key: [value]}
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.truncate()
     jsonFile.close()
