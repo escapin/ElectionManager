@@ -12,10 +12,17 @@ var hash = bcrypt.hashSync(process.argv[4], salt);
 var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
 electionManifest.random = process.argv[3];
 electionManifest.password = hash
-
 var parameters = JSON.stringify(electionManifest);
 
-session = spawn('python', ['createElection.py', "placeholder", parameters]);
+var hidden = process.argv[4]
+if (hidden === 'hidden'){
+	hidden = true;
+}
+else{
+	hidden = false;
+}
+
+session = spawn('python', ['createElection.py', hidden, parameters]);
 session.stdout.on('data', function (data) {
 	if(String(data).indexOf("OTP")>-1){
 		var time =  new Date();

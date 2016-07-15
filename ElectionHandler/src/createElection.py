@@ -40,6 +40,7 @@ def setConfigFiles():
     global sElectDir
     global electionConfig
     global electionInfo
+    global electionInfoHidden
     global defaultManifest
     global nginxConf
     global passList
@@ -62,6 +63,7 @@ def setConfigFiles():
     electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
     electionInfo = rootDirProject + "/_handlerConfigFiles_/electionInfo.json"
     defaultManifest = rootDirProject + "/_handlerConfigFiles_/ElectionManifest.json"
+    electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
     nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
     passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
     nginxLog = rootDirProject + "/nginx_config/log"
@@ -135,12 +137,14 @@ def getInput():
     global publish
     global mixServers
     global random
+    global hidden
     
     #get input parameters (if any)
     password = "";
     mockElection = True
     startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
     endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
+    hidden = True if sys.argv[1] == "true" else False
     if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
         electionArgs = json.loads(sys.argv[2])
         startingTime = electionArgs['startTime']
@@ -158,6 +162,7 @@ def getInput():
         random = True if random == "true" else False
         password = electionArgs['password']
         mockElection = False
+    
 
 def getMixServerConfig():
     global mixConf
@@ -232,17 +237,22 @@ def sElectCopy(iDlength):
     global dstroot
     global electionID
     
+    dstFolder = "elections/"
+    if hidden:
+        dstFolder = "elections_hidden/"
+        
+    
     #get ID after modifying Manifest
     while(iDlength < 40):
         electionID = electionops.getID(sElectDir + manifest, iDlength)
-        dstroot = os.path.join(rootDirProject, "elections/" + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
+        dstroot = os.path.join(rootDirProject, dstFolder + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
         try:
             copy(sElectDir, dstroot)
             electionops.link(dstroot, manifest, votingManifest)
             break
         except:
             iDlength = iDlength+1
-        
+
         
 def writesElectConfigs():
     #modify Server ports
@@ -300,19 +310,24 @@ def writeToHandlerConfig():
     #add the password
     jwrite.jwrite(passList, electionID, password)
     
-    #add PIDs to config
+    #add ports to config
     for x in range(len(ports)):
         jwrite.jAddList(electionConfig, "usedPorts", ports[x])
     
-    #write all election details
-    newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": numMix, "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
-    jwrite.jAddList(electionConfig, "elections", newElection)
-    jwrite.jwrite(electionConfig, "electionsCreated", createdElections+1)
-    subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
+    if not hidden:
+        #write all election details
+        newElection = { "used-ports": ports, "processIDs": newPIDs, "electionID": electionID, "electionTitle": elecTitle, "electionDescription": elecDescr, "startTime": startingTime, "endTime": endingTime, "mixServers": numMix, "ELS": ELS, "timeStamp": sName, "protect": not mockElection}
+        jwrite.jAddList(electionConfig, "elections", newElection)
+        jwrite.jwrite(electionConfig, "electionsCreated", createdElections+1)
+        subprocess.call([sElectDir + "/../ElectionHandler/refreshConfig.sh"], cwd=(sElectDir+"/../ElectionHandler"))
     
-    #write minimal election details
-    eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "protect": not mockElection}
-    eleInfo = jwrite.jAddListAndReturn(electionInfo, "elections", eleInfo)
+        #write minimal election details
+        eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "protect": not mockElection}
+        eleInfo = jwrite.jAddListAndReturn(electionInfo, "elections", eleInfo)
+    else:
+        #write details in different file to not show in the Election Manager
+        eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"], "BulletinBoard": serverAddress["bulletinboard"], "processIDs": newPIDs, "used-ports": ports}
+        jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
     
 def writeToNginxConfig():
     #modify nginx File
