@@ -9,6 +9,7 @@ handler:
 	mkdir -p _handlerConfigFiles_
 	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
 	mkdir -p elections
+	mkdir -p elections_hidden
 
 nginx:
 	mkdir -p nginx_config/log
@@ -24,7 +25,8 @@ select:
 
 
 electionsClean:
-	rm -rf elections
+	rm -rf elections/
+	rm -rf elections_hidden/
 	rm ElectionHandler/_data_/pwd.json
 	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
 
@@ -44,4 +46,5 @@ selectclean:
 
 elclean:
 	-rm -rf elections/
+	-rm -rf elections_hidden/
 
