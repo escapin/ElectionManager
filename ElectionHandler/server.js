@@ -14,7 +14,7 @@ var async = require('async');
 //var credentials = {key: certificate_key, cert: certificate};
 var cors = require('cors');
 var child_process = require("child_process");
-var config = require('./src/config');
+var config = require('../src/file2JSON');
 var port = config.port;
 var app = express();
 app.use(cors());
@@ -23,8 +23,11 @@ var spawn = child_process.spawn;
 var path = 'webapp/';
 //var httpsserver = https.createServer(credentials, app);
 
+//SRC directory of the project
+var SRC_DIR = "../src/"
+
 //create '_data_' dir, if it doesn't exist
-DATA_DIR = './_data_';
+var DATA_DIR = './_data_';
 mkdirp.sync(DATA_DIR);
 
 
@@ -47,7 +50,7 @@ streams: [{
 
 // parameter keeping track of the number of mix servers
 var numMix = 0;
-var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConfigFile.json"));
 var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
 var electionInfo;
@@ -151,7 +154,7 @@ function spawnServer(req, callback){
 		console.log("\nPort " + errPort + " in use, attempting to start server on different port:")
 		var newPort = "placeholder";
 		//start new server with different port
-	    var reSession = spawn('python', ['src/restartServer.py', errPort, newPort]);
+	    var reSession = spawn('python', [SRC_DIR+'restartServer.py', errPort, newPort]);
 	    reSession.stdout.on('data', function (data) {
 	    	//console.log('reSpawn STDOUT:\n\t' + data);
 	    	if(String(data).indexOf("OTP")>-1){
@@ -193,7 +196,7 @@ function spawnServer(req, callback){
 		});
 	}
 	else if(task === "resume"){
-		var oldSession = spawn('python', ['src/resumeElection.py']);
+		var oldSession = spawn('python', [SRC_DIR+'resumeElection.py']);
 		oldSession.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
@@ -243,7 +246,7 @@ function spawnServer(req, callback){
 		var parameters = JSON.stringify(req.body);
 
 		//call the python script to start the servers
-		session = spawn('python', ['src/createElection.py', ports, parameters]);
+		session = spawn('python', [SRC_DIR+'createElection.py', ports, parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
@@ -301,7 +304,7 @@ function spawnServer(req, callback){
 		var ports = "placeholder";
 
 		//call the python script to start the servers
-	    var session = spawn('python', ['src/createElection.py', ports]);
+	    var session = spawn('python', [SRC_DIR+'createElection.py', ports]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
@@ -379,7 +382,7 @@ function spawnServer(req, callback){
 		pass = hash;
 		
 		//call the python script to shutdown the servers
-		session = spawn('python', ['src/removeElection.py', value, pass]);
+		session = spawn('python', [SRC_DIR+'removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("electionInfo.json:\n">-1)){
 				eleInfo = String(data).split("electionInfo.json:\n")
@@ -484,15 +487,15 @@ function start(){
 	    console.log('Serving on, port :%d', server.address().port);
 	});
 	try{
-		var manifest = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/ElectionManifest.json"));
+		var manifest = JSON.parse(fs.readFileSync("../_configFiles_/ElectionManifest.json"));
 		var mixServers = manifest["mixServers"];
 		numMix = mixServers.length;
 	}
 	catch(e){
-		console.log("../_handlerConfigFiles_/ElectionManifest.json is missing or corrupt ([mixServers] field not found)");
+		console.log("../_configFiles_/ElectionManifest.json is missing or corrupt ([mixServers] field not found)");
 	}
 	try{
-		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConfigFile.json"));
 		var usePorts = handlerConfigFile["available-ports"];
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
 				"Each election needs at least 3 different servers: a collecting server, a bulletin board, and a mix server.\n" +
@@ -501,6 +504,6 @@ function start(){
 			    "(if your hardware supports them).\n");
 	}
 	catch(e){
-		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
+		console.log("../_configFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
 	}
 }
