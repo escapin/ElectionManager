@@ -54,6 +54,7 @@ def setConfigFiles():
     global rootDirProject
     global electionConfig
     global electionInfo
+    global electionInfoHidden
     global electionURI
     global nginxConf
     global passList
@@ -65,6 +66,7 @@ def setConfigFiles():
                  
     electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
     electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
+    electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
     electionURI = rootDirProject + "/_configFiles_/electionURI.json"
     nginxConf = rootDirProject + "/nginx_config/nginx_select.conf"
     passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
@@ -72,14 +74,20 @@ def setConfigFiles():
 def getInput():
     global electionID
     global password
+    global hidden
     
     #get ElectionID
     electionID = sys.argv[1]
     password = sys.argv[2]
-    
+    try:
+        hidden = True if sys.argv[3] == "true" else False
+    except:
+        hidden = False
+
 def shutdownServers():
     #kill processes
-    nPIDs = getProcIDs(electionConfig, "processIDs", electionID)
+    config = electionInfoHidden if hidden else electionConfig
+    nPIDs = getProcIDs(config, "processIDs", electionID)
     for x in nPIDs:
         try:
             os.kill(x, SIGKILL)
@@ -109,11 +117,14 @@ def writeToHandlerConfig():
         jsonFile.truncate()
         jsonFile.close()
     except IOError:
-        sys.exit("handlerConfigFile.json missing or corrupt")
-    jwrite.jRemElec(electionConfig, electionID)
-    eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)
+        sys.exit("electionURI.json missing or corrupt")
+    if not hidden:
+        jwrite.jRemElec(electionConfig, electionID)
+        eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)
+    else:
+        jwrite.jRemElec(electionInfoHidden, electionConfig, electionID)
     subprocess.call([rootDirProject + "/ElectionHandler/refreshConfig.sh"], cwd=(rootDirProject + "/ElectionHandler"))
-
+    
 
 def writeToNginxConfig():
     #modify nginx File

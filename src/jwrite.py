@@ -135,3 +135,35 @@ def jRemElecAndReturn(src, value):
     jsonFile.close()
     return jsonData
 
+def jRemHidden(src, src2, value):
+    remPorts = []
+    portsInUse = []
+    try:
+        jsonFile = open(src, 'r+')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        elecs = jsonData["elections"]
+        for x in range(len(elecs)):
+            if elecs[x]["electionID"] == value:
+                remElec = elecs.pop(x)
+                remPorts = remElec["used-ports"]
+                break
+        jsonData["elections"] = elecs
+        jsonFile.seek(0)
+    except IOError:
+        print("file missing")
+    json.dump(jsonData, jsonFile, indent = 4)
+    jsonFile.truncate()
+    jsonFile.close()
+    try:
+        jsonFile = open(src2, 'r+')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        portsInUse = jsonData["usedPorts"]
+        for x in range(len(remPorts)):
+            portsInUse.remove(remPorts[x])
+        jsonFile.seek(0)
+    except IOError:
+        print("file missing")
+    json.dump(jsonData, jsonFile, indent = 4)
+    jsonFile.truncate()
+    jsonFile.close()
+    
