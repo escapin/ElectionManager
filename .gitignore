@@ -6,6 +6,7 @@ sElect/
 nginx_config/
 #Ignore all created elections
 elections/
+elections_hidden/
 # all 'node_modules' directories except for that in the root dir
 **/*/node_modules/
 _data_*
@@ -16,3 +17,4 @@ ElectionHandler/webapp/js/config.js
 ElectionHandler/webapp/pure/
 ElectionHandler/webapp/ref/
 ElectionHandler/webapp/roboto/*.ttf
+*.pyc
