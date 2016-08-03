@@ -1,0 +1,9 @@
+{
+  "name": "CustomElections",
+  "description": "Custom election generator for the sElect voting system",
+  "version": "0.2.0",
+  "private": true,
+  "dependencies": {
+    "bcryptjs": ">= 1.0.0"
+  }
+}
