@@ -13,7 +13,7 @@ import random
 import string
 import re
 import jwrite
-import electionops
+import electionUtils
 
 
 def copy(src, dest):
@@ -42,6 +42,7 @@ def setConfigFiles():
     global electionInfo
     global electionInfoHidden
     global defaultManifest
+    global electionURI
     global nginxConf
     global passList
     global nginxLog
@@ -55,14 +56,15 @@ def setConfigFiles():
 
     # the root dir is three folders back
     rootDirProject = os.path.realpath(__file__)
-    for i in range(3):
+    for i in range(2):
         rootDirProject=os.path.split(rootDirProject)[0]
     
     # absolute paths
     sElectDir = rootDirProject + "/sElect"
-    electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
-    electionInfo = rootDirProject + "/_handlerConfigFiles_/electionInfo.json"
-    defaultManifest = rootDirProject + "/_handlerConfigFiles_/ElectionManifest.json"
+    electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
+    electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
+    defaultManifest = rootDirProject + "/_configFiles_/ElectionManifest.json"
+    electionURI = rootDirProject + "/_configFiles_/electionURI.json"
     electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
     nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
     passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
@@ -182,9 +184,9 @@ def getServerLocations():
     global sName
     
     #get server URI's
-    ports = electionops.usePorts(electionConfig, 3+numMix)
+    ports = electionUtils.usePorts(electionConfig, 3+numMix)
     ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
-    serverAddress = electionops.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
+    serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
     #time stamp for folder path
     tStamp = startingTime.replace("-", "").replace(":", "").split()
     sName = tStamp[0] + tStamp[1]
@@ -244,11 +246,11 @@ def sElectCopy(iDlength):
     
     #get ID after modifying Manifest
     while(iDlength < 40):
-        electionID = electionops.getID(sElectDir + manifest, iDlength)
+        electionID = electionUtils.getID(sElectDir + manifest, iDlength)
         dstroot = os.path.join(rootDirProject, dstFolder + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
         try:
             copy(sElectDir, dstroot)
-            electionops.link(dstroot, manifest, votingManifest)
+            electionUtils.link(dstroot, manifest, votingManifest)
             break
         except:
             iDlength = iDlength+1
@@ -278,7 +280,7 @@ def createBallots():
             userEmail = "user"+str(x)+"@uni-trier.de"
             userRandom = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
             userChoice = random.randint(0,(len(eleChoices)-1))
-            ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), electionops.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/ElectionHandler/src"))
+            ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
         ballots.wait()
 
 
@@ -313,6 +315,8 @@ def writeToHandlerConfig():
     #add ports to config
     for x in range(len(ports)):
         jwrite.jAddList(electionConfig, "usedPorts", ports[x])
+    electionUrls = {"VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"], "BulletinBoard": serverAddress["bulletinboard"], "hidden": hidden}
+    jwrite.jwrite(electionURI, electionID, electionUrls)
     
     if not hidden:
         #write all election details

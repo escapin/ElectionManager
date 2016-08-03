@@ -54,16 +54,18 @@ def setConfigFiles():
     global rootDirProject
     global electionConfig
     global electionInfo
+    global electionURI
     global nginxConf
     global passList
     
     # the root dir is three folders back
     rootDirProject = os.path.realpath(__file__)
-    for i in range(3):
+    for i in range(2):
         rootDirProject=os.path.split(rootDirProject)[0]
                  
-    electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
-    electionInfo = rootDirProject + "/_handlerConfigFiles_/electionInfo.json"
+    electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
+    electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
+    electionURI = rootDirProject + "/_configFiles_/electionURI.json"
     nginxConf = rootDirProject + "/nginx_config/nginx_select.conf"
     passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
@@ -92,6 +94,16 @@ def writeToHandlerConfig():
         jsonFile = open(electionConfig, 'r+')
         jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
         jsonData["electionsCreated"] = jsonData["electionsCreated"]-1
+        jsonFile.seek(0)
+        json.dump(jsonData, jsonFile, indent = 4)
+        jsonFile.truncate()
+        jsonFile.close()
+    except IOError:
+        sys.exit("handlerConfigFile.json missing or corrupt")
+    try:
+        jsonFile = open(electionURI, 'r+')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        del jsonData[electionID]
         jsonFile.seek(0)
         json.dump(jsonData, jsonFile, indent = 4)
         jsonFile.truncate()

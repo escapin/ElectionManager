@@ -37,7 +37,7 @@ rootDirProject = os.path.split(deployDir)[0]
 nginxRootLog = deployDir + "/nginx_config/log"
 nginxRootFile = deployDir + "/nginx_root.conf"
 
-electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
+electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
 
 nginxPort = -1
 try:

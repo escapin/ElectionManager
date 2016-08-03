@@ -107,12 +107,12 @@ def usePorts(num):
 
 # the root dir is three folders back
 rootDirProject = os.path.realpath(__file__)
-for i in range(3):
+for i in range(2):
     rootDirProject=os.path.split(rootDirProject)[0]
 sElectDir = rootDirProject + "/sElect"
 nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
 
-electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
+electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
 
 errPort = int(sys.argv[1])
 #newPort = int(sys.argv[2])

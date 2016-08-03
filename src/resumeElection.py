@@ -49,11 +49,11 @@ def jwriteAdv(src, key, value, pos="", key2=""):
         
 # the root dir is three folders back
 rootDirProject = os.path.realpath(__file__)
-for i in range(3):
+for i in range(2):
     rootDirProject=os.path.split(rootDirProject)[0]
 sElectDir = rootDirProject + "/sElect"
 
-electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
+electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
 
 #get elections
 jsonFile = open(electionConfig, 'r')

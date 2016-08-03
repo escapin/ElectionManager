@@ -10,7 +10,7 @@ elections_hidden/
 # all 'node_modules' directories except for that in the root dir
 **/*/node_modules/
 _data_*
-_handlerConfigFiles_*
+_configFiles_*
 ElectionHandler/webapp/js/ElectionConfigFile.js
 ElectionHandler/webapp/js/serverAddresses.js
 ElectionHandler/webapp/js/config.js
