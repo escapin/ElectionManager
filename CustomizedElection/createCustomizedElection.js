@@ -1,5 +1,4 @@
 var bcrypt = require("bcryptjs");
-var read = require('read');
 var fs = require('fs');
 var child_process = require("child_process");
 var spawn = child_process.spawn;
@@ -22,21 +21,4 @@ else{
 	hidden = false;
 }
 
-var session = spawn('python', ['createElection.py', hidden, parameters]);
-session.stdout.on('data', function (data) {
-	if(String(data).indexOf("OTP")>-1){
-		var time =  new Date();
-		console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
-	}
-	else if(String(data).indexOf("TLS")>-1){
-		var time =  new Date();
-		console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
-	}
-});
-session.stderr.on('data', function (data) {
-	var time =  new Date();
-	console.log('[' + time +  '] Collecting Server STDERR:\n\t' + data)
-});
-session.on('exit', function (code) {
-    console.log('complete child process exited with code ' + code);
-});
+session = spawn('python', ['../src/createElection.py', hidden, parameters]);
