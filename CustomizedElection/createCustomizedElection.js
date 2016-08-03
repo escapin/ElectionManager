@@ -14,7 +14,7 @@ electionManifest.random = process.argv[3];
 electionManifest.password = hash
 var parameters = JSON.stringify(electionManifest);
 
-var hidden = process.argv[4]
+var hidden = process.argv[5]
 if (hidden === 'hidden'){
 	hidden = true;
 }
@@ -22,7 +22,7 @@ else{
 	hidden = false;
 }
 
-session = spawn('python', ['createElection.py', hidden, parameters]);
+var session = spawn('python', ['createElection.py', hidden, parameters]);
 session.stdout.on('data', function (data) {
 	if(String(data).indexOf("OTP")>-1){
 		var time =  new Date();

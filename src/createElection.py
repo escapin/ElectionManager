@@ -330,7 +330,7 @@ def writeToHandlerConfig():
         eleInfo = jwrite.jAddListAndReturn(electionInfo, "elections", eleInfo)
     else:
         #write details in different file to not show in the Election Manager
-        eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"], "BulletinBoard": serverAddress["bulletinboard"], "processIDs": newPIDs, "used-ports": ports}
+        eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "processIDs": newPIDs, "used-ports": ports}
         jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
     
 def writeToNginxConfig():
