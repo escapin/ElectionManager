@@ -6,7 +6,7 @@ devenv: handler nginx select
 
 handler:
 	cd ElectionHandler; make
-	cd CustomElection; npm install
+	cd CustomizedElection; npm install
 	mkdir -p _configFiles_
 	cp templates/config.json _configFiles_/handlerConfigFile.json
 	mkdir -p elections
@@ -18,7 +18,7 @@ nginx:
 	python configNginx.py
 
 select:
-	git clone -b master https://github.com/escapin/sElect.git
+	git clone -b dev https://sElectVoting:fc-dLEhqSKRG0exK@bitbucket.org/escapin/select.git sElect
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
@@ -38,6 +38,7 @@ devclean: handlerclean nginxclean selectclean elclean
 handlerclean:
 	cd ElectionHandler; make clean
 	-rm -rf _configFiles_
+	-cd CustomizedElection; rm -rf node_modules
 
 nginxclean:	
 	-rm -rf nginx_config/
