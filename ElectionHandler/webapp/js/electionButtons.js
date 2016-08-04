@@ -617,11 +617,11 @@ function electionButtons() {
 	  		 electionStatus = electionStates;
 	  	 });
 	     if(elections.length < 1){
-	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the buttons below to create a new election";
+	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the buttons below to create a new election.";
 	     }
 	     else{
 	    	 console.log(elections.length);
-	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the <em>entry</em> of the election you want to manage or create a new one";	    	 
+	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the <em>entry</em> of the election you want to manage or create a new one.";	    	 
 	     }
 	     
 	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
