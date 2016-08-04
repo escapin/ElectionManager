@@ -29,6 +29,8 @@ hsub {
     font-weight: 300;
     color: #444;
     text-shadow: 0px 0px 1px #bbb;
+    margin-right: 4em;
+    float: right;
 }
 
 h1 {
@@ -482,6 +484,10 @@ tr{
 #electionClose div,
 #electionDelete div{
 	width: 90%;
+}
+
+hsub{
+	font-size: 1.5vw;
 }
 
 @media all and (max-width: 480px) {

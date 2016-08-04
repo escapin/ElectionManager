@@ -616,6 +616,13 @@ function electionButtons() {
 	     buildElectionTable(elections, function (electionStates){
 	  		 electionStatus = electionStates;
 	  	 });
+	     if(elections.length < 1){
+	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the buttons below to create a new election";
+	     }
+	     else{
+	    	 console.log(elections.length);
+	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the <em>entry</em> of the election you want to manage or create a new one";	    	 
+	     }
 	     
 	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
 	     document.getElementById('trackDescend').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
