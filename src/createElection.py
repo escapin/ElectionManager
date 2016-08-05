@@ -271,14 +271,23 @@ def writesElectConfigs():
     
 
 def createBallots():
-    #create Ballots
     if mockElection:
+        #check if random or not
+        isRand = False
+        try:
+            jsonFile = open(dstroot+votingConf, 'r')
+            jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+            isRand = jsonData["userChosenRandomness"]
+            jsonFile.close()
+        except IOError:
+            sys.exit("VotingBooth/config.json missing or corrupt")
+        #create Ballots
         os.mkdir(dstroot+"/CollectingServer/_data_")
         mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
         ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
         for x in range(mockVoters):
             userEmail = "user"+str(x)+"@uni-trier.de"
-            userRandom = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)])
+            userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if isRand else ""
             userChoice = random.randint(0,(len(eleChoices)-1))
             ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
         ballots.wait()
