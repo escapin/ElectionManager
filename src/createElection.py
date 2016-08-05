@@ -268,6 +268,9 @@ def writesElectConfigs():
     #change user randomness if not a mock election
     if not mockElection:
         jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", random)
+    else:
+        jwrite.jwrite(dstroot + votingConf, "showOtp", True)
+        jwrite.jwrite(dstroot + collectingConf, "sendOtpBack", True)
     
 
 def createBallots():
