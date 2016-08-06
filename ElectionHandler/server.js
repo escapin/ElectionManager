@@ -67,7 +67,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if(task === "complete" || task === "simple"){
-		 res.end("Max Number of Elections handled by the server reached. Remove an election (if possible) or wait until an authorized user does it.");
+		 res.end("Max Number of Elections reached: Remove an election (if possible) or wait until an authorized user does it.");
 	}
 	else if(task === "remove"){
 		// add the the async queue the task to be performed
@@ -76,7 +76,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else{
-		res.end("Specify wether to create a mock Election or a customized Election");
+		res.end("Specify whether to create a mock Election or a customized Election");
 	}
 	
 });
@@ -138,7 +138,7 @@ var logErrQueue = async.queue(logError, 1);
 function spawnServer(req, callback){
 	var task = req.body.task;
 	if((task === "complete" || task === "simple") && createdElections >= maxElections){
-		 callback("Max Number of Elections handled by the server reached. Remove an election (if possible) or wait until an authorized user does it.");
+		 callback("Max Number of Elections reached: Remove an election (if possible) or wait until an authorized user does it.");
 		 return;
 	}
 	/**
