@@ -14,6 +14,14 @@ def jwrite(src, key, value):
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.truncate()
     jsonFile.close()
+
+#create a json file from a json object
+def jcreate(src, value):
+    jsonFile = open(src, 'w')
+    json.dump(value, jsonFile, indent = 4)
+    jsonFile.truncate()
+    jsonFile.close()
+                            
    
 #write a value in a list or multi-layered json objects
 def jwriteAdv(src, key, value, pos="", key2=""):
