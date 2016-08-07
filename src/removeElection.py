@@ -122,7 +122,7 @@ def writeToHandlerConfig():
         jwrite.jRemElec(electionConfig, electionID)
         eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)
     else:
-        jwrite.jRemElec(electionInfoHidden, electionConfig, electionID)
+        jwrite.jRemHidden(electionInfoHidden, electionConfig, electionID)
     subprocess.call([rootDirProject + "/ElectionHandler/refreshConfig.sh"], cwd=(rootDirProject + "/ElectionHandler"))
     
 
