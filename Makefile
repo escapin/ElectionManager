@@ -1,7 +1,7 @@
 default:
 	@echo Specify the goal: devenv OR devclean
 
-devenv: handler nginx select
+devenv: handler custom nginx select
 
 
 handler:
@@ -10,7 +10,10 @@ handler:
 	mkdir -p _configFiles_
 	cp templates/config.json _configFiles_/handlerConfigFile.json
 	mkdir -p elections
+
+custom:
 	mkdir -p elections_hidden
+	mkdir -p CustomizedElection/manifests
 
 nginx:
 	mkdir -p nginx_config/log
