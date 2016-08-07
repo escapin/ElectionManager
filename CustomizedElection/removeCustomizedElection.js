@@ -1,5 +1,4 @@
 var bcrypt = require("bcryptjs");
-var read = require('read');
 var fs = require('fs');
 var child_process = require("child_process");
 var spawn = child_process.spawn;
