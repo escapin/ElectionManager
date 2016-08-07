@@ -5,11 +5,13 @@ var spawn = child_process.spawn;
 
 
 var manifestPath = process.argv[2];
-var salt = bcrypt.genSaltSync(10);
-var hash = bcrypt.hashSync(process.argv[4], salt);
-
 var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
-electionManifest.random = process.argv[3];
+
+var salt = bcrypt.genSaltSync(10);
+var hash = bcrypt.hashSync(process.argv[3], salt);
+
+
+electionManifest.random = process.argv[4];
 electionManifest.password = hash
 var parameters = JSON.stringify(electionManifest);
 
