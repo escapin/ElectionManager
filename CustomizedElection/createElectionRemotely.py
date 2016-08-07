@@ -25,11 +25,11 @@ ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS
 #sftp.close()
 stdin, stdout, stderr = ssh.exec_command('cd /home/select/ElectionManager/CustomizedElection; node createCustomizedElection.js '+remotepath+' '+password+' '+random+' '+hidden)
 #stdin, stdout, stderr = ssh.exec_command('cd ElectionManager/CustomizedElection; node test.js')
-terminate = false
+terminate = False
 for line in stdout:
+    print (line.strip('\n'))
     if terminate:
         break
-    print '... ' + line.strip('\n')
     if "Collecting Server Admin:" in line:
         terminate = True
 ssh.close()
