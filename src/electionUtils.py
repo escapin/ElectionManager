@@ -4,7 +4,7 @@ import codecs
 import json
 import collections
 
-def usePorts(src, num):
+def usePortsOld(src, num):
     newPorts = []
     try:
         jsonFile = open(src, 'r')
@@ -14,6 +14,27 @@ def usePorts(src, num):
         usingPorts = []
         for x in range (len(elecs)):
             usingPorts.extend(elecs[x]["used-ports"]) 
+        for openPort in range(rangePorts[0], rangePorts[1]):
+            if openPort in usingPorts:
+                continue
+            newPorts.append(openPort)
+            if len(newPorts) >= num:
+                break
+        if len(newPorts) < num:
+            sys.exit("Maximum number of elections reached.")
+        jsonFile.close()
+    except IOError:
+        sys.exit("handlerConfigFile.json missing or corrupt")
+    return newPorts
+
+def usePorts(src, num):
+    newPorts = []
+    try:
+        jsonFile = open(src, 'r')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        rangePorts = jsonData["available-ports"]
+        usingPorts = jsonData["usedPorts"]
+        newPorts = []
         for openPort in range(rangePorts[0], rangePorts[1]):
             if openPort in usingPorts:
                 continue
