@@ -9,7 +9,7 @@ var value = process.argv[2];
 var pass = process.argv[3]
 
 var hidden = process.argv[4]
-if (hidden === 'hidden'){
+if (hidden === 'hidden' || hidden === 'true'){
 	hidden = true;
 }
 else{

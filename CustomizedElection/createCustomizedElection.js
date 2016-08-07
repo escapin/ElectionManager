@@ -14,7 +14,7 @@ electionManifest.password = hash
 var parameters = JSON.stringify(electionManifest);
 
 var hidden = process.argv[5]
-if (hidden === 'hidden'){
+if (hidden === 'hidden' || hidden === 'true'){
 	hidden = true;
 }
 else{
