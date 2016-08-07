@@ -39,7 +39,7 @@ session.stdout.on('data', function (data) {
 		console.log("\nFull Election ID: \n"+(eleInfo.ElectionIdentifier).toUpperCase());
 		console.log("(use first "+(eleInfo.electionID).length+" characters ["+eleInfo.electionID+"] to remove the election)"+"\n")
 		console.log("Voting Booth: \n"+eleInfo.VotingBooth+"\n");
-		console.log("Collecting Server Admin: \n"+eleInfo.CollectingServer);
+		console.log("Collecting Server Admin: \n"+eleInfo.CollectingServer+"admin/close");
 	}
 });
 session.stderr.on('data', function (data) {
