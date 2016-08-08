@@ -12,7 +12,7 @@ hidden = "hidden"
 
 if(len(sys.argv)>3):
     hidden = sys.argv[3]
-    if(hidden is not 'hidden' or hidden is not 'visible'):
+    if(hidden <> 'hidden' and hidden <> 'visible'):
         sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password [hidden/visible]")
     if(len(sys.argv)>4):
         remotepath = sys.argv[4]
