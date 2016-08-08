@@ -13,7 +13,6 @@ handler:
 custom:
 	cd CustomizedElection; make
 	mkdir -p elections_hidden
-	mkdir -p CustomizedElection/manifests
 
 nginx:
 	mkdir -p nginx_config/log
