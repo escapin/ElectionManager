@@ -491,8 +491,6 @@ writeToHandlerConfig()
 writeToNginxConfig()
 
 #prints election details to server.js
-if hidden:
-    print("electionUrls.json:\n"+json.dumps(electionUrls))
-else:
-    print("electionInfo.json:\n"+json.dumps(eleInfo))
+print("electionUrls.json:\n"+json.dumps(electionUrls))
+print("electionInfo.json:\n"+json.dumps(eleInfo))
 
