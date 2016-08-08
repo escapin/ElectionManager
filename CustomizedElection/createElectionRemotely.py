@@ -3,9 +3,11 @@ import sys
 import paramiko
 
 remotepath = "/home/select/ElectionManager/CustomizedElection/manifests/manifest.json"
-
-localpath = sys.argv[1]
-password = sys.argv[2]
+try:
+    localpath = sys.argv[1]
+    password = sys.argv[2]
+except:
+    sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password [random [hidden]] \nwhereas random and hidden are optional boolean values (true/false)")
 random = "true"
 hidden = "true"
 
@@ -31,4 +33,6 @@ for line in stdout:
         break
     if "Collecting Server Admin:" in line:
         terminate = True
+for line in stderr:
+    print (line.strip('\n'))
 ssh.close()

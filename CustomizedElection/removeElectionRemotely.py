@@ -2,8 +2,12 @@ import os
 import sys
 import paramiko
 
-electionID = sys.argv[1]
-password = sys.argv[2]
+try:
+    electionID = sys.argv[1]
+    password = sys.argv[2]
+except:
+    sys.exit("Script is called with arguments: \n python script.py password [hidden] \nwhereas hidden is an optional boolean value (true/false)")
+
 hidden = "true"
 
 if(len(sys.argv)>3):
@@ -15,5 +19,7 @@ ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS
 
 stdin, stdout, stderr = ssh.exec_command('cd /home/select/ElectionManager/CustomizedElection; node removeCustomizedElection.js '+electionID+' '+password+' '+hidden)
 for line in stdout:
-    print '... ' + line.strip('\n')
+    print (line.strip('\n'))
+for line in stderr:
+    print (line.strip('\n'))
 ssh.close()
