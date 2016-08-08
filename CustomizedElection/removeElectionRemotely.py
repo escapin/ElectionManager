@@ -6,12 +6,14 @@ try:
     electionID = sys.argv[1]
     password = sys.argv[2]
 except:
-    sys.exit("Script is called with arguments: \n python script.py password [hidden] \nwhereas hidden is an optional boolean value (true/false)")
+    sys.exit("Script is called with arguments: \n python script.py password [hidden/visible]")
 
-hidden = "true"
+hidden = "hidden"
 
 if(len(sys.argv)>3):
     hidden = sys.argv[3]
+    if(hidden is not 'hidden' or hidden is not 'visible'):
+        sys.exit("Script is called with arguments: \n python script.py password [hidden/visible]")
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

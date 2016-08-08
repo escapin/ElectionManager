@@ -14,11 +14,15 @@ electionManifest.password = hash
 var parameters = JSON.stringify(electionManifest);
 
 var hidden = process.argv[4]
-if (hidden === 'hidden' || hidden === 'true'){
+if (hidden === 'hidden'){
 	hidden = true;
 }
-else{
+else if(hidden === 'visible'){
 	hidden = false;
+}
+else{
+	console.log("wrong parameters: last argument should be 'hidden' or 'visible'");
+	process.exit()
 }
 
 session = spawn('python', ['../src/createElection.py', hidden, parameters]);
@@ -39,7 +43,7 @@ session.stdout.on('data', function (data) {
 		console.log("\nFull Election ID: \n"+(eleInfo.ElectionIdentifier).toUpperCase());
 		console.log("(use first "+(eleInfo.electionID).length+" characters ["+eleInfo.electionID+"] to remove the election)"+"\n")
 		console.log("Voting Booth: \n"+eleInfo.VotingBooth+"\n");
-		console.log("Collecting Server Admin: \n"+eleInfo.CollectingServer+"admin/panel");
+		console.log("Collecting Server Admin: \n"+eleInfo.CollectingServer+"admin/close");
 	}
 });
 session.stderr.on('data', function (data) {

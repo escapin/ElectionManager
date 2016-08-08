@@ -8,11 +8,15 @@ var value = process.argv[2];
 var pass = process.argv[3]
 
 var hidden = process.argv[4]
-if (hidden === 'hidden' || hidden === 'true'){
+if (hidden === 'hidden'){
 	hidden = true;
 }
-else{
+else if(hidden === 'visible'){
 	hidden = false;
+}
+else{
+	console.log("wrong parameters: last argument should be 'hidden' or 'visible'");
+	process.exit()
 }
 
 
