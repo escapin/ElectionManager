@@ -7,16 +7,13 @@ try:
     localpath = sys.argv[1]
     password = sys.argv[2]
 except:
-    sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password [random [hidden]] \nwhereas random and hidden are optional boolean values (true/false)")
-random = "true"
+    sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password [hidden] \nwhereas hidden is an optional boolean value (true/false)")
 hidden = "true"
 
 if(len(sys.argv)>3):
-    random = sys.argv[3]
+    hidden = sys.argv[3]
     if(len(sys.argv)>4):
-        hidden = sys.argv[4]
-        if(len(sys.argv)>5):
-            remotepath = sys.argv[5]
+        remotepath = sys.argv[4]
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

@@ -10,12 +10,10 @@ var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
 var salt = bcrypt.genSaltSync(10);
 var hash = bcrypt.hashSync(process.argv[3], salt);
 
-
-electionManifest.random = process.argv[4];
 electionManifest.password = hash
 var parameters = JSON.stringify(electionManifest);
 
-var hidden = process.argv[5]
+var hidden = process.argv[4]
 if (hidden === 'hidden' || hidden === 'true'){
 	hidden = true;
 }
