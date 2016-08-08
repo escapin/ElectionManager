@@ -17,6 +17,13 @@ else{
 
 
 var match = passList[value];
+if(!passList.hasOwnProperty(value)){
+	//means the election already has been removed by another request,
+	//therefore browser should act as if it had been removed by 
+	//its own request.
+	console.log("Election does not exist or has already been removed.");
+	process.exit();
+}
 var hash = match;
 if(match !== ""){
 	var salt = bcrypt.getSalt(match);
@@ -30,3 +37,6 @@ if(match !== ""){
 pass = hash;
 
 session = spawn('python', ['../src/removeElection.py', value, pass, hidden]);
+session.stderr.on('data', function (data) {
+	console.log("STDERR: "+data);
+});
