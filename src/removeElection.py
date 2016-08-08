@@ -174,6 +174,7 @@ writeToNginxConfig()
 removePass(passList, electionID)
 
 #prints election details to server.js
-print("electionInfo.json:\n"+json.dumps(eleInfo))
+if not hidden:
+    print("electionInfo.json:\n"+json.dumps(eleInfo))
 
 
