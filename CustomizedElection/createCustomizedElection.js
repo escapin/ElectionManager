@@ -38,6 +38,7 @@ session.stdout.on('data', function (data) {
 	else if(String(data).indexOf("electionUrls.json:\n")>-1){
 		eleInfo = String(data).split("electionUrls.json:\n")
 		eleInfo = eleInfo[eleInfo.length-1];
+		eleInfo = eleInfo.split("electionInfo.json:\n")[0];
 		eleInfo = JSON.parse(eleInfo);
 		eleInfo.task = "created";
 		console.log("\nFull Election ID: \n"+(eleInfo.ElectionIdentifier).toUpperCase());
