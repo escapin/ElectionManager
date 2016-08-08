@@ -21,7 +21,7 @@ ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS
 sftp = ssh.open_sftp()
 sftp.put(localpath, remotepath)
 sftp.close()
-stdin, stdout, stderr = ssh.exec_command('cd /home/select/ElectionManager/CustomizedElection; node createCustomizedElection.js '+remotepath+' '+password+' '+random+' '+hidden)
+stdin, stdout, stderr = ssh.exec_command('cd /home/select/ElectionManager/CustomizedElection; node createCustomizedElection.js '+remotepath+' '+password+' '+hidden)
 
 terminate = False
 for line in stdout:
