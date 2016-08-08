@@ -160,9 +160,7 @@ def getInput():
         except:
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
-        publish = True if publish == "true" else False
         randomness = electionArgs['userChosenRandomness']
-        randomness = True if randomness == "true" else False
         password = electionArgs['password']
         mockElection = False
     
