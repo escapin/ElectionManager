@@ -20,7 +20,7 @@ if(len(sys.argv)>3):
     if(len(sys.argv)>4):
         remotepath = sys.argv[4]
 
-paramiko.util.log_to_file("paramikoCreate.log")
+paramiko.util.log_to_file("log/paramikoCreate.log")
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS#randoM")
