@@ -138,7 +138,7 @@ def getInput():
     global eleChoices
     global publish
     global mixServers
-    global random
+    global randomness
     global hidden
     
     #get input parameters (if any)
@@ -146,6 +146,7 @@ def getInput():
     mockElection = True
     startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
     endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
+    randomness = False
     hidden = True if sys.argv[1] == "true" else False
     if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
         electionArgs = json.loads(sys.argv[2])
@@ -160,8 +161,8 @@ def getInput():
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
         publish = True if publish == "true" else False
-        random = electionArgs['userChosenRandomness']
-        random = True if random == "true" else False
+        randomness = electionArgs['userChosenRandomness']
+        randomness = True if randomness == "true" else False
         password = electionArgs['password']
         mockElection = False
     
@@ -228,7 +229,7 @@ def writeManifest():
     jwrite.jwrite(sElectDir + manifest, "description", elecDescr)
     jwrite.jwrite(sElectDir + manifest, "question", elecQuestion)
     jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)
-    jwrite.jwrite(sElectDir + manifest, "userChosenRandomness", random)
+    jwrite.jwrite(sElectDir + manifest, "userChosenRandomness", randomness)
     jwrite.jwrite(sElectDir + manifest, "publishListOfVoters", publish)
     jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress["collectingserver"], "URI")
     jwrite.jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress["bulletinboard"], 0, "URI")
@@ -268,7 +269,7 @@ def writesElectConfigs():
         
     #change user randomness if not a mock election
     if not mockElection:
-        jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", random)
+        jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", randomness)
     else:
         jwrite.jwrite(dstroot + votingConf, "showOtp", True)
         jwrite.jwrite(dstroot + collectingConf, "sendOtpBack", True)
@@ -279,12 +280,12 @@ def createBallots():
         #check if random or not
         isRand = False
         try:
-            jsonFile = open(dstroot+votingConf, 'r')
+            jsonFile = open(sElectDir+manifest, 'r')
             jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
             isRand = jsonData["userChosenRandomness"]
             jsonFile.close()
         except IOError:
-            sys.exit("VotingBooth/config.json missing or corrupt")
+            sys.exit("ElectionManifest.json missing or corrupt")
         #create Ballots
         os.mkdir(dstroot+"/CollectingServer/_data_")
         mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
