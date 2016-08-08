@@ -160,7 +160,7 @@ def getInput():
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
         publish = True if publish == "true" else False
-        random = electionArgs['random']
+        random = electionArgs['userChosenRandomness']
         random = True if random == "true" else False
         password = electionArgs['password']
         mockElection = False
@@ -227,7 +227,8 @@ def writeManifest():
     jwrite.jwrite(sElectDir + manifest, "title", elecTitle)
     jwrite.jwrite(sElectDir + manifest, "description", elecDescr)
     jwrite.jwrite(sElectDir + manifest, "question", elecQuestion)
-    jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)  
+    jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)
+    jwrite.jwrite(sElectDir + manifest, "userChosenRandomness", random)
     jwrite.jwrite(sElectDir + manifest, "publishListOfVoters", publish)
     jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress["collectingserver"], "URI")
     jwrite.jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress["bulletinboard"], 0, "URI")
@@ -299,23 +300,28 @@ def createBallots():
 def sElectStart():
     global newPIDs
     
+    if not os.path.exists(dstroot+"/STDOUT_STDERR"):
+        os.makedirs(dstroot+"/STDOUT_STDERR")
+    logfile = dstroot+"/STDOUT_STDERR/server.log"
+    
     #start all node servers
+    
     subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
-    #vot = subprocess.Popen(["node", "server.js"], cwd=(dstroot+"/VotingBooth"))
-    if mockElection:
-        col = subprocess.Popen(["node", "collectingServer.js", "--resume"], cwd=(dstroot+"/CollectingServer"))
-    else:
-        col = subprocess.Popen(["node", "collectingServer.js"], cwd=(dstroot+"/CollectingServer"))
-    mix = []
-    for x in range(numMix):
-        if x < 10:
-            mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/0"+str(x))))
+    with open(logfile, 'w') as file_out:
+        if mockElection:
+            col = subprocess.Popen(["node", "collectingServer.js", "--resume"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/CollectingServer"))
         else:
-            mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/"+str(x))))
-    bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-    newPIDs = [col.pid, bb.pid]
-    for x in range(numMix):
-        newPIDs.append(mix[x].pid)   
+            col = subprocess.Popen(["node", "collectingServer.js"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/CollectingServer"))
+        mix = []
+        for x in range(numMix):
+            if x < 10:
+                mix.append(subprocess.Popen(["node", "mixServer.js"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/mix/0"+str(x))))
+            else:
+                mix.append(subprocess.Popen(["node", "mixServer.js"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/mix/"+str(x))))
+        bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
+        newPIDs = [col.pid, bb.pid]
+        for x in range(numMix):
+            newPIDs.append(mix[x].pid)   
 
 
 def writeToHandlerConfig():
