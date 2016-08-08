@@ -10,6 +10,9 @@ except:
     sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password [hidden/visible]")
 hidden = "hidden"
 
+if not os.path.isfile(localpath):
+    sys.exit("File "+localpath+" does not exist.")
+
 if(len(sys.argv)>3):
     hidden = sys.argv[3]
     if(hidden <> 'hidden' and hidden <> 'visible'):
