@@ -11,7 +11,7 @@ handler:
 	mkdir -p elections
 
 custom:
-	cd CustomizedElection; npm install
+	cd CustomizedElection; make
 	mkdir -p elections_hidden
 	mkdir -p CustomizedElection/manifests
 
@@ -35,13 +35,15 @@ electionsClean:
 	cp templates/handlerConfigFile.json _configFiles_/handlerConfigFile.json
 
 
-devclean: handlerclean nginxclean selectclean elclean
+devclean: handlerclean customclean nginxclean selectclean elclean
 
 
 handlerclean:
 	cd ElectionHandler; make clean
 	-rm -rf _configFiles_
-	-cd CustomizedElection; rm -rf node_modules
+
+customclean:
+	cd CustomizedElection; make clean
 
 nginxclean:	
 	-rm -rf nginx_config/
