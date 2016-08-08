@@ -301,22 +301,24 @@ def sElectStart():
     
     if not os.path.exists(dstroot+"/STDOUT_STDERR"):
         os.makedirs(dstroot+"/STDOUT_STDERR")
-    logfile = dstroot+"/STDOUT_STDERR/server.log"
+    logfolder = dstroot+"/STDOUT_STDERR"
     
     #start all node servers
     
     subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
-    with open(logfile, 'w') as file_out:
+    with open(logfolder+"/ColllectingServer.log", 'w') as file_out:
         if mockElection:
             col = subprocess.Popen(["node", "collectingServer.js", "--resume"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/CollectingServer"))
         else:
             col = subprocess.Popen(["node", "collectingServer.js"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/CollectingServer"))
+    with open(logfolder+"/MixServer.log", 'w') as file_out:
         mix = []
         for x in range(numMix):
             if x < 10:
                 mix.append(subprocess.Popen(["node", "mixServer.js"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/mix/0"+str(x))))
             else:
                 mix.append(subprocess.Popen(["node", "mixServer.js"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/mix/"+str(x))))
+    with open(logfolder+"/BulletinBoard.log", 'w') as file_out:
         bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
         newPIDs = [col.pid, bb.pid]
         for x in range(numMix):
