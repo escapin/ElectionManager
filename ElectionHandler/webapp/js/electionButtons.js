@@ -30,7 +30,7 @@ function electionButtons() {
 	function simpleElection(rand) {
 		disableButtons();
 		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "simple", ID: "generated", random: rand, title: "", description: ""})
+		$.post(electionManager+"/election", {task: "simple", ID: "generated", userChosenRandomness: rand, title: "", description: ""})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -179,7 +179,7 @@ function electionButtons() {
 		}
 		electionCh.choices = echoices;
 		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishListOfVoters: listVoters})
+		$.post(electionManager+"/election", {task: "complete", ID: "generated", userChosenRandomness: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishListOfVoters: listVoters})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
