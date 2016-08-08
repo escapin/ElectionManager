@@ -33,6 +33,4 @@ for line in stdout:
         break
     if "Collecting Server Admin:" in line:
         terminate = True
-for line in stderr:
-    print (line.strip('\n'))
 ssh.close()
