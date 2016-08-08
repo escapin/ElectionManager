@@ -6,12 +6,12 @@ devenv: handler custom nginx select
 
 handler:
 	cd ElectionHandler; make
-	cd CustomizedElection; npm install
 	mkdir -p _configFiles_
 	cp templates/config.json _configFiles_/handlerConfigFile.json
 	mkdir -p elections
 
 custom:
+	cd CustomizedElection; npm install
 	mkdir -p elections_hidden
 	mkdir -p CustomizedElection/manifests
 
