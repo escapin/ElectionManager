@@ -67,7 +67,7 @@ def setConfigFiles():
     electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
     electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
     electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
-    electionURI = rootDirProject + "/_configFiles_/electionURI.json"
+    electionURI = rootDirProject + "/_configFiles_/electionsURI.json"
     nginxConf = rootDirProject + "/nginx_config/nginx_select.conf"
     passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
@@ -117,7 +117,7 @@ def writeToHandlerConfig():
         jsonFile.truncate()
         jsonFile.close()
     except IOError:
-        sys.exit("electionURI.json missing or corrupt")
+        sys.exit("electionsURI.json missing or corrupt")
     if not hidden:
         jwrite.jRemElec(electionConfig, electionID)
         eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)
