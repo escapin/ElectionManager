@@ -12,6 +12,7 @@ elections_hidden/
 **/*/node_modules/
 _data_*
 _configFiles_*
+*electionsURI.json
 ElectionHandler/webapp/js/ElectionConfigFile.js
 ElectionHandler/webapp/js/serverAddresses.js
 ElectionHandler/webapp/js/config.js
