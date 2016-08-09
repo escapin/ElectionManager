@@ -31,9 +31,22 @@ jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
 jsonFile.close()
 sftp.close()
 
+print("Elections currently running:")
+
 for electionID in jsonData.keys():
     votingBooth = jsonData[electionID]["VotingBooth"]
     collectingAdmin = jsonData[electionID]["CollectingServer"]+"/admin/panel"
     hidden = jsonData[electionID]["hidden"]
     hidden = "hidden" if hidden == True else "visible"
     jwrite(localFile, electionID, [votingBooth, collectingAdmin, hidden])
+
+    print("------------------------------\n")
+    print("Election ID:")
+    print(str(electionID)+" ("+hidden+")\n")
+    print("Voting Booth:")
+    print(votingBooth+"\n")
+    print("Collecting Server Admin:")
+    print(collectingAdmin+"\n")
+print("------------------------------")
+
+
