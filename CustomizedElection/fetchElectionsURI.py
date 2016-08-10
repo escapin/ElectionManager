@@ -18,27 +18,33 @@ def jwrite(src, key, value):
     jsonFile.truncate()
     jsonFile.close()
 
+def printTotals(transferred, toBeTransferred):
+    print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
+
 electionURIserverPath = "/home/select/ElectionManager/_configFiles_/electionsURI.json"
-localFile = "electionsURI.json"
+localFilePath = "./electionsURI.json"
 
 paramiko.util.log_to_file("log/paramikoFetchURI.log")
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS#randoM")
 sftp = ssh.open_sftp()
-jsonFile = sftp.open(electionURIserverPath)
-jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-jsonFile.close()
+print "Transferring the file with the elections' URIs to the current directory..."
+sftp.get(electionURIserverPath, localFilePath, callback=printTotals);
+#jsonFile = sftp.open(electionURIserverPath)
 sftp.close()
+with open(localFilePath) as jsonFile:
+    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+
 
 print("Elections currently running:")
 
 for electionID in jsonData.keys():
     votingBooth = jsonData[electionID]["VotingBooth"]
-    collectingAdmin = jsonData[electionID]["CollectingServer"]
+    collectingServerAdmin = jsonData[electionID]["CollectingServer"]
     hidden = jsonData[electionID]["hidden"]
     hidden = "hidden" if hidden == True else "visible"
-    jwrite(localFile, electionID, [votingBooth, collectingAdmin, hidden])
+    jwrite(localFilePath, electionID, [votingBooth, collectingServerAdmin, hidden])
 
     print("------------------------------\n")
     print("Election ID:")
@@ -46,7 +52,7 @@ for electionID in jsonData.keys():
     print("Voting Booth:")
     print(votingBooth+"\n")
     print("Collecting Server Admin:")
-    print(collectingAdmin+"\n")
+    print(collectingServerAdmin+"\n")
 print("------------------------------")
 
 
