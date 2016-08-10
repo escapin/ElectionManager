@@ -41,10 +41,9 @@ print("Elections currently running:")
 
 for electionID in jsonData.keys():
     votingBooth = jsonData[electionID]["VotingBooth"]
-    collectingServerAdmin = jsonData[electionID]["CollectingServer"]
-    hidden = jsonData[electionID]["hidden"]
-    hidden = "hidden" if hidden == True else "visible"
-    jwrite(localFilePath, electionID, [votingBooth, collectingServerAdmin, hidden])
+    collectingServerAdmin = jsonData[electionID]["CollectingServerAdmin"]
+    visible = jsonData[electionID]["handlerVisibility"]
+    jwrite(localFilePath, electionID, [votingBooth, collectingServerAdmin, "visible" if visible else "hidden"])
 
     print("------------------------------\n")
     print("Election ID:")
