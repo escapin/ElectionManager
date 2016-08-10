@@ -18,15 +18,15 @@ def jwrite(src, key, value):
     jsonFile.truncate()
     jsonFile.close()
 
-electionURI = "/home/select/ElectionManager/_configFiles_/electionsURI.json"
+electionURIserverPath = "/home/select/ElectionManager/_configFiles_/electionsURI.json"
 localFile = "electionsURI.json"
 
-#paramiko.util.log_to_file("log/paramikoRemove.log")
+paramiko.util.log_to_file("log/paramikoFetchURI.log")
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS#randoM")
 sftp = ssh.open_sftp()
-jsonFile = sftp.open(electionURI)
+jsonFile = sftp.open(electionURIserverPath)
 jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
 jsonFile.close()
 sftp.close()
@@ -35,7 +35,7 @@ print("Elections currently running:")
 
 for electionID in jsonData.keys():
     votingBooth = jsonData[electionID]["VotingBooth"]
-    collectingAdmin = jsonData[electionID]["CollectingServer"]+"/admin/panel"
+    collectingAdmin = jsonData[electionID]["CollectingServer"]
     hidden = jsonData[electionID]["hidden"]
     hidden = "hidden" if hidden == True else "visible"
     jwrite(localFile, electionID, [votingBooth, collectingAdmin, hidden])

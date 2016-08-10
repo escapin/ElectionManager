@@ -335,7 +335,7 @@ def writeToHandlerConfig():
     for x in range(len(ports)):
         jwrite.jAddList(electionConfig, "usedPorts", ports[x])
     #electionUrls = {"VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"], "BulletinBoard": serverAddress["bulletinboard"], "hidden": hidden}
-    electionUrls = {electionID, serverAddress["votingbooth"], serverAddress["collectingserver"], serverAddress["bulletinboard"], "hidden" if hidden else "visible"}
+    electionUrls = {electionID, serverAddress["votingbooth"], os.path.join(serverAddress["collectingserver"], "/admin/panel"), serverAddress["bulletinboard"], "hidden" if hidden else "visible"}
     jwrite.jwrite(electionURI, electionID, electionUrls)
     electionUrls["ElectionIdentifier"] = electionUtils.hashManifest(sElectDir+manifest)
     electionUrls["electionID"] = electionID
