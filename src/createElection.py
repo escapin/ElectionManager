@@ -42,7 +42,7 @@ def setConfigFiles():
     global electionInfo
     global electionInfoHidden
     global defaultManifest
-    global electionsURI
+    global electionsURIpath
     global nginxConf
     global passList
     global nginxLog
@@ -64,7 +64,7 @@ def setConfigFiles():
     electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
     electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
     defaultManifest = rootDirProject + "/_configFiles_/ElectionManifest.json"
-    electionsURI = rootDirProject + "/_configFiles_/electionsURI.json"
+    electionsURIpath = rootDirProject + "/_configFiles_/electionsURIpath.json"
     electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
     nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
     passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
@@ -341,11 +341,11 @@ def writeToHandlerConfig():
     electionInfo["VotingBooth"] = serverAddress["votingbooth"]
     electionInfo["CollectingServerAdmin"] = serverAddress["collectingserver"] + "admin/panel/"
     electionInfo["BulletinBoard"] = serverAddress["bulletinboard"]
-    electionInfo["handlerVisibility"] = "hidden" if hidden == True else "visible"
+    #electionInfo["handlerVisibility"] = "hidden" if hidden == True else "visible"
     #electionInfo = {electionID, serverAddress["votingbooth"], , serverAddress["bulletinboard"], "hidden" if hidden else "visible"}
     #electionUrls["ElectionIdentifier"] = electionUtils.hashManifest(sElectDir+manifest)
     #electionUrls["electionID"] = electionID
-    jwrite.jwrite(electionsURI, electionID, electionInfo)
+    jwrite.jwrite(electionsURIpath, electionID, electionInfo)
 
     
     if not hidden:
