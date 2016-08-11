@@ -41,8 +41,8 @@ session.stdout.on('data', function (data) {
 		eleInfo = eleInfo.split("electionInfo.json:\n")[0];
 		eleInfo = JSON.parse(eleInfo);
 		eleInfo.task = "created";
-		console.log("\nFull Election ID: \n"+(eleInfo.electionID).toUpperCase());
-		console.log("(use first "+(eleInfo.electionIDshort).length+" characters ["+eleInfo.electionIDshort+"] to remove the election)"+"\n")
+		console.log("\nFull Election ID: \n"+(eleInfo.ElectionIdentifier).toUpperCase());
+		console.log("(use first "+(eleInfo.electionID).length+" characters ["+eleInfo.electionID+"] to remove the election)"+"\n")
 		console.log("Voting Booth: \n"+eleInfo.VotingBooth+"\n");
 		console.log("Collecting Server Admin: \n"+eleInfo.CollectingServerAdmin);
 	}
