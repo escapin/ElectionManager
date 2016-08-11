@@ -42,7 +42,7 @@ def setConfigFiles():
     global electionInfo
     global electionInfoHidden
     global defaultManifest
-    global electionURI
+    global electionsURI
     global nginxConf
     global passList
     global nginxLog
@@ -64,7 +64,7 @@ def setConfigFiles():
     electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
     electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
     defaultManifest = rootDirProject + "/_configFiles_/ElectionManifest.json"
-    electionURI = rootDirProject + "/_configFiles_/electionsURI.json"
+    electionsURI = rootDirProject + "/_configFiles_/electionsURI.json"
     electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
     nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
     passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
@@ -334,18 +334,18 @@ def writeToHandlerConfig():
     #add ports to config
     for x in range(len(ports)):
         jwrite.jAddList(electionConfig, "usedPorts", ports[x])
-
+    
     #electionUrls = {"VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"], "BulletinBoard": serverAddress["bulletinboard"], "hidden": hidden}
     electionInfo = {}
     electionInfo["electionID"] = electionUtils.hashManifest(sElectDir+manifest)
     electionInfo["VotingBooth"] = serverAddress["votingbooth"]
     electionInfo["CollectingServerAdmin"] = serverAddress["collectingserver"] + "admin/panel/"
     electionInfo["BulletinBoard"] = serverAddress["bulletinboard"]
-    electionInfo["handlerVisibility"] = False if hidden == True else True
+    electionInfo["handlerVisibility"] = "hidden" if hidden == True else "visible"
     #electionInfo = {electionID, serverAddress["votingbooth"], , serverAddress["bulletinboard"], "hidden" if hidden else "visible"}
     #electionUrls["ElectionIdentifier"] = electionUtils.hashManifest(sElectDir+manifest)
     #electionUrls["electionID"] = electionID
-    jwrite.jwrite(electionURI, electionID, electionInfo)
+    jwrite.jwrite(electionsURI, electionID, electionInfo)
 
     
     if not hidden:
