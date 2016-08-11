@@ -500,6 +500,6 @@ writeToHandlerConfig()
 writeToNginxConfig()
 
 #prints election details to server.js
-print("electionUrls.json:\n"+json.dumps(electionUrls))
+print("electionUrls.json:\n"+json.dumps(electionInfo))
 print("electionInfo.json:\n"+json.dumps(eleInfo))
 
