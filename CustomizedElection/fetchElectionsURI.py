@@ -55,12 +55,9 @@ for electionID in jsonData.keys():
     #jwrite(localFilePath, electionID, [votingBooth, collectingAdmin, hidden])
 
     print("------------------------------\n")
-    print("Election ID:")
-    print(str(electionID)+" ("+hidden+")\n")
-    print("Voting Booth:")  
-    print(votingBooth+"\n")
-    print("Collecting Server Admin:")
-    print(collectingAdmin+"\n")
+    print("Election ID: " + str(electionID)+" ("+hidden+")")
+    print("Voting Booth:\t\t\t" + votingBooth+"")
+    print("Collecting Server Admin:\t" + collectingAdmin+"\n")
 print("------------------------------")
 
 
