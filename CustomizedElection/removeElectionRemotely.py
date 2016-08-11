@@ -15,8 +15,11 @@ if(len(sys.argv)>3):
     if(hidden <> 'hidden' and hidden <> 'visible'):
         sys.exit("Script is called with arguments: \n python script.py password [hidden/visible]")
 
-paramiko.util.log_to_file("log/paramikoRemove.log")
-ssh = paramiko.SSHClient()
+try:
+    ssh = paramiko.SSHClient()
+except:
+    paramiko.util.log_to_file("log/paramikoCreate.log")
+    ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS#randoM")
 
