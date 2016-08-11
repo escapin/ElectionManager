@@ -341,7 +341,7 @@ def writeToHandlerConfig():
     electionInfo["VotingBooth"] = serverAddress["votingbooth"]
     electionInfo["CollectingServerAdmin"] = serverAddress["collectingserver"] + "admin/panel/"
     electionInfo["BulletinBoard"] = serverAddress["bulletinboard"]
-    electionInfo["handlerVisibility"] = False if hidden else True
+    electionInfo["handlerVisibility"] = False if hidden == True else True
     #electionInfo = {electionID, serverAddress["votingbooth"], , serverAddress["bulletinboard"], "hidden" if hidden else "visible"}
     #electionUrls["ElectionIdentifier"] = electionUtils.hashManifest(sElectDir+manifest)
     #electionUrls["electionID"] = electionID
