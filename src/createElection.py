@@ -327,17 +327,15 @@ def sElectStart():
 
 def writeToHandlerConfig():
     global eleInfo
-    global electionUrls
     #add the password
     jwrite.jwrite(passList, electionID, password)
     
     #add ports to config
     for x in range(len(ports)):
         jwrite.jAddList(electionConfig, "usedPorts", ports[x])
-    electionUrls = {"VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"], "BulletinBoard": serverAddress["bulletinboard"], "hidden": hidden}
-    jwrite.jwrite(electionURI, electionID, electionUrls)
-    electionUrls["ElectionIdentifier"] = electionUtils.hashManifest(sElectDir+manifest)
-    electionUrls["electionID"] = electionID
+    electionUrlsFile = [electionUtils.hashManifest(sElectDir+manifest), serverAddress["votingbooth"], serverAddress["collectingserver"]+"/admin/panel", serverAddress["bulletinboard"], "hidden" if hidden else "visible"]
+    jwrite.jwrite(electionURI, electionID, electionUrlsFile)
+    
     
     if not hidden:
         #write all election details
@@ -491,6 +489,9 @@ writeToHandlerConfig()
 writeToNginxConfig()
 
 #prints election details to server.js
+electionUrls = {"ElectionIdentifier": electionUtils.hashManifest(sElectDir+manifest), "electionID": electionID,
+                "VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"]+"/admin/panel", 
+                "BulletinBoard": serverAddress["bulletinboard"], "hidden": hidden}
 print("electionUrls.json:\n"+json.dumps(electionUrls))
 print("electionInfo.json:\n"+json.dumps(eleInfo))
 

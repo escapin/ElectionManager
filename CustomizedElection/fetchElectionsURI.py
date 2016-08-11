@@ -34,10 +34,10 @@ sftp.close()
 print("Elections currently running:")
 
 for electionID in jsonData.keys():
-    votingBooth = jsonData[electionID]["VotingBooth"]
-    collectingAdmin = jsonData[electionID]["CollectingServer"]+"/admin/panel"
-    hidden = jsonData[electionID]["hidden"]
-    hidden = "hidden" if hidden == True else "visible"
+    votingBooth = jsonData[electionID][1]
+    collectingAdmin = jsonData[electionID][2]
+    bulletinBoard = jsonData[electionID][3]
+    hidden = jsonData[electionID][4]
     jwrite(localFile, electionID, [votingBooth, collectingAdmin, hidden])
 
     print("------------------------------\n")
