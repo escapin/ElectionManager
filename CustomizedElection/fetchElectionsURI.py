@@ -17,9 +17,12 @@ def jwrite(src, key, value):
     json.dump(jsonData, jsonFile, indent = 4)
     jsonFile.truncate()
     jsonFile.close()
+    
+def printTotals(transferred, toBeTransferred):
+    print "Transferred: {0} bytes\tOut of: {1} bytes".format(transferred, toBeTransferred)
 
-electionURI = "/home/select/ElectionManager/_configFiles_/electionsURI.json"
-localFile = "electionsURI.json"
+electionURIserverPath = "/home/select/ElectionManager/_configFiles_/electionsURI.json"
+localFilePath = "electionsURI.json"
 
 try:
     ssh = paramiko.SSHClient()
@@ -29,10 +32,18 @@ except:
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS#randoM")
 sftp = ssh.open_sftp()
-jsonFile = sftp.open(electionURI)
-jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-jsonFile.close()
+
+print "Transferring the file with the elections' URIs to the current directory..."
+sftp.get(electionURIserverPath, localFilePath, callback=printTotals);
+#jsonFile = sftp.open(electionURIserverPath)
 sftp.close()
+with open(localFilePath) as jsonFile:
+    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+
+#jsonFile = sftp.open(electionURIserverPath)
+#jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+#jsonFile.close()
+#sftp.close()
 
 print("Elections currently running:")
 
@@ -41,12 +52,12 @@ for electionID in jsonData.keys():
     collectingAdmin = jsonData[electionID][2]
     bulletinBoard = jsonData[electionID][3]
     hidden = jsonData[electionID][4]
-    jwrite(localFile, electionID, [votingBooth, collectingAdmin, hidden])
+    #jwrite(localFilePath, electionID, [votingBooth, collectingAdmin, hidden])
 
     print("------------------------------\n")
     print("Election ID:")
     print(str(electionID)+" ("+hidden+")\n")
-    print("Voting Booth:")
+    print("Voting Booth:")  
     print(votingBooth+"\n")
     print("Collecting Server Admin:")
     print(collectingAdmin+"\n")
