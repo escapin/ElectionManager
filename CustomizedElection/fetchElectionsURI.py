@@ -18,32 +18,27 @@ def jwrite(src, key, value):
     jsonFile.truncate()
     jsonFile.close()
 
-def printTotals(transferred, toBeTransferred):
-    print "Transferred: {0}\tOut of: {1}".format(transferred, toBeTransferred)
+electionURI = "/home/select/ElectionManager/_configFiles_/electionsURI.json"
+localFile = "electionsURI.json"
 
-electionURIserverPath = "/home/select/ElectionManager/_configFiles_/electionsURI.json"
-localFilePath = "./electionsURI.json"
-
-paramiko.util.log_to_file("log/paramikoFetchURI.log")
+#paramiko.util.log_to_file("log/paramikoRemove.log")
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect("select.uni-trier.de", username="select", password="teA3votinG1dartS#randoM")
 sftp = ssh.open_sftp()
-print "Transferring the file with the elections' URIs to the current directory..."
-sftp.get(electionURIserverPath, localFilePath, callback=printTotals);
-#jsonFile = sftp.open(electionURIserverPath)
+jsonFile = sftp.open(electionURI)
+jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+jsonFile.close()
 sftp.close()
-with open(localFilePath) as jsonFile:
-    jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-
 
 print("Elections currently running:")
 
 for electionID in jsonData.keys():
     votingBooth = jsonData[electionID]["VotingBooth"]
-    collectingServerAdmin = jsonData[electionID]["CollectingServerAdmin"]
-    visible = jsonData[electionID]["handlerVisibility"]
-    jwrite(localFilePath, electionID, [votingBooth, collectingServerAdmin, "visible" if visible else "hidden"])
+    collectingAdmin = jsonData[electionID]["CollectingServer"]+"/admin/panel"
+    hidden = jsonData[electionID]["hidden"]
+    hidden = "hidden" if hidden == True else "visible"
+    jwrite(localFile, electionID, [votingBooth, collectingAdmin, hidden])
 
     print("------------------------------\n")
     print("Election ID:")
@@ -51,7 +46,7 @@ for electionID in jsonData.keys():
     print("Voting Booth:")
     print(votingBooth+"\n")
     print("Collecting Server Admin:")
-    print(collectingServerAdmin+"\n")
+    print(collectingAdmin+"\n")
 print("------------------------------")
 
 
