@@ -375,8 +375,8 @@ function electionButtons() {
     
 	/* Create Buttons */
 	$("#mock").click(function() {
-		//askRandom("simple");
-		simpleElection(false);
+		askRandom("simple");
+		//simpleElection(false);
 	});
 	
 	$("#adv-create").click(function() {
