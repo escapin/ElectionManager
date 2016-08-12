@@ -799,6 +799,13 @@ function electionButtons() {
     ////////////////////////////////////////////////////////////////////////////
     // Random overlay
     
+    $(document).keypress(function(e){
+    	console.log(e.keyCode);
+    	if(e.keyCode === 27){
+    		document.getElementById("userRandom").style.visibility = "hidden";
+    	}
+    });
+    
     function askRandom(etype) {
     	document.getElementById("mod").value = etype;
     	elecType = etype;
@@ -829,6 +836,11 @@ function electionButtons() {
 		el = document.getElementById("userRandom");
 		el.style.visibility = "hidden";
 		progressElection(false);
+	});
+	
+	$("#rand-close").click(function() {
+		el = document.getElementById("userRandom");
+		el.style.visibility = "hidden";
 	});
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
