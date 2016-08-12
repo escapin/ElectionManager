@@ -147,6 +147,10 @@ def getInput():
     startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
     endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
     randomness = False
+    if "mockElection" in sys.argv[1]:
+        mockArgs = json.loads(sys.argv[1])
+        randomness = mockArgs["userChosenRandomness"]
+        randomness = True if randomness == "true" else False
     hidden = True if sys.argv[1] == "true" else False
     if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
         electionArgs = json.loads(sys.argv[2])

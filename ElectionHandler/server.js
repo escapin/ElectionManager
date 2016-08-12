@@ -301,10 +301,11 @@ function spawnServer(req, callback){
 	else if(task === "simple"){
 		var value = req.body.ID;
 		var pass = req.body.password;
-		var ports = "placeholder";
-
+		var rand = req.body.userChosenRandomness;
+		var mockParam = {mockElection: true, userChosenRandomness: rand}
+		console.log(rand);
 		//call the python script to start the servers
-	    var session = spawn('python', [SRC_DIR+'createElection.py', ports]);
+	    var session = spawn('python', [SRC_DIR+'createElection.py', JSON.stringify(mockParam)]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
