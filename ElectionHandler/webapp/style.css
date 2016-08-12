@@ -223,6 +223,7 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
      background-color: #fff;
      border:1px solid #000;
      padding:1em;
+     overflow: auto;
 }
 
 #userRandom div {
@@ -232,6 +233,7 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
      border:1px solid #000;
      padding: 1em;
      text-align:center;
+     overflow: auto;
 }
 
 #infopage div,
@@ -272,13 +274,8 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 	margin-top: 1.3em;
 }
 
-#u-rand{
-	margin-right: 10%;
-	margin-top: 5%;
-}
-
+#u-rand,
 #u-norm{
-	margin-left: 10%;
 	margin-top: 5%;
 }
 
@@ -335,12 +332,12 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 	font-size: 0.9em;
 }
 
-tr { 
+tr.elecs { 
 	font-size: 0.9em;
 	box-shadow: 0px 1px 12px 3px #ddd;
 }
 
-th{
+th.elecs{
 	font-weight: 500;
 	    border-left: 1px solid #cbcbcb;/*  inner column border */
     border-width: 0 0 0 1px;
@@ -354,7 +351,7 @@ th{
     border: 1px solid #cbcbcb;
     background: #e0e0e0;
 }
-td{
+td.elecs{
 	font-weight: 300;
 	border-left: 1px solid #cbcbcb;/*  inner column border */
     border-width: 0 0 0 1px;
@@ -371,6 +368,12 @@ td{
     word-wrap: break-word;
     max-width: 12vw;
     cursor: pointer;
+}
+
+td.align{
+	font-weight: 300;
+	border: none;
+    empty-cells: hide;
 }
 
 .faintHover:hover{

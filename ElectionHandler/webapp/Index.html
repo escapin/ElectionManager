@@ -227,13 +227,22 @@
 	</div>
     <!-- --------------------------------------------------------------------------------- -->
 	<div id="userRandom">
-     <div class="body">
-          <p>Do you wish your election to enable user-randomness?</p>
-          <p> This will allow the user to enter a code
-          that will be visible for verification, in order to enhance security.</p>
-          <p></p>                
-          <input id='u-rand' type="button" class="pure-button pure-button-primary" value="random"></input>
-          <input id='u-norm' style="float: right;" type="button" class="pure-button pure-button-primary" value="normal"></input>
+     <div id="vert-align" class="body" style="width: 35%; height: 20%;">
+     	  <input id="rand-close" class="closeButton" style="float: right; margin: -2%;" type="button" value="X">
+          <p>Do you trust your browser?<br><br></p>
+          <table id='rand-table' style="min-width: 100%; table-layout: fixed;">
+          <tr class="align"/>
+          <td class="align" style="width: 20%;">
+          <input id='u-norm' style="width: 80%;" type="button" class="pure-button pure-button-primary" value="Yes"></input>
+          </td>
+          <td class="align" style="width: 20%;">
+          <input id='u-rand' style="width: 80%" type="button" class="pure-button pure-button-primary" value="No, I'm paranoid"></input>
+          </th>
+          <tr class="align"/>
+          <td class="align" style="width: 20%; vertical-align: top; font-size: 9pt;"/>(for most of the users)
+          <td class="align" style="width: 20%; vertical-align: top; font-size: 9pt;"/>(and I know how to insert random characters)     	  
+          </table>
+     	  </div>
      </div>
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->

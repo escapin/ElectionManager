@@ -52,12 +52,12 @@ function buildElectionTable(elections, res) {
 	 
 	document.getElementById("elections").innerHTML = "";
 	 
-	var head$ = $('<tr/>');
-	head$.append($('<th style="text-align:center"/>').html(" Election IDs "));
-	head$.append($('<th style="text-align:center"/>').html(" Election Title "));
-	head$.append($('<th style="text-align:center"/>').html(" Starting Time "));
-	head$.append($('<th style="text-align:center"/>').html(" Ending Time "));
-	head$.append($('<th style="text-align:center"/>').html(" Election State "));
+	var head$ = $('<tr class="elecs"/>');
+	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Election IDs "));
+	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Election Title "));
+	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Starting Time "));
+	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Ending Time "));
+	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Election State "));
 	$("#elections").append(head$);
   
 	var electionTitles = [];
@@ -68,13 +68,13 @@ function buildElectionTable(elections, res) {
 		var startingTime = resolveTime(elections[i].startTime)
 		var endingTime = resolveTime(elections[i].endTime)
 		var ELS = elections[i].ELS
-		var row$ = $('<tr class="faintHover"/>');
+		var row$ = $('<tr class="faintHover elecs"/>');
       
-		row$.append($('<td />').html(elections[i].electionID));
-		row$.append($('<td />').html(escapeHTML(elections[i].electionTitle, true)));
-		row$.append($('<td />').html(startingTime));
-		row$.append($('<td />').html(endingTime));
-		row$.append($('<td id='+elecID+'/>').html(elecStatus));
+		row$.append($('<td class="elecs"/>').html(elections[i].electionID));
+		row$.append($('<td class="elecs"/>').html(escapeHTML(elections[i].electionTitle, true)));
+		row$.append($('<td class="elecs"/>').html(startingTime));
+		row$.append($('<td class="elecs"/>').html(endingTime));
+		row$.append($('<td id='+elecID+' class="elecs"/>').html(elecStatus));
 		$("#elections").append(row$);
       
 		setTimeout(getElectionStatus(elecID, ELS, function (eleID, ELS, stat){

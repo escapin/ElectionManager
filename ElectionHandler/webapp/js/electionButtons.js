@@ -375,8 +375,8 @@ function electionButtons() {
     
 	/* Create Buttons */
 	$("#mock").click(function() {
-		//askRandom("simple");
-		simpleElection(false);
+		askRandom("simple");
+		//simpleElection(false);
 	});
 	
 	$("#adv-create").click(function() {
@@ -799,6 +799,14 @@ function electionButtons() {
     ////////////////////////////////////////////////////////////////////////////
     // Random overlay
     
+    $(document).keyup(function(e){
+    	e.preventDefault();
+    	e.stopPropagation();
+    	if(e.keyCode === 27){
+    		document.getElementById("userRandom").style.visibility = "hidden";
+    	}
+    });
+    
     function askRandom(etype) {
     	document.getElementById("mod").value = etype;
     	elecType = etype;
@@ -829,6 +837,11 @@ function electionButtons() {
 		el = document.getElementById("userRandom");
 		el.style.visibility = "hidden";
 		progressElection(false);
+	});
+	
+	$("#rand-close").click(function() {
+		el = document.getElementById("userRandom");
+		el.style.visibility = "hidden";
 	});
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
