@@ -799,8 +799,9 @@ function electionButtons() {
     ////////////////////////////////////////////////////////////////////////////
     // Random overlay
     
-    $(document).keypress(function(e){
-    	console.log(e.keyCode);
+    $(document).keyup(function(e){
+    	e.preventDefault();
+    	e.stopPropagation();
     	if(e.keyCode === 27){
     		document.getElementById("userRandom").style.visibility = "hidden";
     	}
