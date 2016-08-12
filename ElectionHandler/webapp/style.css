@@ -274,13 +274,8 @@ div.electionid,h3.lead,h1.title,h3.subtitle,div.extra-info,p.further-info {
 	margin-top: 1.3em;
 }
 
-#u-rand{
-	margin-right: 10%;
-	margin-top: 5%;
-}
-
+#u-rand,
 #u-norm{
-	margin-left: 10%;
 	margin-top: 5%;
 }
 
