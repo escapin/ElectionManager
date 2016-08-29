@@ -7,6 +7,7 @@ var http = require('http');
 var mkdirp = require('mkdirp');
 var net = require('net');
 var async = require('async');
+var toobusy = require('toobusy-js');
 
 //var https = require('https');
 //var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
@@ -54,6 +55,7 @@ var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConf
 var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
 var electionInfo;
+var maxStoredKeypairs = 20;
 
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
@@ -284,26 +286,12 @@ function spawnServer(req, callback){
 		    	callback('{"error": "An error occurred while creating an election: error code ' + code + '. Try again!"}');
 		    }
 		});
-		/**
-		session.on('exit', function (code) {
-		    console.log('complete child process exited with code ' + code);
-		    if(code === 0){
-		    	createdElections = createdElections + 1;
-		    	callback("created");
-		    }
-		    else{ // an error in createElection.py occurred
-		    	callback("An error occurred while creating an election. Try again!");
-			//res.end("error code" + code) //only for debugging
-		    }
-		});
-		**/
 	}
 	else if(task === "simple"){
 		var value = req.body.ID;
 		var pass = req.body.password;
 		var rand = req.body.userChosenRandomness;
 		var mockParam = {mockElection: true, userChosenRandomness: rand}
-		console.log(rand);
 		//call the python script to start the servers
 	    var session = spawn('python', [SRC_DIR+'createElection.py', JSON.stringify(mockParam)]);
 		session.stdout.on('data', function (data) {
@@ -311,11 +299,16 @@ function spawnServer(req, callback){
 				var time =  new Date();
 				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 			}
-			else if(String(data).indexOf("TLS")>-1){
+			if(String(data).indexOf("TLS")>-1){
 				var time =  new Date();
 				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
-			else if(String(data).indexOf("electionInfo.json:\n")>-1){
+			if(String(data).indexOf("start test information::")>-1){
+				var testPrint = String(data).split("start test information::")[1];
+				testPrint = testPrint.split("::end test information")[0];
+				console.log(testPrint);
+			}
+			if(String(data).indexOf("electionInfo.json:\n")>-1){
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
 				eleInfo = JSON.parse(eleInfo);
@@ -328,6 +321,7 @@ function spawnServer(req, callback){
 			//log the error in ERRLOG_FILE, async queue
 	    	//to make sure it's not being written to 
 	    	//simultaneously
+			console.log(data);
 			var dat = {err: data, proc: 'simple'};
 	    	logErrQueue.push(dat);
 
@@ -343,19 +337,6 @@ function spawnServer(req, callback){
 		    	callback('{"error": "An error occurred while creating an election: error code ' + code + '. Try again!"}');
 		    }
 		});
-		/**
-		session.on('exit', function (code) {
-		    console.log('simple child process exited with code ' + code);
-		    if(code === 0){
-		    	createdElections = createdElections + 1;
-		    	callback("created");
-		    }
-		    else{ // an error in createElection.py occurred
-		    	callback("An error occurred while creating an election: error code " + code + ". Try again!");
-			//res.end("error code" + code) //only for debugging
-		    }
-		});
-		**/
 	}
 	else if(task === "remove"){
 		var value = req.body.ID;
@@ -410,18 +391,34 @@ function spawnServer(req, callback){
 		    	callback('{"error": "An error occurred while removing an election: error code ' + code + '. Try again!"}');
 		    }
 		});
-		/**
-		session.on('exit', function (code) {
-		    console.log('remove child process exited with code ' + code);
-		    if(code === 0){
-		    	createdElections = createdElections - 1;
-		    	callback("removed");
-		    }
-		    else{
-		    	callback("An error occurred while removing an election: error code " + code + ". Try again!");
-		    }
-		});
-		**/
+	}
+	else if(task = "generateKeys"){
+		var keyFile = DATA_DIR+"/keys.json"
+		var keyGen;
+		var jsonFile;
+		try{
+			jsonFile = JSON.parse(fs.readFileSync(keyFile));
+		}
+		catch(e){
+			var obj = {keys: []}
+			fs.writeFileSync(keyFile, JSON.stringify(obj, null, 4), {spaces:4});
+			jsonFile = JSON.parse(fs.readFileSync("_data_/keys.json"));
+		}
+		if(jsonFile.keys.length < maxStoredKeypairs){
+			keyGen = spawn('node', ['../sElect/tools/keyGen.js']);
+			keyGen.stdout.on('data', function (data) {
+				var keys = jsonFile.keys;
+				keys.push(JSON.parse(String(data)));
+		    	fs.writeFileSync(keyFile, JSON.stringify(jsonFile, null, 4), {spaces:4});
+		    	callback("keypair created: " + jsonFile.keys.length + " out of " + maxStoredKeypairs + ".");
+			});
+			keyGen.stderr.on('data', function (data) {
+				callback("something went wrong: \n"+String(data));
+			});
+		}
+		else{
+			callback("maximum number of keys (" + maxStoredKeypairs + ") reached.")
+		}
 	}
 }
 
@@ -429,6 +426,7 @@ function spawnServer(req, callback){
 // Since no tasks can be performed in parallel, only one
 // dispatcher can run at any time
 var pythonQueue = async.queue(spawnServer, 1);
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////////Start the server up
@@ -507,4 +505,12 @@ function start(){
 	catch(e){
 		console.log("../_configFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
 	}
+	var keyGeneration = setInterval(function(){
+		if(!toobusy()){
+			pythonQueue.push({body: {task: "generateKeys"}});
+		}
+		else{
+			console.log('server is running busy.');
+		}
+	}, 5000)
 }
