@@ -56,6 +56,7 @@ var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
 var electionInfo;
 var maxStoredKeypairs = 20;
+var storedKeypairs = [];
 
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
@@ -239,7 +240,13 @@ function spawnServer(req, callback){
 		var value = req.body.ID;
 		var pass = req.body.password;
 		var ports = "placeholder";
-	    
+	    var keypairs = [];
+		if(storedKeypairs.length > numMix){
+			for(i = 0; i < numMix+1; i++){
+				keypairs.push(storedKeypairs.pop());
+			}
+			req.body.keys = keypairs;
+		}
 	    
 	    //hash password
 		var salt = bcrypt.genSaltSync(10);
@@ -296,7 +303,13 @@ function spawnServer(req, callback){
 		var value = req.body.ID;
 		var pass = req.body.password;
 		var rand = req.body.userChosenRandomness;
-		var mockParam = {mockElection: true, userChosenRandomness: rand}
+		var keypairs = [];
+		if(storedKeypairs.length > numMix){
+			for(i = 0; i < numMix+1; i++){
+				keypairs.push(storedKeypairs.pop());
+			}
+		}
+		var mockParam = {mockElection: true, userChosenRandomness: rand, keys: keypairs}
 		//call the python script to start the servers
 	    var session = spawn('python', [SRC_DIR+'createElection.py', JSON.stringify(mockParam)]);
 		session.stdout.on('data', function (data) {
@@ -402,33 +415,11 @@ function spawnServer(req, callback){
 		    }
 		});
 	}
-	else if(task = "generateKeys"){
+	else if(task = "saveKeys"){
 		var keyFile = DATA_DIR+"/keys.json"
-		var keyGen;
-		var jsonFile;
-		try{
-			jsonFile = JSON.parse(fs.readFileSync(keyFile));
-		}
-		catch(e){
-			var obj = {keys: []}
-			fs.writeFileSync(keyFile, JSON.stringify(obj, null, 4), {spaces:4});
-			jsonFile = JSON.parse(fs.readFileSync("_data_/keys.json"));
-		}
-		if(jsonFile.keys.length < maxStoredKeypairs){
-			keyGen = spawn('node', ['../sElect/tools/keyGen.js']);
-			keyGen.stdout.on('data', function (data) {
-				var keys = jsonFile.keys;
-				keys.push(JSON.parse(String(data)));
-		    	fs.writeFileSync(keyFile, JSON.stringify(jsonFile, null, 4), {spaces:4});
-		    	callback("keypair created: " + jsonFile.keys.length + " out of " + maxStoredKeypairs + ".");
-			});
-			keyGen.stderr.on('data', function (data) {
-				callback("something went wrong: \n"+String(data));
-			});
-		}
-		else{
-			callback("maximum number of keys (" + maxStoredKeypairs + ") reached.")
-		}
+		var obj = {keys: storedKeypairs};
+		fs.writeFileSync(keyFile, JSON.stringify(obj, null, 4), {spaces:4});
+		callback(storedKeypairs.length+" keypairs saved.")
 	}
 }
 
@@ -438,6 +429,19 @@ function spawnServer(req, callback){
 var pythonQueue = async.queue(spawnServer, 1);
 
 
+function generateKeys(callback){
+	if(storedKeypairs.length < maxStoredKeypairs){
+		keyGen = spawn('node', ['../sElect/tools/keyGen.js']);
+		keyGen.stdout.on('data', function (data) {
+			var keys = jsonFile.keys;
+			storedKeypairs.push(JSON.parse(String(data)));
+	    	callback("keypair created: " + jsonFile.keys.length + " out of " + maxStoredKeypairs + ".");
+		});
+		keyGen.stderr.on('data', function (data) {
+			callback("something went wrong: \n"+String(data));
+		});
+	}
+}
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////////Start the server up
 
@@ -515,9 +519,20 @@ function start(){
 	catch(e){
 		console.log("../_configFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
 	}
+	try{
+		jsonFile = JSON.parse(fs.readFileSync(DATA_DIR+"/keys.json"));
+		storedKeypairs = jsonFile["keys"]
+		console.log(storedKeypairs.length + " keypairs loaded.")
+	}
+	catch(e){
+		var obj = {keys: []}
+		fs.writeFileSync(keyFile, JSON.stringify(obj, null, 4), {spaces:4});
+		jsonFile = JSON.parse(fs.readFileSync(DATA_DIR+"/keys.json"));
+	}
 	var keyGeneration = setInterval(function(){
 		if(!toobusy()){
-			pythonQueue.push({body: {task: "generateKeys"}});
+			generateKeys(function(){
+			});
 		}
 		else{
 			console.log('server is running busy.');
