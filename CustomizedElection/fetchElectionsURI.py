@@ -37,7 +37,13 @@ if (pwd is None):
     #for line in sys.stdin:
     #    pwd = line
     pwd = getpass.getpass()
-    
+    # if the entry is not there we are going to set it up
+    # to avoid it keeps on asking it
+    try:
+        keyring.set_password(hostname, user, pwd);
+        print("Password stored in the OS keyring")
+    except keyring.errors.PasswordSetError:
+        print("Failed to store password in the OS keyring")
 try:
     ssh = paramiko.SSHClient()
 except:
