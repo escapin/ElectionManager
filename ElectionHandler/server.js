@@ -254,11 +254,16 @@ function spawnServer(req, callback){
 				var time =  new Date();
 				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 			}
-			else if(String(data).indexOf("TLS")>-1){
+			if(String(data).indexOf("TLS")>-1){
 				var time =  new Date();
 				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
-			else if(String(data).indexOf("electionInfo.json:\n")>-1){
+			if(String(data).indexOf("start test information::")>-1){
+				var testPrint = String(data).split("start test information::")[1];
+				testPrint = testPrint.split("::end test information")[0];
+				console.log(testPrint);
+			}
+			if(String(data).indexOf("electionInfo.json:\n")>-1){
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
 				eleInfo = JSON.parse(eleInfo);
@@ -366,6 +371,11 @@ function spawnServer(req, callback){
 		//call the python script to shutdown the servers
 		session = spawn('python', [SRC_DIR+'removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
+			if(String(data).indexOf("start test information::")>-1){
+				var testPrint = String(data).split("start test information::")[1];
+				testPrint = testPrint.split("::end test information")[0];
+				console.log(testPrint);
+			}
 			if(String(data).indexOf("electionInfo.json:\n">-1)){
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
