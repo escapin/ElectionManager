@@ -8,6 +8,7 @@ var mkdirp = require('mkdirp');
 var net = require('net');
 var async = require('async');
 var toobusy = require('toobusy-js');
+const readline = require('readline');
 
 //var https = require('https');
 //var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
@@ -519,6 +520,45 @@ function start(){
 	catch(e){
 		console.log("../_configFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
 	}
+
+	
+	//create interface to read user input
+	const rl = readline.createInterface({
+	  input: process.stdin,
+	  output: process.stdout
+	});
+	rl.on('line', function(input){
+		//add store keypairs
+		switch (input){
+		case "save-keys":
+			pythonQueue.push({body: {task: "saveKeys"}}, function(data){
+				console.log(data);
+			});
+			break;
+		case "exit":
+			rl.question("save generated keys before closing the server? (Y/n): ", function(answer){
+				if (answer.match(/^y(es)?$/i)){
+					pythonQueue.push({body: {task: "saveKeys"}}, function(data){
+						console.log(data);
+						process.exit();
+					});
+				}
+				else if(answer.match(/^n(o)?$/i)){ 
+					console.log("server shutting down"); 
+					process.exit();
+				}
+			});
+			break;
+		case "test":
+			console.log("test recieved");
+			break;
+		default:
+			console.log("unknown command");
+		}
+	});
+	
+	
+	//read stored keys
 	try{
 		jsonFile = JSON.parse(fs.readFileSync(DATA_DIR+"/keys.json"));
 		storedKeypairs = jsonFile["keys"]
@@ -526,9 +566,11 @@ function start(){
 	}
 	catch(e){
 		var obj = {keys: []}
-		fs.writeFileSync(keyFile, JSON.stringify(obj, null, 4), {spaces:4});
+		fs.writeFileSync(DATA_DIR+"/keys.json", JSON.stringify(obj, null, 4), {spaces:4});
 		jsonFile = JSON.parse(fs.readFileSync(DATA_DIR+"/keys.json"));
 	}
+	
+	//generate keys when the server isn't busy
 	var keyGeneration = setInterval(function(){
 		if(!toobusy()){
 			generateKeys(function(){
