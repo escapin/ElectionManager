@@ -139,6 +139,7 @@ def getInput():
     global publish
     global mixServers
     global randomness
+    global keys
     global hidden
     
     #get input parameters (if any)
@@ -151,6 +152,7 @@ def getInput():
         mockArgs = json.loads(sys.argv[1])
         randomness = mockArgs["userChosenRandomness"]
         randomness = True if randomness == "true" else False
+        keys = mockArgs["keys"]
     hidden = True if sys.argv[1] == "true" else False
     if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
         electionArgs = json.loads(sys.argv[2])
@@ -166,6 +168,8 @@ def getInput():
         publish = electionArgs['publishListOfVoters']
         randomness = electionArgs['userChosenRandomness']
         password = electionArgs['password']
+        if "keys" in electionArgs:
+            keys = electionArgs["keys"]
         mockElection = False
     
 
@@ -196,6 +200,7 @@ def getServerLocations():
 
 def updateKeys():
     global mixServerEncKey
+    global keys
     
     #update encryption keys
     pattern="[0-9]+"
@@ -203,19 +208,6 @@ def updateKeys():
     keyGeneratorCS_file="genKeys4collectingServer.js"
     tools_path = sElectDir + "/tools"
     keyFile = rootDirProject + "/ElectionHandler/_data_/keys.json"
-    keys = []
-    try:
-        jsonFile = open(keyFile, 'r+')
-        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        if len(jsonData["keys"]) > numMix+1:
-            for x in range(numMix+1):
-                keys.append(jsonData["keys"].pop())
-            jsonFile.seek(0)
-            json.dump(jsonData, jsonFile, indent = 4)
-            jsonFile.truncate()
-        jsonFile.close()
-    except IOError:
-        pass
     
     if  len(keys) < numMix+1:
         keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix+1)]).splitlines()
