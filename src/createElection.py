@@ -202,26 +202,46 @@ def updateKeys():
     keyGeneratorMix_file="genKeys4mixServer.js"
     keyGeneratorCS_file="genKeys4collectingServer.js"
     tools_path = sElectDir + "/tools"
+    keyFile = rootDirProject + "/ElectionHandler/_data_/keys.json"
+    keys = []
+    try:
+        jsonFile = open(keyFile, 'r+')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        if len(jsonData["keys"]) > numMix+1:
+            for x in range(numMix+1):
+                keys.append(jsonData["keys"].pop())
+            jsonFile.seek(0)
+            json.dump(jsonData, jsonFile, indent = 4)
+            jsonFile.truncate()
+        jsonFile.close()
+    except IOError:
+        pass
     
-    keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix+1)]).splitlines()
-    
+    if  len(keys) < numMix+1:
+        keys = check_output(["node", os.path.join(tools_path,"keyGen.js"), str(numMix+1)]).splitlines()
+        for x in range(len(keys)):
+            keys[x] = json.loads(keys[x])
+    else:
+        pass
+        
     #write new keys to manifest and config files
-    jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["encryptionKey"], "encryption_key")
-    jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", json.loads(keys[len(keys)-1])["verificationKey"], "verification_key")
-    jwrite.jwrite(sElectDir + collectingConf, "signing_key", json.loads(keys[len(keys)-1])["signingKey"])
-    jwrite.jwrite(sElectDir + collectingConf, "decryption_key", json.loads(keys[len(keys)-1])["decryptionKey"])
+    jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", keys[numMix]["encryptionKey"], "encryption_key")
+    jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", keys[numMix]["verificationKey"], "verification_key")
+    jwrite.jwrite(sElectDir + collectingConf, "signing_key", keys[numMix]["signingKey"])
+    jwrite.jwrite(sElectDir + collectingConf, "decryption_key", keys[numMix]["decryptionKey"])
     for x in range(numMix):
-        jwrite.jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["encryptionKey"], x, "encryption_key")
-        jwrite.jwriteAdv(sElectDir + manifest, "mixServers", json.loads(keys[x])["verificationKey"], x, "verification_key")
-        jwrite.jwrite(sElectDir + mixConf[x], "encryption_key", json.loads(keys[x])["encryptionKey"])
-        jwrite.jwrite(sElectDir + mixConf[x], "verification_key", json.loads(keys[x])["verificationKey"])
-        jwrite.jwrite(sElectDir + mixConf[x], "signing_key", json.loads(keys[x])["signingKey"])
-        jwrite.jwrite(sElectDir + mixConf[x], "decryption_key", json.loads(keys[x])["decryptionKey"])
-    
+        jwrite.jwriteAdv(sElectDir + manifest, "mixServers", keys[x]["encryptionKey"], x, "encryption_key")
+        jwrite.jwriteAdv(sElectDir + manifest, "mixServers", keys[x]["verificationKey"], x, "verification_key")
+        jwrite.jwrite(sElectDir + mixConf[x], "encryption_key", keys[x]["encryptionKey"])
+        jwrite.jwrite(sElectDir + mixConf[x], "verification_key", keys[x]["verificationKey"])
+        jwrite.jwrite(sElectDir + mixConf[x], "signing_key", keys[x]["signingKey"])
+        jwrite.jwrite(sElectDir + mixConf[x], "decryption_key", keys[x]["decryptionKey"])
+            
     #get new keys
     mixServerEncKey = []
     for x in range(numMix):
-        mixServerEncKey.append(json.loads(keys[x])["encryptionKey"])
+        mixServerEncKey.append(keys[x]["encryptionKey"])
+
 
 def writeManifest():
     #modify ElectionManifest, if no arguments are given, this is a mock election
@@ -315,9 +335,10 @@ def sElectStart():
             col = subprocess.Popen(["node", "collectingServer.js", "--resume"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/CollectingServer"))
         else:
             col = subprocess.Popen(["node", "collectingServer.js"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/CollectingServer"))
-    with open(logfolder+"/MixServer.log", 'w') as file_out:
-        mix = []
-        for x in range(numMix):
+    
+    mix = []
+    for x in range(numMix):
+        with open(logfolder+"/MixServer"+str(x)+".log", 'w') as file_out:
             if x < 10:
                 mix.append(subprocess.Popen(["node", "mixServer.js"], stdout=file_out, stderr=subprocess.STDOUT, cwd=(dstroot+"/mix/0"+str(x))))
             else:
