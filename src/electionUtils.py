@@ -3,29 +3,27 @@ import hashlib
 import codecs
 import json
 import collections
+import socket
 
-def usePortsOld(src, num):
-    newPorts = []
+def portOpen(port):
+    host = "127.0.0.1"
+    captive_dns_addr = ""
+    host_addr = ""
+
     try:
-        jsonFile = open(src, 'r')
-        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-        rangePorts = jsonData["available-ports"]
-        elecs = jsonData["elections"]
-        usingPorts = []
-        for x in range (len(elecs)):
-            usingPorts.extend(elecs[x]["used-ports"]) 
-        for openPort in range(rangePorts[0], rangePorts[1]):
-            if openPort in usingPorts:
-                continue
-            newPorts.append(openPort)
-            if len(newPorts) >= num:
-                break
-        if len(newPorts) < num:
-            sys.exit("Maximum number of elections reached.")
-        jsonFile.close()
-    except IOError:
-        sys.exit("handlerConfigFile.json missing or corrupt")
-    return newPorts
+        host_addr = socket.gethostbyname(host)
+
+        if (captive_dns_addr == host_addr):
+            return False
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        s.bind((host, port))
+        s.close()
+    except:
+        return False
+
+    return True
 
 def usePorts(src, num):
     newPorts = []
@@ -38,7 +36,8 @@ def usePorts(src, num):
         for openPort in range(rangePorts[0], rangePorts[1]):
             if openPort in usingPorts:
                 continue
-            newPorts.append(openPort)
+            if portOpen(openPort):
+                newPorts.append(openPort)
             if len(newPorts) >= num:
                 break
         if len(newPorts) < num:
