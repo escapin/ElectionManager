@@ -530,11 +530,15 @@ function start(){
 	rl.on('line', function(input){
 		//add store keypairs
 		switch (input){
-		case "save-keys":
+		case "--save-keys":
 			pythonQueue.push({body: {task: "saveKeys"}}, function(data){
 				console.log(data);
 			});
 			break;
+		case "--keys-stored":
+			console.log("Currently %s key(s) stored in memory.", storedKeypairs.length);
+			break;
+		case "--exit":
 		case "exit":
 			rl.question("save generated keys before closing the server? (Y/n): ", function(answer){
 				if (answer.match(/^y(es)?$/i)){
@@ -549,7 +553,7 @@ function start(){
 				}
 			});
 			break;
-		case "test":
+		case "--test":
 			console.log("test recieved");
 			break;
 		default:
