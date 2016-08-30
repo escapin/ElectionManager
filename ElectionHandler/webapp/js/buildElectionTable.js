@@ -53,7 +53,7 @@ function buildElectionTable(elections, res) {
 	document.getElementById("elections").innerHTML = "";
 	 
 	var head$ = $('<tr class="elecs"/>');
-	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Election IDs "));
+	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Election ID "));
 	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Election Title "));
 	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Starting Time "));
 	head$.append($('<th class="elecs" style="text-align:center"/>').html(" Ending Time "));
