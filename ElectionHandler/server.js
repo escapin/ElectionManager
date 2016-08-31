@@ -55,8 +55,8 @@ var numMix = 0;
 var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConfigFile.json"));
 var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
+var maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
 var electionInfo;
-var maxStoredKeypairs = 20;
 var storedKeypairs = [];
 
 ERRLOG_FILE = DATA_DIR + '/err.log';
@@ -277,6 +277,8 @@ function spawnServer(req, callback){
 				eleInfo = JSON.parse(eleInfo);
 				eleInfo.task = "created";
 				eleInfo = JSON.stringify(eleInfo);
+				createdElections = createdElections + 1;
+				maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
 				callback(eleInfo);
 			}
 		});
@@ -333,6 +335,8 @@ function spawnServer(req, callback){
 				eleInfo = JSON.parse(eleInfo);
 				eleInfo.task = "created";
 				eleInfo = JSON.stringify(eleInfo);
+				createdElections = createdElections + 1;
+				maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
 				callback(eleInfo);
 			}
 		});
@@ -396,6 +400,8 @@ function spawnServer(req, callback){
 				eleInfo = JSON.parse(eleInfo);
 				eleInfo.task = "removed";
 				eleInfo = JSON.stringify(eleInfo);
+				createdElections = createdElections - 1;
+				maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
 				callback(eleInfo);
 			}
 			else{
@@ -537,6 +543,9 @@ function start(){
 			break;
 		case "--keys-stored":
 			console.log("Currently %s key(s) stored in memory.", storedKeypairs.length);
+			break;
+		case "--max-keys":
+			console.log("Currently a maximum of %s key(s) can be stored in memory.", maxStoredKeypairs);
 			break;
 		case "--exit":
 		case "exit":
