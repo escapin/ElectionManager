@@ -1,14 +1,18 @@
 default:
 	@echo Specify the goal: devenv OR devclean
 
-devenv: handler nginx select
+devenv: handler custom nginx select
 
 
 handler:
 	cd ElectionHandler; make
-	mkdir -p _handlerConfigFiles_
-	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
+	mkdir -p _configFiles_
+	cp templates/config.json _configFiles_/handlerConfigFile.json
 	mkdir -p elections
+
+custom:
+	cd CustomizedElection; make
+	mkdir -p elections_hidden
 
 nginx:
 	mkdir -p nginx_config/log
@@ -16,25 +20,29 @@ nginx:
 	python configNginx.py
 
 select:
-	git clone -b master https://github.com/escapin/sElect.git
+	git clone -b dev https://sElectVoting:fc-dLEhqSKRG0exK@bitbucket.org/escapin/select.git sElect
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
-	cp sElect/templates/ElectionManifest.json _handlerConfigFiles_/ElectionManifest.json
+	cp sElect/templates/ElectionManifest.json _configFiles_/ElectionManifest.json
 
 
 electionsClean:
-	rm -rf elections
+	rm -rf elections/
+	rm -rf elections_hidden/
 	rm ElectionHandler/_data_/pwd.json
-	cp templates/handlerConfigFile.json _handlerConfigFiles_/handlerConfigFile.json
+	cp templates/handlerConfigFile.json _configFiles_/handlerConfigFile.json
 
 
-devclean: handlerclean nginxclean selectclean elclean
+devclean: handlerclean customclean nginxclean selectclean elclean
 
 
 handlerclean:
 	cd ElectionHandler; make clean
-	-rm -rf _handlerConfigFiles_
+	-rm -rf _configFiles_
+
+customclean:
+	cd CustomizedElection; make clean
 
 nginxclean:	
 	-rm -rf nginx_config/
@@ -44,4 +52,5 @@ selectclean:
 
 elclean:
 	-rm -rf elections/
+	-rm -rf elections_hidden/
 

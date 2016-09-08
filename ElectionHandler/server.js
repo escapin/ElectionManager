@@ -7,6 +7,8 @@ var http = require('http');
 var mkdirp = require('mkdirp');
 var net = require('net');
 var async = require('async');
+var toobusy = require('toobusy-js');
+const readline = require('readline');
 
 //var https = require('https');
 //var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
@@ -14,7 +16,7 @@ var async = require('async');
 //var credentials = {key: certificate_key, cert: certificate};
 var cors = require('cors');
 var child_process = require("child_process");
-var config = require('./src/config');
+var config = require('../src/file2JSON');
 var port = config.port;
 var app = express();
 app.use(cors());
@@ -23,8 +25,11 @@ var spawn = child_process.spawn;
 var path = 'webapp/';
 //var httpsserver = https.createServer(credentials, app);
 
+//SRC directory of the project
+var SRC_DIR = "../src/"
+
 //create '_data_' dir, if it doesn't exist
-DATA_DIR = './_data_';
+var DATA_DIR = './_data_';
 mkdirp.sync(DATA_DIR);
 
 
@@ -47,10 +52,12 @@ streams: [{
 
 // parameter keeping track of the number of mix servers
 var numMix = 0;
-var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConfigFile.json"));
 var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
+var maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
 var electionInfo;
+var storedKeypairs = [];
 
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
@@ -64,7 +71,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else if(task === "complete" || task === "simple"){
-		 res.end("Max Number of Elections handled by the server reached. Remove an election (if possible) or wait until an authorized user does it.");
+		 res.end("Max Number of Elections reached: Remove an election (if possible) or wait until an authorized user does it.");
 	}
 	else if(task === "remove"){
 		// add the the async queue the task to be performed
@@ -73,7 +80,7 @@ app.post('/election', function(req, res) {
 		});
 	}
 	else{
-		res.end("Specify wether to create a mock Election or a customized Election");
+		res.end("Specify whether to create a mock Election or a customized Election");
 	}
 	
 });
@@ -135,7 +142,7 @@ var logErrQueue = async.queue(logError, 1);
 function spawnServer(req, callback){
 	var task = req.body.task;
 	if((task === "complete" || task === "simple") && createdElections >= maxElections){
-		 callback("Max Number of Elections handled by the server reached. Remove an election (if possible) or wait until an authorized user does it.");
+		 callback("Max Number of Elections reached: Remove an election (if possible) or wait until an authorized user does it.");
 		 return;
 	}
 	/**
@@ -151,7 +158,7 @@ function spawnServer(req, callback){
 		console.log("\nPort " + errPort + " in use, attempting to start server on different port:")
 		var newPort = "placeholder";
 		//start new server with different port
-	    var reSession = spawn('python', ['src/restartServer.py', errPort, newPort]);
+	    var reSession = spawn('python', [SRC_DIR+'restartServer.py', errPort, newPort]);
 	    reSession.stdout.on('data', function (data) {
 	    	//console.log('reSpawn STDOUT:\n\t' + data);
 	    	if(String(data).indexOf("OTP")>-1){
@@ -193,7 +200,7 @@ function spawnServer(req, callback){
 		});
 	}
 	else if(task === "resume"){
-		var oldSession = spawn('python', ['src/resumeElection.py']);
+		var oldSession = spawn('python', [SRC_DIR+'resumeElection.py']);
 		oldSession.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
@@ -234,7 +241,13 @@ function spawnServer(req, callback){
 		var value = req.body.ID;
 		var pass = req.body.password;
 		var ports = "placeholder";
-	    
+	    var keypairs = [];
+		if(storedKeypairs.length > numMix){
+			for(i = 0; i < numMix+1; i++){
+				keypairs.push(storedKeypairs.pop());
+			}
+			req.body.keys = keypairs;
+		}
 	    
 	    //hash password
 		var salt = bcrypt.genSaltSync(10);
@@ -243,22 +256,29 @@ function spawnServer(req, callback){
 		var parameters = JSON.stringify(req.body);
 
 		//call the python script to start the servers
-		session = spawn('python', ['src/createElection.py', ports, parameters]);
+		session = spawn('python', [SRC_DIR+'createElection.py', ports, parameters]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
 				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 			}
-			else if(String(data).indexOf("TLS")>-1){
+			if(String(data).indexOf("TLS")>-1){
 				var time =  new Date();
 				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
-			else if(String(data).indexOf("electionInfo.json:\n")>-1){
+			if(String(data).indexOf("start test information::")>-1){
+				var testPrint = String(data).split("start test information::")[1];
+				testPrint = testPrint.split("::end test information")[0];
+				console.log(testPrint);
+			}
+			if(String(data).indexOf("electionInfo.json:\n")>-1){
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
 				eleInfo = JSON.parse(eleInfo);
 				eleInfo.task = "created";
 				eleInfo = JSON.stringify(eleInfo);
+				createdElections = createdElections + 1;
+				maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
 				callback(eleInfo);
 			}
 		});
@@ -281,42 +301,42 @@ function spawnServer(req, callback){
 		    	callback('{"error": "An error occurred while creating an election: error code ' + code + '. Try again!"}');
 		    }
 		});
-		/**
-		session.on('exit', function (code) {
-		    console.log('complete child process exited with code ' + code);
-		    if(code === 0){
-		    	createdElections = createdElections + 1;
-		    	callback("created");
-		    }
-		    else{ // an error in createElection.py occurred
-		    	callback("An error occurred while creating an election. Try again!");
-			//res.end("error code" + code) //only for debugging
-		    }
-		});
-		**/
 	}
 	else if(task === "simple"){
 		var value = req.body.ID;
 		var pass = req.body.password;
-		var ports = "placeholder";
-
+		var rand = req.body.userChosenRandomness;
+		var keypairs = [];
+		if(storedKeypairs.length > numMix){
+			for(i = 0; i < numMix+1; i++){
+				keypairs.push(storedKeypairs.pop());
+			}
+		}
+		var mockParam = {mockElection: true, userChosenRandomness: rand, keys: keypairs}
 		//call the python script to start the servers
-	    var session = spawn('python', ['src/createElection.py', ports]);
+	    var session = spawn('python', [SRC_DIR+'createElection.py', JSON.stringify(mockParam)]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
 				console.log('[' + time +  '] Collecting Server STDOUT:\n\t' + data);
 			}
-			else if(String(data).indexOf("TLS")>-1){
+			if(String(data).indexOf("TLS")>-1){
 				var time =  new Date();
 				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
-			else if(String(data).indexOf("electionInfo.json:\n")>-1){
+			if(String(data).indexOf("start test information::")>-1){
+				var testPrint = String(data).split("start test information::")[1];
+				testPrint = testPrint.split("::end test information")[0];
+				console.log(testPrint);
+			}
+			if(String(data).indexOf("electionInfo.json:\n")>-1){
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
 				eleInfo = JSON.parse(eleInfo);
 				eleInfo.task = "created";
 				eleInfo = JSON.stringify(eleInfo);
+				createdElections = createdElections + 1;
+				maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
 				callback(eleInfo);
 			}
 		});
@@ -324,6 +344,7 @@ function spawnServer(req, callback){
 			//log the error in ERRLOG_FILE, async queue
 	    	//to make sure it's not being written to 
 	    	//simultaneously
+			console.log(data);
 			var dat = {err: data, proc: 'simple'};
 	    	logErrQueue.push(dat);
 
@@ -339,19 +360,6 @@ function spawnServer(req, callback){
 		    	callback('{"error": "An error occurred while creating an election: error code ' + code + '. Try again!"}');
 		    }
 		});
-		/**
-		session.on('exit', function (code) {
-		    console.log('simple child process exited with code ' + code);
-		    if(code === 0){
-		    	createdElections = createdElections + 1;
-		    	callback("created");
-		    }
-		    else{ // an error in createElection.py occurred
-		    	callback("An error occurred while creating an election: error code " + code + ". Try again!");
-			//res.end("error code" + code) //only for debugging
-		    }
-		});
-		**/
 	}
 	else if(task === "remove"){
 		var value = req.body.ID;
@@ -379,14 +387,21 @@ function spawnServer(req, callback){
 		pass = hash;
 		
 		//call the python script to shutdown the servers
-		session = spawn('python', ['src/removeElection.py', value, pass]);
+		session = spawn('python', [SRC_DIR+'removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
+			if(String(data).indexOf("start test information::")>-1){
+				var testPrint = String(data).split("start test information::")[1];
+				testPrint = testPrint.split("::end test information")[0];
+				console.log(testPrint);
+			}
 			if(String(data).indexOf("electionInfo.json:\n">-1)){
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
 				eleInfo = JSON.parse(eleInfo);
 				eleInfo.task = "removed";
 				eleInfo = JSON.stringify(eleInfo);
+				createdElections = createdElections - 1;
+				maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
 				callback(eleInfo);
 			}
 			else{
@@ -406,18 +421,12 @@ function spawnServer(req, callback){
 		    	callback('{"error": "An error occurred while removing an election: error code ' + code + '. Try again!"}');
 		    }
 		});
-		/**
-		session.on('exit', function (code) {
-		    console.log('remove child process exited with code ' + code);
-		    if(code === 0){
-		    	createdElections = createdElections - 1;
-		    	callback("removed");
-		    }
-		    else{
-		    	callback("An error occurred while removing an election: error code " + code + ". Try again!");
-		    }
-		});
-		**/
+	}
+	else if(task = "saveKeys"){
+		var keyFile = DATA_DIR+"/keys.json"
+		var obj = {keys: storedKeypairs};
+		fs.writeFileSync(keyFile, JSON.stringify(obj, null, 4), {spaces:4});
+		callback(storedKeypairs.length+" keypairs saved.")
 	}
 }
 
@@ -426,6 +435,20 @@ function spawnServer(req, callback){
 // dispatcher can run at any time
 var pythonQueue = async.queue(spawnServer, 1);
 
+
+function generateKeys(callback){
+	if(storedKeypairs.length < maxStoredKeypairs){
+		keyGen = spawn('node', ['../sElect/tools/keyGen.js']);
+		keyGen.stdout.on('data', function (data) {
+			var keys = jsonFile.keys;
+			storedKeypairs.push(JSON.parse(String(data)));
+	    	callback("keypair created: " + jsonFile.keys.length + " out of " + maxStoredKeypairs + ".");
+		});
+		keyGen.stderr.on('data', function (data) {
+			callback("something went wrong: \n"+String(data));
+		});
+	}
+}
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////////Start the server up
 
@@ -484,15 +507,15 @@ function start(){
 	    console.log('Serving on, port :%d', server.address().port);
 	});
 	try{
-		var manifest = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/ElectionManifest.json"));
+		var manifest = JSON.parse(fs.readFileSync("../_configFiles_/ElectionManifest.json"));
 		var mixServers = manifest["mixServers"];
 		numMix = mixServers.length;
 	}
 	catch(e){
-		console.log("../_handlerConfigFiles_/ElectionManifest.json is missing or corrupt ([mixServers] field not found)");
+		console.log("../_configFiles_/ElectionManifest.json is missing or corrupt ([mixServers] field not found)");
 	}
 	try{
-		var handlerConfigFile = JSON.parse(fs.readFileSync("../_handlerConfigFiles_/handlerConfigFile.json"));
+		var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConfigFile.json"));
 		var usePorts = handlerConfigFile["available-ports"];
 		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
 				"Each election needs at least 3 different servers: a collecting server, a bulletin board, and a mix server.\n" +
@@ -501,6 +524,73 @@ function start(){
 			    "(if your hardware supports them).\n");
 	}
 	catch(e){
-		console.log("../_handlerConfigFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
+		console.log("../_configFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");
 	}
+
+	
+	//create interface to read user input
+	const rl = readline.createInterface({
+	  input: process.stdin,
+	  output: process.stdout
+	});
+	rl.on('line', function(input){
+		//add store keypairs
+		switch (input){
+		case "--save-keys":
+			pythonQueue.push({body: {task: "saveKeys"}}, function(data){
+				console.log(data);
+			});
+			break;
+		case "--keys-stored":
+			console.log("Currently %s key(s) stored in memory.", storedKeypairs.length);
+			break;
+		case "--max-keys":
+			console.log("Currently a maximum of %s key(s) can be stored in memory.", maxStoredKeypairs);
+			break;
+		case "--exit":
+		case "exit":
+			rl.question("save generated keys before closing the server? (Y/n): ", function(answer){
+				if (answer.match(/^y(es)?$/i)){
+					pythonQueue.push({body: {task: "saveKeys"}}, function(data){
+						console.log(data);
+						process.exit();
+					});
+				}
+				else if(answer.match(/^n(o)?$/i)){ 
+					console.log("server shutting down"); 
+					process.exit();
+				}
+			});
+			break;
+		case "--test":
+			console.log("test recieved");
+			break;
+		default:
+			console.log("unknown command");
+		}
+	});
+	
+	
+	//read stored keys
+	try{
+		jsonFile = JSON.parse(fs.readFileSync(DATA_DIR+"/keys.json"));
+		storedKeypairs = jsonFile["keys"]
+		console.log(storedKeypairs.length + " keypairs loaded.")
+	}
+	catch(e){
+		var obj = {keys: []}
+		fs.writeFileSync(DATA_DIR+"/keys.json", JSON.stringify(obj, null, 4), {spaces:4});
+		jsonFile = JSON.parse(fs.readFileSync(DATA_DIR+"/keys.json"));
+	}
+	
+	//generate keys when the server isn't busy
+	var keyGeneration = setInterval(function(){
+		if(!toobusy()){
+			generateKeys(function(){
+			});
+		}
+		else{
+			console.log('server is running busy.');
+		}
+	}, 5000)
 }

@@ -38,9 +38,9 @@
     <div class="body">
     	<img src="pic/sElect-logo.png" align="right" alt="sElect-logo" width="25%"/>
         <h1 class="title"> Election Manager </h1>  
-        <h3> 
-            Click on the <em>entry</em> of the election you want to manage (if any):
-	</h3>
+        <h3 id="gen_info"> 
+            &#9656 Click on the <em>entry</em> of the election you want to manage or create a new one.
+		</h3>
 		<div style="overflow:auto; width:87%">
 			<table id="elections" style="min-width: 100%;"></table>
 		</div>
@@ -48,8 +48,13 @@
 				<fieldset>
 					<div class="pure-g">
 						<div id="trackDescend" class="pure-u-1 pure-u-md-1-3" style="width: 87%;">
-							<input id='advance' type="button" class="pure-button pure-button-primary" value="Create Election"></input>
+							<input id='advance' type="button" class="pure-button pure-button-primary" value="Create Custom Election"></input>
 							<input id='mock' type="button" class="pure-button pure-button-primary" value="Set up a Mock Election"></input>
+						</div>
+						<div id="trackDescend" class="pure-u-1 pure-u-md-1-3" style="width: 100%;">
+						<hsub>
+            				<br>(for Mock Elections no real email addresses necessary)
+            			</hsub>
 						</div>
 						<div class="pure-u-1 pure-u-md-1-3" style="width: 87%;">
 							<input id='close' type="button" class="pure-button pure-button-primary" value="Close Election"></input> 
@@ -57,7 +62,7 @@
 						</div>
 					</div>
 				</fieldset>
-				<div class="pure-u-1 pure-u-md-1-3" style="width: 60%;">
+				<div class="pure-u-1 pure-u-md-1-3" style="width: 87%; text-align: center">
 						<input id='vote' type="button" class="pure-button pure-button-primary" value="Invite Voters"></input> 
 				</div>
 				<a id="help" href="#" class="stylish"><span id="buttontext">Help</span></a>
@@ -222,13 +227,24 @@
 	</div>
     <!-- --------------------------------------------------------------------------------- -->
 	<div id="userRandom">
-     <div class="body">
-          <p>Do you wish your election to enable user-randomness?</p>
-          <p> This will allow the user to enter a code
-          that will be visible for verification, in order to enhance security.</p>
-          <p></p>                
-          <input id='u-rand' type="button" class="pure-button pure-button-primary" value="random"></input>
-          <input id='u-norm' style="float: right;" type="button" class="pure-button pure-button-primary" value="normal"></input>
+     <div id="vert-align" class="body">
+     	  <input id="rand-close" class="closeButton" style="float: right; margin: -2%;" type="button" value="X">
+          <p><font size="5pt">Is the voting platform supposed to be trusted?</font><br><font size="2pt">(<b>voting platform</b>: voters' browser, operating system, and hardware)</font></p>
+          <table id='rand-table' style="width: 100%; table-layout: fixed;">
+          <tr class="align"/>
+          <td class="align" style="width: 20%;">
+          <input id='u-norm' style="width: 80%;" type="button" class="pure-button pure-button-primary" value="Yes"></input>
+          </td>
+          <td class="align" style="width: 20%;">
+          <!-- <input id='u-rand' style="width: 80%" type="button" class="pure-button pure-button-primary" value="No, they're paranoid"></input> -->
+	  <input id='u-rand' style="width: 80%" type="button" class="pure-button pure-button-primary" value="No"></input>
+          </th>
+          <tr class="align"/>
+          <td class="align" style="width: 20%; vertical-align: top; font-size: 9pt;"/> <!-- (for most of the electorates) --> 
+          <td class="align" style="width: 20%; vertical-align: top; font-size: 9pt;"/> (in this case the voters will be asked to enter some random characters) 
+          <!-- (and they know how to insert random characters)  -->
+          </table>
+     	  </div>
      </div>
 	</div>
 	<!-- --------------------------------------------------------------------------------- -->

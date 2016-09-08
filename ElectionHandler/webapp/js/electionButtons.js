@@ -30,7 +30,7 @@ function electionButtons() {
 	function simpleElection(rand) {
 		disableButtons();
 		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "simple", ID: "generated", random: rand, title: "", description: ""})
+		$.post(electionManager+"/election", {task: "simple", ID: "generated", userChosenRandomness: rand, title: "", description: ""})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -179,7 +179,7 @@ function electionButtons() {
 		}
 		electionCh.choices = echoices;
 		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "complete", ID: "generated", random: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishVoters: listVoters})
+		$.post(electionManager+"/election", {task: "complete", ID: "generated", userChosenRandomness: rand, title: ename, description: edesc, startTime: startingTime, endTime: endingTime, question: equestion, choices: echoices, password: pass, publishListOfVoters: listVoters})
 		 .done(function(data){
 			$('#processing').fadeOut(150);
 			enableButtons();
@@ -348,13 +348,13 @@ function electionButtons() {
     				document.getElementById("inviteVoters").style.visibility = "visible";
     	    		//document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
     	    		//document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
-    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS;
-    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS;
+    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS +"/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS +"/";
     			}
     			else if(stat === "closed"){
     				document.getElementById("checkResult").style.visibility = "visible";
-    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS;
-    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS;
+    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS+"/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS+"/";
     			}
     			else{
     				alerting("Server is not responding");
@@ -375,8 +375,8 @@ function electionButtons() {
     
 	/* Create Buttons */
 	$("#mock").click(function() {
-		//askRandom("simple");
-		simpleElection(false);
+		askRandom("simple");
+		//simpleElection(false);
 	});
 	
 	$("#adv-create").click(function() {
@@ -616,13 +616,20 @@ function electionButtons() {
 	     buildElectionTable(elections, function (electionStates){
 	  		 electionStatus = electionStates;
 	  	 });
+	     if(elections.length < 1){
+	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the buttons below to create a new election.";
+	     }
+	     else{
+	    	 console.log(elections.length);
+	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the <em>entry</em> of the election you want to manage or create a new one.";	    	 
+	     }
 	     
 	     var tableHeight = document.getElementById('elections').clientHeight/parseFloat($("html").css("font-size"));
 	     document.getElementById('trackDescend').style.marginTop = 18.5-tableHeight <= 0 ? "1.3em" : 1.3+18.5-tableHeight+"em";
 	     
 	     
 		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
-		 votingBooth = "http://localhost";
+		 votingBooth = "http://localhost:"+electionConf["nginx-port"];
 		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 		
 		//don't use port 80 if it's not deployed
@@ -792,6 +799,14 @@ function electionButtons() {
     ////////////////////////////////////////////////////////////////////////////
     // Random overlay
     
+    $(document).keyup(function(e){
+    	e.preventDefault();
+    	e.stopPropagation();
+    	if(e.keyCode === 27){
+    		document.getElementById("userRandom").style.visibility = "hidden";
+    	}
+    });
+    
     function askRandom(etype) {
     	document.getElementById("mod").value = etype;
     	elecType = etype;
@@ -822,6 +837,11 @@ function electionButtons() {
 		el = document.getElementById("userRandom");
 		el.style.visibility = "hidden";
 		progressElection(false);
+	});
+	
+	$("#rand-close").click(function() {
+		el = document.getElementById("userRandom");
+		el.style.visibility = "hidden";
 	});
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

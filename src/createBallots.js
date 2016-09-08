@@ -1,8 +1,8 @@
 var exports = {};
 //////////////////////////////////////////////////////////////////////////////////////////////
 var fs = require('fs');
-var crypto = require('../../sElect/node_modules/cryptofunc');
-var strHexConversion = require('../../sElect/node_modules/strHexConversion');
+var crypto = require('../sElect/node_modules/cryptofunc');
+var strHexConversion = require('../sElect/node_modules/strHexConversion');
 var unpair = crypto.deconcatenate;
 var verif = crypto.verifsig;
 

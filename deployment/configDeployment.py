@@ -7,7 +7,7 @@ srcfile = os.path.realpath(__file__)
 deployDir = os.path.split(srcfile)[0]
 rootDirProject = os.path.split(deployDir)[0]
 
-electionConfig = rootDirProject + "/_handlerConfigFiles_/handlerConfigFile.json"
+electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
 
 try:
     jsonFile = open(electionConfig, 'r+')
