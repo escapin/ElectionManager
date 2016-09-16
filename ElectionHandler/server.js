@@ -53,6 +53,7 @@ streams: [{
 // parameter keeping track of the number of mix servers
 var numMix = 0;
 var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConfigFile.json"));
+var seperateAuthentication = handlerConfigFile.seperateAuthentication;
 var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
 var maxStoredKeypairs = Math.min(handlerConfigFile.upperBoundKeyGeneration, maxElections-createdElections);
@@ -248,13 +249,14 @@ function spawnServer(req, callback){
 			}
 			req.body.keys = keypairs;
 		}
-	    
+	    req.body.seperateAuthentication = seperateAuthentication;
 	    //hash password
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
 		req.body.password = hash;
+		
 		var parameters = JSON.stringify(req.body);
-
+		
 		//call the python script to start the servers
 		session = spawn('python', [SRC_DIR+'createElection.py', ports, parameters]);
 		session.stdout.on('data', function (data) {
@@ -312,7 +314,7 @@ function spawnServer(req, callback){
 				keypairs.push(storedKeypairs.pop());
 			}
 		}
-		var mockParam = {mockElection: true, userChosenRandomness: rand, keys: keypairs}
+		var mockParam = {mockElection: true, userChosenRandomness: rand, keys: keypairs, seperateAuthentication: seperateAuthentication}
 		//call the python script to start the servers
 	    var session = spawn('python', [SRC_DIR+'createElection.py', JSON.stringify(mockParam)]);
 		session.stdout.on('data', function (data) {

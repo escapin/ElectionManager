@@ -141,6 +141,7 @@ def getInput():
     global randomness
     global keys
     global hidden
+    global seperateAuthentication
     
     #get input parameters (if any)
     password = "";
@@ -153,6 +154,7 @@ def getInput():
         randomness = mockArgs["userChosenRandomness"]
         randomness = True if randomness == "true" else False
         keys = mockArgs["keys"]
+        seperateAuthentication = mockArgs["seperateAuthentication"]
     hidden = True if sys.argv[1] == "true" else False
     if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
         electionArgs = json.loads(sys.argv[2])
@@ -168,10 +170,11 @@ def getInput():
         publish = electionArgs['publishListOfVoters']
         randomness = electionArgs['userChosenRandomness']
         password = electionArgs['password']
+        seperateAuthentication = mockArgs["seperateAuthentication "]
         if "keys" in electionArgs:
             keys = electionArgs["keys"]
         mockElection = False
-    
+
 
 def getMixServerConfig():
     global mixConf
@@ -276,7 +279,7 @@ def writesElectConfigs():
     #modify Server ports
     jwrite.jwrite(dstroot + collectingConf, "port", ports[0])
     jwrite.jwrite(dstroot + bulletinConf, "port", ports[1])
-    jwrite.jwrite(dstroot + votingConf, "authenticate", serverAddress["votingbooth"])
+    jwrite.jwrite(dstroot + votingConf, "authenticator", serverAddress["authenticator"])
     jwrite.jwrite(dstroot + collectingConf, "serverAdminPassword", password)
     for x in range(numMix):     
         jwrite.jwrite(dstroot + mixConf[x], "port", ports[x+2])
@@ -370,6 +373,7 @@ def writeToHandlerConfig():
         jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
     
 def writeToNginxConfig():
+    votingBoothPage = "votingBooth_authenticator.html" if seperateAuthentication else "votingBooth.html"
     #modify nginx File
     if "http://localhost" not in serverAddress["collectingserver"]:
         nginxFile = open(nginxConf, 'r+')
@@ -430,7 +434,7 @@ def writeToNginxConfig():
             counter = counter + 1
         bracketIt = nginxData[prevBracket:]
         del nginxData[prevBracket:]
-        comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+        comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index "+votingBoothPage+";\n","    }\n", "\n"]
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
@@ -473,7 +477,7 @@ def writeToNginxConfig():
         bracketIt = nginxData[prevBracket:]
         del nginxData[prevBracket:]
         comments = ["    # Voting Booth " + electionID + " \n", 
-                    "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+                    "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index "+votingBoothPage+";\n","    }\n", "\n"]
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)    
