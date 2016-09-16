@@ -6,7 +6,7 @@ remove **secure** and **verifiable** elections powered by sElect.
 
 ## Dependencies
 
-* node.js and npm (tested on v4.3.1 and 1.4.21, respectively)
+* node.js and npm (tested on v4.3.1 and v1.4.21, respectively)
 * python (tested on v.2.7.6)
 * nginx (tested on v1.9.10)
 * git and wget (only for downloading the proper files and library)
