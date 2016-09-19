@@ -280,6 +280,7 @@ def writesElectConfigs():
     jwrite.jwrite(dstroot + collectingConf, "port", ports[0])
     jwrite.jwrite(dstroot + bulletinConf, "port", ports[1])
     jwrite.jwrite(dstroot + votingConf, "authenticator", serverAddress["authenticator"])
+    jwrite.jwrite(dstroot + votingConf, "csFrame", serverAddress["csframe"])
     jwrite.jwrite(dstroot + collectingConf, "serverAdminPassword", password)
     for x in range(numMix):     
         jwrite.jwrite(dstroot + mixConf[x], "port", ports[x+2])
