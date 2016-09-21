@@ -111,4 +111,6 @@ The nginx sessions created can be stopped by
 
 * At client side date and time are displayed in the user's machine 
   timezone, whereas at server side the UTC timezone is used.
-* Passwords are transmitted in plaintext to the server, unless the system runs on https.
+
+* Using `CreateCustomElection` might interfere with an election created 
+  by `server.js` if they are executed synchronously.
