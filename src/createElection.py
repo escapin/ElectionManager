@@ -324,7 +324,7 @@ def sElectStart():
     logfolder = dstroot+"/LOG"
     
     #start all node servers
-    
+    subprocess.Popen(["node", "compileEJS.js", str(seperateAuthentication)], cwd=(dstroot+"/VotingBooth/webapp/ejs"))
     subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
     with open(logfolder+"/ColllectingServer.log", 'w') as file_out:
         if mockElection:
@@ -374,7 +374,7 @@ def writeToHandlerConfig():
         jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
     
 def writeToNginxConfig():
-    votingBoothPage = "votingBooth_authenticator.html" if seperateAuthentication else "votingBooth.html"
+    votingBoothPage = "votingBooth.html" #"votingBooth_authenticator.html" if seperateAuthentication else "votingBooth.html"
     #modify nginx File
     if "http://localhost" not in serverAddress["collectingserver"]:
         nginxFile = open(nginxConf, 'r+')
