@@ -251,8 +251,9 @@ function electionButtons() {
 		nchoices = nchoices + 1;
 		
 		//save inputs
-		var str = "";
+		var oldChoices = [];
 		for(var i = 3; i < nchoices; i++){
+			oldChoices.push($('#choice'+(i)).val());
 			str += $('#choice'+(i)).val() + " ";
 		}
 		
@@ -264,9 +265,8 @@ function electionButtons() {
 			document.getElementById("c-list").innerHTML+='<input id="choice'+nchoices+'" class="pure-input-1" type="text" size="50" style="margin-top: 1.3em;" placeholder="choice '+nchoices+'">';		
 		}
 		//insert previous inputs
-		str = str.split(" ");
 		for(var i = 3; i < nchoices; i++){
-			document.getElementById("choice"+(i)).value = str[i-3];
+			document.getElementById("choice"+(i)).value = oldChoices[i-3];
 		}
 		if(nchoices > 2){
 			$("#remove-choice").prop('disabled', null);
