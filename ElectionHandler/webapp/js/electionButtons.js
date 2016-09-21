@@ -252,10 +252,8 @@ function electionButtons() {
 		
 		//save inputs
 		var oldChoices = [];
-		for(var i = 3; i < nchoices; i++){
+		for(var i = 3; i < nchoices; i++)
 			oldChoices.push($('#choice'+(i)).val());
-			str += $('#choice'+(i)).val() + " ";
-		}
 		
 		//add new question
 		if(nchoices === 3){
