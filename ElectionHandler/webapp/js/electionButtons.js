@@ -181,34 +181,32 @@ function electionButtons() {
     
 	var nchoices = 2;
 		
-	function addChoice(){
-		nchoices = nchoices + 1;
-		
-		//save inputs
-		var str = "";
-		for(var i = 3; i < nchoices; i++){
-			str += $('#choice'+(i)).val() + " ";
+    function addChoice(){
+	nchoices = nchoices + 1;
+	
+	//save inputs
+	var oldChoices = [];
+	for(var i = 3; i < nchoices; i++)
+	    oldChoices.push($('#choice'+(i)).val());
+	
+	//add new question
+	if(nchoices === 3){
+	    document.getElementById("c-list").innerHTML+='<input id="choice'+nchoices+'" class="pure-input-1" type="text" size="50" placeholder="choice '+nchoices+'">';		
 		}
-		
-		//add new question
-		if(nchoices === 3){
-			document.getElementById("c-list").innerHTML+='<input id="choice'+nchoices+'" class="pure-input-1" type="text" size="50" placeholder="choice '+nchoices+'">';		
-		}
-		else{
+	else{
 			document.getElementById("c-list").innerHTML+='<input id="choice'+nchoices+'" class="pure-input-1" type="text" size="50" style="margin-top: 1.3em;" placeholder="choice '+nchoices+'">';		
-		}
-		//insert previous inputs
-		str = str.split(" ");
-		for(var i = 3; i < nchoices; i++){
-			document.getElementById("choice"+(i)).value = str[i-3];
-		}
-		if(nchoices > 2){
-			$("#remove-choice").prop('disabled', null);
-		}
-		document.getElementById('choice'+nchoices).focus();
-		//document.getElementById('add-choice').setAttribute("style",
-        //        "margin-top:"+(19.2*(nchoices-1)).toString()+"%");
 	}
+	//insert previous inputs
+	for(var i = 3; i < nchoices; i++){
+	    document.getElementById("choice"+(i)).value = oldChoices[i-3];
+	}
+	if(nchoices > 2){
+	    $("#remove-choice").prop('disabled', null);
+	}
+	document.getElementById('choice'+nchoices).focus();
+	//document.getElementById('add-choice').setAttribute("style",
+        //        "margin-top:"+(19.2*(nchoices-1)).toString()+"%");
+    }
 	
 	function removeChoice(){
 		if(nchoices > 2){
