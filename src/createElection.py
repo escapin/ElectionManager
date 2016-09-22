@@ -170,7 +170,7 @@ def getInput():
         publish = electionArgs['publishListOfVoters']
         randomness = electionArgs['userChosenRandomness']
         password = electionArgs['password']
-        seperateAuthentication = mockArgs["seperateAuthentication "]
+        seperateAuthentication = electionArgs["seperateAuthentication"]
         if "keys" in electionArgs:
             keys = electionArgs["keys"]
         mockElection = False
