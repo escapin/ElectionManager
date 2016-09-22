@@ -291,6 +291,8 @@ def writesElectConfigs():
     else:
         jwrite.jwrite(dstroot + votingConf, "showOtp", True)
         jwrite.jwrite(dstroot + collectingConf, "sendOtpBack", True)
+        jwrite.jwrite(dstroot + collectingConf, "sendEmail", False)
+
     
 
 def createBallots():
