@@ -113,4 +113,4 @@ The nginx sessions created can be stopped by
   timezone, whereas at server side the UTC timezone is used.
 
 * Using `CreateCustomElection` might interfere with an election created 
-  by `server.js` if they are executed synchronously.
+  by `server.js` if they are created at the same time.
