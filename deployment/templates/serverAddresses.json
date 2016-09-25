@@ -4,8 +4,8 @@
         "mix1": "http://localhost/m1", 
         "mix2": "http://localhost/m2", 
         "mix0": "http://localhost/m0", 
-        "authenticator": "http://localhost/auth", 
-        "csframe":	"http://localhost/csframe",
+        "authenticator": "http://localhost/auth/", 
+        "csframe":	"http://localhost/csframe/",
         "bulletinboard": "http://localhost/bb", 
         "collectingserver": "http://localhost/cs", 
         "votingbooth": "http://localhost"
