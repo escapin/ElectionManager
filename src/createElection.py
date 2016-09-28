@@ -246,7 +246,6 @@ def writeManifest():
     jwrite.jwrite(sElectDir + manifest, "description", elecDescr)
     jwrite.jwrite(sElectDir + manifest, "question", elecQuestion)
     jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)
-    jwrite.jwrite(sElectDir + manifest, "userChosenRandomness", randomness)
     jwrite.jwrite(sElectDir + manifest, "publishListOfVoters", publish)
     jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress["collectingserver"], "URI")
     jwrite.jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress["bulletinboard"], 0, "URI")
@@ -281,14 +280,13 @@ def writesElectConfigs():
     jwrite.jwrite(dstroot + bulletinConf, "port", ports[1])
     jwrite.jwrite(dstroot + votingConf, "authenticator", serverAddress["authenticator"])
     jwrite.jwrite(dstroot + votingConf, "csFrame", serverAddress["csframe"])
+    jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", randomness)
     jwrite.jwrite(dstroot + collectingConf, "serverAdminPassword", password)
     for x in range(numMix):     
         jwrite.jwrite(dstroot + mixConf[x], "port", ports[x+2])
         
     #change user randomness if not a mock election
-    if not mockElection:
-        jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", randomness)
-    else:
+    if mockElection:
         jwrite.jwrite(dstroot + votingConf, "showOtp", True)
         jwrite.jwrite(dstroot + collectingConf, "sendOtpBack", True)
         jwrite.jwrite(dstroot + collectingConf, "sendEmail", False)
@@ -297,22 +295,13 @@ def writesElectConfigs():
 
 def createBallots():
     if mockElection:
-        #check if random or not
-        isRand = False
-        try:
-            jsonFile = open(sElectDir+manifest, 'r')
-            jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-            isRand = jsonData["userChosenRandomness"]
-            jsonFile.close()
-        except IOError:
-            sys.exit("ElectionManifest.json missing or corrupt")
         #create Ballots
         os.mkdir(dstroot+"/CollectingServer/_data_")
         mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
         ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
         for x in range(mockVoters):
             userEmail = "user"+str(x)+"@uni-trier.de"
-            userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if isRand else ""
+            userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if randomness else ""
             userChoice = random.randint(0,(len(eleChoices)-1))
             ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
         ballots.wait()
@@ -326,7 +315,7 @@ def sElectStart():
     logfolder = dstroot+"/LOG"
     
     #start all node servers
-    subprocess.Popen(["node", "compileEJS.js", str(seperateAuthentication)], cwd=(dstroot+"/VotingBooth/webapp/ejs"))
+    subprocess.Popen(["node", "compileEJS.js"], cwd=(dstroot+"/VotingBooth/webapp/ejs"))
     subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
     with open(logfolder+"/ColllectingServer.log", 'w') as file_out:
         if mockElection:
@@ -376,7 +365,7 @@ def writeToHandlerConfig():
         jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
     
 def writeToNginxConfig():
-    votingBoothPage = "votingBooth.html" #"votingBooth_authenticator.html" if seperateAuthentication else "votingBooth.html"
+    votingBoothPage = "votingBooth.html"
     #modify nginx File
     if "http://localhost" not in serverAddress["collectingserver"]:
         nginxFile = open(nginxConf, 'r+')
