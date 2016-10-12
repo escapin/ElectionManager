@@ -118,6 +118,8 @@ def writeToHandlerConfig():
         jsonFile.close()
     except IOError:
         sys.exit("electionsURI.json missing or corrupt")
+    except KeyError:
+        print(electionID + "not found i electionsURI.json, continue without removing.")
     if not hidden:
         jwrite.jRemElec(electionConfig, electionID)
         eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)
