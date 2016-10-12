@@ -60,7 +60,7 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
             jsonAddress["bulletinboard"] = "http://localhost:"+str(nginxPort)+"/bb/"+str(ELS)+"/"
             jsonAddress["votingbooth"] = "http://localhost:"+str(nginxPort)+"/"+str(ELS)+"/"
             jsonAddress["authenticator"] = "http://localhost:"+str(nginxPort)+"/auth/"
-            jsonAddress["csframe"] = "http://localhost:"+str(nginxPort)+"/csframe/"
+            jsonAddress["authchannel"] = "http://localhost:"+str(nginxPort)+"/authChannel/"
             jsonFile.close()
         else:
             jsonFile.close()
@@ -71,7 +71,7 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
             jsonAddress["bulletinboard"] = addresses["bulletinboard"]+"/"+str(ELS)+"/"
             jsonAddress["votingbooth"] = addresses["votingbooth"]+"/"+str(ELS)+"/"
             jsonAddress["authenticator"] = addresses["authenticator"]
-            jsonAddress["csframe"] = addresses["csframe"]
+            jsonAddress["authchannel"] = addresses["authChannel"]
             for x in range(numMix):
                 jsonAddress["mix"+str(x)] = addresses["mix"+str(x)]+"/"+str(ELS)+"/"
             
