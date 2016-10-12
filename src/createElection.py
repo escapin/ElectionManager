@@ -141,7 +141,6 @@ def getInput():
     global randomness
     global keys
     global hidden
-    global seperateAuthentication
     
     #get input parameters (if any)
     password = "";
@@ -154,7 +153,6 @@ def getInput():
         randomness = mockArgs["userChosenRandomness"]
         randomness = True if randomness == "true" else False
         keys = mockArgs["keys"]
-        seperateAuthentication = mockArgs["seperateAuthentication"]
     hidden = True if sys.argv[1] == "true" else False
     if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
         electionArgs = json.loads(sys.argv[2])
@@ -170,7 +168,6 @@ def getInput():
         publish = electionArgs['publishListOfVoters']
         randomness = electionArgs['userChosenRandomness']
         password = electionArgs['password']
-        seperateAuthentication = electionArgs["seperateAuthentication"]
         if "keys" in electionArgs:
             keys = electionArgs["keys"]
         mockElection = False
