@@ -167,12 +167,17 @@ def getInput():
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
         randomness = electionArgs['userChosenRandomness']
+        randomness = True if randomness == "true" else False
         password = electionArgs['password']
         if "keys" in electionArgs:
             keys = electionArgs["keys"]
         else:
             keys = []
         mockElection = False
+    print("start test information::")
+    print(randomness)
+    print(type(randomness))
+    print("::end test information")
 
 
 def getMixServerConfig():
