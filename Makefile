@@ -20,12 +20,12 @@ nginx:
 	python configNginx.py
 
 select:
-	git clone -b dev https://sElectVoting:fc-dLEhqSKRG0exK@bitbucket.org/escapin/select.git sElect
+	git clone -b renaming https://sElectVoting:fc-dLEhqSKRG0exK@bitbucket.org/escapin/select.git sElect
 	cd sElect; make devenv
 	cp templates/config2js.js sElect/tools/config2js.js
 	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
 	cp sElect/templates/ElectionManifest.json _configFiles_/ElectionManifest.json
-
+	cd sElect/VotingBooth; refresh.sh
 
 electionsClean:
 	rm -rf elections/
