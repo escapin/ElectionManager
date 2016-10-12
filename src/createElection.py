@@ -170,6 +170,8 @@ def getInput():
         password = electionArgs['password']
         if "keys" in electionArgs:
             keys = electionArgs["keys"]
+        else:
+            keys = []
         mockElection = False
 
 
