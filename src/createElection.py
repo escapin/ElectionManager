@@ -18,7 +18,7 @@ import electionUtils
 
 def copy(src, dest):
     try:
-        shutil.copytree(src, dest, symlinks=False, ignore=ignore_patterns("*.py", "00", "01", "02", "ElectionHandler", "nginx*"))
+        shutil.copytree(src, dest, symlinks=False, ignore=ignore_patterns("*.py", "00", "01", "02", "Authenticator", "tests"))
     except OSError as e:
         # source is a file, not a directory
         if e.errno == errno.ENOTDIR:
@@ -174,10 +174,6 @@ def getInput():
         else:
             keys = []
         mockElection = False
-    print("start test information::")
-    print(randomness)
-    print(type(randomness))
-    print("::end test information")
 
 
 def getMixServerConfig():
