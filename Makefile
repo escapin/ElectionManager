@@ -24,7 +24,6 @@ select:
 	cd sElect; make devenv
 	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
 	cp sElect/templates/ElectionManifest.json _configFiles_/ElectionManifest.json
-	cd sElect/VotingBooth; refresh.sh
 
 electionsClean:
 	rm -rf elections/
