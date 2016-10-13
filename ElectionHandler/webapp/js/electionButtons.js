@@ -654,29 +654,31 @@ function electionButtons() {
 	    rows.on('click', function(e) {
 	        row = $(this);
 	        
-	        rows.removeClass('highlight');
-	        row.addClass('highlight');
-	        
-	        value = $(this).children()["0"].innerHTML; 
-	        
-	        // read the time stamp for the election address
-	        var i = 0;
-    		for(i = 0; i < elections.length ; i++) {
-    			if(elections[i].electionID == value){
-    				break;
-    			}
-    		}
-	        ELS = elections[i]["ELS"];
-
-			$("#remove").prop('disabled', null);
-			
-			// Show Invite Voters or Check Result button
-			// (depending on election state) and retest every second
-			window.clearInterval(votingStatus);
-			showVotingState(value);
-		    votingStatus = window.setInterval(function() {
-		    	showVotingState(value);
-		     }, 3000);
+	        if(row.hasClass('elecs')){
+		        rows.removeClass('highlight');
+		        row.addClass('highlight');
+		        
+		        value = $(this).children()["0"].innerHTML; 
+		        
+		        // read the time stamp for the election address
+		        var i = 0;
+	    		for(i = 0; i < elections.length ; i++) {
+	    			if(elections[i].electionID == value){
+	    				break;
+	    			}
+	    		}
+		        ELS = elections[i]["ELS"];
+	
+				$("#remove").prop('disabled', null);
+				
+				// Show Invite Voters or Check Result button
+				// (depending on election state) and retest every second
+				window.clearInterval(votingStatus);
+				showVotingState(value);
+			    votingStatus = window.setInterval(function() {
+			    	showVotingState(value);
+			     }, 3000);
+	        }
 		    
 	        
 	    });
