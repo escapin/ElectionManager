@@ -379,7 +379,8 @@ def writeToNginxConfig():
         nginxData = nginxFile.readlines()
         
         ###### Collecting server ######
-        domain = serverAddress["collectingserver"].split("://")[1][:len(domain)-1]
+        domain = serverAddress["collectingserver"].split("://")[1]
+        domain = domain[:len(domain)-1]
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -408,7 +409,8 @@ def writeToNginxConfig():
         nginxFile.seek(0)
     
         ###### Bulletin board ######
-        domain = serverAddress["bulletinboard"].split("://")[1][:len(domain)-1]
+        domain = serverAddress["bulletinboard"].split("://")[1]
+        domain = domain[:len(domain)-1]
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -438,8 +440,9 @@ def writeToNginxConfig():
     
         ###### Mix Server ######
         for x in range(numMix):
-            domain = serverAddress["mix"+str(x)].split("://")[1][:len(domain)-1]
-	    keyFolder = domain.split(".")
+            domain = serverAddress["mix"+str(x)].split("://")[1]
+            domain = domain[:len(domain)-1]
+            keyFolder = domain.split(".")
             keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
             keyFolder = ".".join(keyFolder)
             prevBracket = 0
@@ -468,7 +471,8 @@ def writeToNginxConfig():
       
       
         ###### Voting Booth ######
-        domain = serverAddress["votingbooth"].split("://")[1][:len(domain)-1]
+        domain = serverAddress["votingbooth"].split("://")[1]
+        domain = domain[:len(domain)-1]
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
