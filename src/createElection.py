@@ -378,8 +378,8 @@ def writeToNginxConfig():
         nginxFile = open(nginxConf, 'r+')
         nginxData = nginxFile.readlines()
         
-        ###### Bulletin board ######
-        domain = serverAddress["collectingserver"].split("://")[1]
+        ###### Collecting server ######
+        domain = serverAddress["collectingserver"].split("://")[1][:len(domain)-1]
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -396,8 +396,8 @@ def writeToNginxConfig():
                     listenPort, "\n",
                     "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
-            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
-                        "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
@@ -408,7 +408,7 @@ def writeToNginxConfig():
         nginxFile.seek(0)
     
         ###### Bulletin board ######
-        domain = serverAddress["bulletinboard"].split("://")[1]
+        domain = serverAddress["bulletinboard"].split("://")[1][:len(domain)-1]
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -425,8 +425,8 @@ def writeToNginxConfig():
                     listenPort, "\n",
                     "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
-            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
-                        "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
@@ -438,7 +438,7 @@ def writeToNginxConfig():
     
         ###### Mix Server ######
         for x in range(numMix):
-            domain = serverAddress["mix"+str(x)].split("://")[1]
+            domain = serverAddress["mix"+str(x)].split("://")[1][:len(domain)-1]
 	    keyFolder = domain.split(".")
             keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
             keyFolder = ".".join(keyFolder)
@@ -455,8 +455,8 @@ def writeToNginxConfig():
                         listenPort, "\n",
                         "    server_name "+ domain + ";\n", "\n"]
             if onSSL:
-                comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
-	                    "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
+                comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+	                    "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
                             "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                             "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                             "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
@@ -468,7 +468,7 @@ def writeToNginxConfig():
       
       
         ###### Voting Booth ######
-        domain = serverAddress["votingbooth"].split("://")[1]
+        domain = serverAddress["votingbooth"].split("://")[1][:len(domain)-1]
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -485,8 +485,8 @@ def writeToNginxConfig():
                     listenPort, "\n",
                     "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
-            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
-                        "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
