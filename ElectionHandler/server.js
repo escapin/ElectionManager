@@ -357,7 +357,6 @@ function spawnServer(req, callback){
 			//log the error in ERRLOG_FILE, async queue
 	    	//to make sure it's not being written to 
 	    	//simultaneously
-			console.log(data);
 			var dat = {err: data, proc: 'simple'};
 	    	logErrQueue.push(dat);
 
