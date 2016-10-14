@@ -195,7 +195,7 @@ def getServerLocations():
     
     #get server URI's
     ports = electionUtils.usePorts(electionConfig, 3+numMix)
-    ELS = electionUtils.getELS(electionConfig)
+    ELS = electionUtils.getELS(electionConfig)                      #number between 00 and 100/maxElections, corresponds with subdomains
     serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
     #time stamp for folder path
     tStamp = startingTime.replace("-", "").replace(":", "").split()
