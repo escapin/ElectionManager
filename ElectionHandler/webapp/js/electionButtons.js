@@ -348,8 +348,8 @@ function electionButtons() {
     	    		document.getElementById("votePage").innerHTML = votingBooth.replace(".", ELS+".") +"/";
 				}
 				else{
-    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS +"/";
-    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS +"/";
+    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS +"/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS +"/";
 				}
     			if(stat === "open"){
     				document.getElementById("inviteVoters").style.visibility = "visible";
