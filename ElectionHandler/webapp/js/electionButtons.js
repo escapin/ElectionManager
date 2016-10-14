@@ -3,9 +3,9 @@ function electionButtons() {
 	var electionConf;
 	var votingBooth;
 	var collectingServer;
-	var lastMix;
 	var elections;
-
+	var deployment;
+	
 	var electionManager;
 	var protocol;
 	
@@ -93,8 +93,9 @@ function electionButtons() {
     		closingID = value;
     		disableButtons();
     		$('#processing').fadeIn(150);
+    		csServer = protocol+collectingServer.replace(".", ELS+".")+"/admin/close" ? deployment : protocol+collectingServer+"/"+ELS+"/admin/close"
     		$.ajax({type: "GET", 
-    				url: protocol+collectingServer+"/"+ELS+"/admin/close",
+    				url: csServer,
     				dataType: 'json',
     				headers: {"Authorization": "Basic " + btoa("admin" + ":" + pass)},
     				//beforeSend: function (xhr){ 
@@ -114,7 +115,7 @@ function electionButtons() {
     	    			enableButtons();
     	    			$('#processing').hide();
     	    			if(data.status===502){
-    	    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+ELS+"/", false);
+    	    				alerting("cannot connect to CollectingServer at "+ csServer, false);
     	    			}
     	    			else if(data.status===401){
     	    				alerting("wrong password", false);
@@ -342,17 +343,19 @@ function electionButtons() {
     	}
     	else{
     		getElectionStatus(value, function (eleID, stat){
-    			if(stat === "open"){
-    				document.getElementById("inviteVoters").style.visibility = "visible";
-    	    		//document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
-    	    		//document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    			if(deployment){
+    	    		document.getElementById("votePage").href = votingBooth.replace(".", ELS+".") +"/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth.replace(".", ELS+".") +"/";
+				}
+				else{
     	    		document.getElementById("votePage").href = votingBooth+"/"+ELS +"/";
     	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS +"/";
+				}
+    			if(stat === "open"){
+    				document.getElementById("inviteVoters").style.visibility = "visible";
     			}
     			else if(stat === "closed"){
     				document.getElementById("checkResult").style.visibility = "visible";
-    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS+"/";
-    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS+"/";
     			}
     			else{
     				alerting("Server is not responding");
@@ -631,12 +634,13 @@ function electionButtons() {
 		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 		
 		//don't use port 80 if it's not deployed
-		 if(electionConf.deployment === true){
+		 deployment = false;
+		 if(electionConf.deployment){
+			 deployment = true;
 			 var sAddresses = JSON.parse(sAddressesRaw);
 			 electionManager = sAddresses.electionHandler;
 			 votingBooth = sAddresses["server-address"].votingbooth;
 			 collectingServer = sAddresses["server-address"].collectingserver;
-			 lastMix = sAddresses["server-address"].mix2;
 		 }
 		var tmp = collectingServer.split("://");
 		if(tmp.length > 1){
@@ -988,7 +992,7 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = protocol + collectingServer+'/'+ELS+'/status';
+	 	 var url = protocol+collectingServer.replace(".", ELS+".")+"/status" ? deployment : protocol+collectingServer+"/"+ELS+"/status"
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';

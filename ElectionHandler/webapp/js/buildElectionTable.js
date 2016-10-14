@@ -94,7 +94,7 @@ function buildElectionTable(elections, res) {
       //
 
  	 var stat = 'what';
- 	 var url = collectingServer+'/'+ELS+'/status';
+ 	 var url = protocol+collectingServer.replace(".", ELS+".")+"/status" ? electionConf.deployment : protocol+collectingServer+"/"+ELS+"/status"
       $.get(url)
        .fail(function () { 
           //var stat = 'no response';
