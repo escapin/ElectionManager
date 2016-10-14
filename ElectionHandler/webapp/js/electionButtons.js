@@ -346,8 +346,12 @@ function electionButtons() {
     			if(deployment){
     	    		document.getElementById("votePage").href = votingBooth.replace(".", ELS+".") +"/";
     	    		document.getElementById("votePage").innerHTML = votingBooth.replace(".", ELS+".") +"/";
+    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS +"/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS +"/";
 				}
 				else{
+    	    		document.getElementById("votePage").href = votingBooth+"/"+ELS +"/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS +"/";
     	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS +"/";
     	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS +"/";
 				}
