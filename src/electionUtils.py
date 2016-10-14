@@ -69,7 +69,7 @@ def getELS(src):
         jsonFile.close()
     except IOError:
         sys.exit("handlerConfigFile.json missing or corrupt")
-    return newPorts
+    return newELS
 
 def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
     sAddress = []
