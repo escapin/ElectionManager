@@ -364,73 +364,126 @@ def writeToHandlerConfig():
         eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "processIDs": newPIDs, "used-ports": ports}
         jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
     
+
 def writeToNginxConfig():
-    votingBoothPage = "votingBooth.html"
+    eleNumber = 17
+    onSSL = True
+    crtPath = "/etc/letsencrypt/live/"
+    listenPort = "    listen " + str(nginxPort)
+    if onSSL:
+        listenPort = listenPort + " ssl"
+    listenPort = listenPort + ";\n"
+    
     #modify nginx File
     if "http://localhost" not in serverAddress["collectingserver"]:
         nginxFile = open(nginxConf, 'r+')
         nginxData = nginxFile.readlines()
+        
+        ###### Bulletin board ######
+        domain = serverAddress["collectingserver"].split("://")[1]
+        serverName = domain.replace(".", str(eleNumber)+".", 1)
         prevBracket = 0
         counter = 0
         for line in nginxData:
-            if "}" in line:
-                prevBracket = counter
             if "end collecting server" in line:
                 break
             counter = counter + 1
-        bracketIt = nginxData[prevBracket:]
-        del nginxData[prevBracket:]
-        comments = ["    # Collecting server " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n"]
+        bracketIt = nginxData[counter:]
+        del nginxData[counter:]
+        
+        comments = ["  # Collecting Server " + str(eleNumber) + " \n", "  server {\n", 
+                    listenPort, "\n",
+                    "    server_name "+ serverName + ";\n", "\n"]
+        if onSSL:
+            comments.extend(["    ssl_certificate " + crtPath + serverName + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + serverName + "privkey.pem;\n",
+                        "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                        "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                        "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
     
+        ###### Bulletin board ######
+        domain = serverAddress["bulletinboard"].split("://")[1]
+        serverName = domain.replace(".", str(eleNumber)+".", 1)
         prevBracket = 0
         counter = 0
         for line in nginxData:
-            if "}" in line:
-                prevBracket = counter
             if "end bulletin board" in line:
                 break
             counter = counter + 1
-        bracketIt = nginxData[prevBracket:]
-        del nginxData[prevBracket:]
-        comments = ["    # Bulletin board " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n"]
+        bracketIt = nginxData[counter:]
+        del nginxData[counter:]
+        
+        comments = ["  # Bulletin Board " + str(eleNumber) + " \n", "  server {\n", 
+                    listenPort, "\n",
+                    "    server_name "+ serverName + ";\n", "\n"]
+        if onSSL:
+            comments.extend(["    ssl_certificate " + crtPath + serverName + ";\n",
+                        "    ssl_certificate_key " + crtPath + serverName + ";\n",
+                        "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                        "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                        "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
     
+        ###### Mix Server ######
         for x in range(numMix):
+            domain = serverAddress["mix"+str(x)].split("://")[1]
+            serverName = domain.replace(".", str(eleNumber)+".", 1)
             prevBracket = 0
             counter = 0
             for line in nginxData:
-                if "}" in line:
-                    prevBracket = counter
-                if "end mix server "+str(x) in line:
+                if "end mix server " + str(x) in line:
                     break
                 counter = counter + 1
-            bracketIt = nginxData[prevBracket:]
-            del nginxData[prevBracket:]
-            comments = ["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"]
+            bracketIt = nginxData[counter:]
+            del nginxData[counter:]
+            
+            comments = ["  # Mix Server "+str(x) + str(eleNumber) + " \n", "  server {\n", 
+                        listenPort, "\n",
+                        "    server_name "+ serverName + ";\n", "\n"]
+            if onSSL:
+                comments.extend(["    ssl_certificate " + crtPath + serverName + ";\n",
+                            "    ssl_certificate_key " + crtPath + serverName + ";\n",
+                            "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                            "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                            "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+            comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])
             comments.extend(bracketIt)
             nginxData.extend(comments)
             nginxFile.seek(0)
       
+      
+        ###### Voting Booth ######
+        domain = serverAddress["votingbooth"].split("://")[1]
+        serverName = domain.replace(".", str(eleNumber)+".", 1)
         prevBracket = 0
         counter = 0
         for line in nginxData:
-            if "}" in line:
-                prevBracket = counter
             if "end voting booth" in line:
                 break
             counter = counter + 1
-        bracketIt = nginxData[prevBracket:]
-        del nginxData[prevBracket:]
-        comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index "+votingBoothPage+";\n","    }\n", "\n"]
+        bracketIt = nginxData[counter:]
+        del nginxData[counter:]
+        
+        comments = ["  # Voting Booth " + str(eleNumber) + " \n", "  server {\n", 
+                    listenPort, "\n",
+                    "    server_name "+ serverName + ";\n", "\n"]
+        if onSSL:
+            comments.extend(["    ssl_certificate " + crtPath + serverName + ";\n",
+                        "    ssl_certificate_key " + crtPath + serverName + ";\n",
+                        "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                        "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                        "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"])
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
-        
         
         nginxFile.writelines(nginxData)
         nginxFile.close()
@@ -469,14 +522,14 @@ def writeToNginxConfig():
         bracketIt = nginxData[prevBracket:]
         del nginxData[prevBracket:]
         comments = ["    # Voting Booth " + electionID + " \n", 
-                    "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index "+votingBoothPage+";\n","    }\n", "\n"]
+                    "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)    
         
         nginxFile.writelines(nginxData)
         nginxFile.close()
-    
+        
     
     #refresh nginx 
     #TODO: fix /usr/sbin nginx issue
