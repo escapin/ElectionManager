@@ -47,6 +47,30 @@ def usePorts(src, num):
         sys.exit("handlerConfigFile.json missing or corrupt")
     return newPorts
 
+def getELS(src):
+    usedELS = []
+    newELS = -1
+    try:
+        jsonFile = open(src, 'r')
+        jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
+        maxElections = jsonData["maxNumberOfElections"]
+        elections = jsonData["elections"]
+        for x in range(len(elections)):
+            usedELS.append(elections[x]["ELS"])
+        if len(usedELS) >= maxElections:
+            sys.exit("Maximum number of elections reached.")
+        else:
+            for x in range(maxElections):
+                if x in usedELS:
+                    continue
+                else:
+                    newELS = x
+                    break
+        jsonFile.close()
+    except IOError:
+        sys.exit("handlerConfigFile.json missing or corrupt")
+    return newPorts
+
 def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
     sAddress = []
     try:
