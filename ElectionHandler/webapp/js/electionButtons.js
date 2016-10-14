@@ -93,7 +93,7 @@ function electionButtons() {
     		closingID = value;
     		disableButtons();
     		$('#processing').fadeIn(150);
-    		csServer = protocol+collectingServer.replace(".", ELS+".")+"/admin/close" ? deployment : protocol+collectingServer+"/"+ELS+"/admin/close"
+    		csServer = deployment ? protocol+collectingServer.replace(".", ELS+".")+"/admin/close" : protocol+collectingServer+"/"+ELS+"/admin/close"
     		$.ajax({type: "GET", 
     				url: csServer,
     				dataType: 'json',
@@ -992,7 +992,7 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = protocol+collectingServer.replace(".", ELS+".")+"/status" ? deployment : protocol+collectingServer+"/"+ELS+"/status"
+	 	 var url = deployment ? protocol+collectingServer.replace(".", ELS+".")+"/status" : protocol+collectingServer+"/"+ELS+"/status"
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';
