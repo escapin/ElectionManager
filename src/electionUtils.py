@@ -91,13 +91,13 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
             jsonFile = open(serverAddr, 'r')
             jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
             addresses = jsonData["server-address"]
-            jsonAddress["collectingserver"] = addresses["collectingserver"]+"/"+str(ELS)+"/"
-            jsonAddress["bulletinboard"] = addresses["bulletinboard"]+"/"+str(ELS)+"/"
-            jsonAddress["votingbooth"] = addresses["votingbooth"]+"/"+str(ELS)+"/"
+            jsonAddress["collectingserver"] = addresses["collectingserver"].replace(".", str(ELS)+".", 1)+"/"
+            jsonAddress["bulletinboard"] = addresses["bulletinboard"].replace(".", str(ELS)+".", 1)+"/"
+            jsonAddress["votingbooth"] = addresses["votingbooth"].replace(".", str(ELS)+".", 1)+"/"
             jsonAddress["authenticator"] = addresses["authenticator"]
             jsonAddress["authchannel"] = addresses["authChannel"]
             for x in range(numMix):
-                jsonAddress["mix"+str(x)] = addresses["mix"+str(x)]+"/"+str(ELS)+"/"
+                jsonAddress["mix"+str(x)] = addresses["mix"+str(x)].replace(".", str(ELS)+".", 1)+"/"
             
             onSSL = jsonData["ssl"]
             if onSSL:

@@ -380,7 +380,6 @@ def writeToNginxConfig():
         
         ###### Bulletin board ######
         domain = serverAddress["collectingserver"].split("://")[1]
-        serverName = domain.replace(".", str(ELS)+".", 1)
         keyFolder = domain.replace(".", "00.", 1)
         prevBracket = 0
         counter = 0
@@ -393,7 +392,7 @@ def writeToNginxConfig():
         
         comments = ["  # Collecting Server " + str(electionID) + " \n", "  server {\n", 
                     listenPort, "\n",
-                    "    server_name "+ serverName + ";\n", "\n"]
+                    "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
             comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
                         "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
@@ -407,7 +406,6 @@ def writeToNginxConfig():
     
         ###### Bulletin board ######
         domain = serverAddress["bulletinboard"].split("://")[1]
-        serverName = domain.replace(".", str(ELS)+".", 1)
         keyFolder = domain.replace(".", "00.", 1)
         prevBracket = 0
         counter = 0
@@ -420,7 +418,7 @@ def writeToNginxConfig():
         
         comments = ["  # Bulletin Board " + str(electionID) + " \n", "  server {\n", 
                     listenPort, "\n",
-                    "    server_name "+ serverName + ";\n", "\n"]
+                    "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
             comments.extend(["    ssl_certificate " + crtPath + keyFolder + ";\n",
                         "    ssl_certificate_key " + crtPath + keyFolder + ";\n",
@@ -435,7 +433,6 @@ def writeToNginxConfig():
         ###### Mix Server ######
         for x in range(numMix):
             domain = serverAddress["mix"+str(x)].split("://")[1]
-            serverName = domain.replace(".", str(ELS)+".", 1)
             keyFolder = domain.replace(".", "00.", 1)
             prevBracket = 0
             counter = 0
@@ -448,7 +445,7 @@ def writeToNginxConfig():
             
             comments = ["  # Mix Server "+str(x) + str(electionID) + " \n", "  server {\n", 
                         listenPort, "\n",
-                        "    server_name "+ serverName + ";\n", "\n"]
+                        "    server_name "+ domain + ";\n", "\n"]
             if onSSL:
                 comments.extend(["    ssl_certificate " + crtPath + keyFolder + ";\n",
                             "    ssl_certificate_key " + crtPath + keyFolder + ";\n",
@@ -463,7 +460,6 @@ def writeToNginxConfig():
       
         ###### Voting Booth ######
         domain = serverAddress["votingbooth"].split("://")[1]
-        serverName = domain.replace(".", str(ELS)+".", 1)
         keyFolder = domain.replace(".", "00.", 1)
         prevBracket = 0
         counter = 0
@@ -476,7 +472,7 @@ def writeToNginxConfig():
         
         comments = ["  # Voting Booth " + str(electionID) + " \n", "  server {\n", 
                     listenPort, "\n",
-                    "    server_name "+ serverName + ";\n", "\n"]
+                    "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
             comments.extend(["    ssl_certificate " + crtPath + keyFolder + ";\n",
                         "    ssl_certificate_key " + crtPath + keyFolder + ";\n",
