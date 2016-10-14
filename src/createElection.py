@@ -396,12 +396,13 @@ def writeToNginxConfig():
                     listenPort, "\n",
                     "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
-		comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
                         "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
-        comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])
+        comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])        
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
@@ -424,11 +425,12 @@ def writeToNginxConfig():
                     listenPort, "\n",
                     "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
-       		comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
                         "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
         comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])
         comments.extend(bracketIt)
         nginxData.extend(comments)
@@ -453,11 +455,12 @@ def writeToNginxConfig():
                         listenPort, "\n",
                         "    server_name "+ domain + ";\n", "\n"]
             if onSSL:
-            	comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
+                comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
 	                    "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
                             "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                             "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                             "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+            comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
             comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])
             comments.extend(bracketIt)
             nginxData.extend(comments)
@@ -482,11 +485,12 @@ def writeToNginxConfig():
                     listenPort, "\n",
                     "    server_name "+ domain + ";\n", "\n"]
         if onSSL:
-		comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "fullchain.pem;\n",
                         "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
         comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"])
         comments.extend(bracketIt)
         nginxData.extend(comments)
