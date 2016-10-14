@@ -98,11 +98,7 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
             jsonAddress["authchannel"] = addresses["authchannel"].replace(".", str(ELS)+".", 1)+"/"
             for x in range(numMix):
                 jsonAddress["mix"+str(x)] = addresses["mix"+str(x)].replace(".", str(ELS)+".", 1)+"/"
-            
-            onSSL = jsonData["ssl"]
-            if onSSL:
-                sslKey = jsonData["ssl-key"]
-                sslCrt = jsonData["ssl-crt"]
+
                 
         jsonFile.close()
     except IOError:
