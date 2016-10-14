@@ -69,6 +69,9 @@ def getELS(src):
         jsonFile.close()
     except IOError:
         sys.exit("handlerConfigFile.json missing or corrupt")
+    newELS = str(newELS)
+    if len(newELS) < 2:
+        newELS = "0"+newELS
     return newELS
 
 def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
