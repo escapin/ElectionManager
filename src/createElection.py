@@ -451,7 +451,7 @@ def writeToNginxConfig():
             bracketIt = nginxData[counter:]
             del nginxData[counter:]
             
-            comments = ["  # Mix Server "+str(x) + str(electionID) + " \n", "  server {\n", 
+            comments = ["  # Mix Server "+str(x) +" "+ str(electionID) + " \n", "  server {\n", 
                         listenPort, "\n",
                         "    server_name "+ domain + ";\n", "\n"]
             if onSSL:
