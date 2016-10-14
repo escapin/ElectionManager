@@ -195,7 +195,7 @@ def getServerLocations():
     
     #get server URI's
     ports = electionUtils.usePorts(electionConfig, 3+numMix)
-    ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
+    ELS = electionUtils.getELS(electionConfig)
     serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
     #time stamp for folder path
     tStamp = startingTime.replace("-", "").replace(":", "").split()
@@ -366,7 +366,6 @@ def writeToHandlerConfig():
     
 
 def writeToNginxConfig():
-    eleNumber = 17
     onSSL = True
     crtPath = "/etc/letsencrypt/live/"
     listenPort = "    listen " + str(nginxPort)
@@ -381,7 +380,8 @@ def writeToNginxConfig():
         
         ###### Bulletin board ######
         domain = serverAddress["collectingserver"].split("://")[1]
-        serverName = domain.replace(".", str(eleNumber)+".", 1)
+        serverName = domain.replace(".", str(ELS)+".", 1)
+        keyFolder = domain.replace(".", "00.", 1)
         prevBracket = 0
         counter = 0
         for line in nginxData:
@@ -391,12 +391,12 @@ def writeToNginxConfig():
         bracketIt = nginxData[counter:]
         del nginxData[counter:]
         
-        comments = ["  # Collecting Server " + str(eleNumber) + " \n", "  server {\n", 
+        comments = ["  # Collecting Server " + str(electionID) + " \n", "  server {\n", 
                     listenPort, "\n",
                     "    server_name "+ serverName + ";\n", "\n"]
         if onSSL:
-            comments.extend(["    ssl_certificate " + crtPath + serverName + "/fullchain.pem;\n",
-                        "    ssl_certificate_key " + crtPath + serverName + "privkey.pem;\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "privkey.pem;\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
@@ -407,7 +407,8 @@ def writeToNginxConfig():
     
         ###### Bulletin board ######
         domain = serverAddress["bulletinboard"].split("://")[1]
-        serverName = domain.replace(".", str(eleNumber)+".", 1)
+        serverName = domain.replace(".", str(ELS)+".", 1)
+        keyFolder = domain.replace(".", "00.", 1)
         prevBracket = 0
         counter = 0
         for line in nginxData:
@@ -417,12 +418,12 @@ def writeToNginxConfig():
         bracketIt = nginxData[counter:]
         del nginxData[counter:]
         
-        comments = ["  # Bulletin Board " + str(eleNumber) + " \n", "  server {\n", 
+        comments = ["  # Bulletin Board " + str(electionID) + " \n", "  server {\n", 
                     listenPort, "\n",
                     "    server_name "+ serverName + ";\n", "\n"]
         if onSSL:
-            comments.extend(["    ssl_certificate " + crtPath + serverName + ";\n",
-                        "    ssl_certificate_key " + crtPath + serverName + ";\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + ";\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + ";\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
@@ -434,7 +435,8 @@ def writeToNginxConfig():
         ###### Mix Server ######
         for x in range(numMix):
             domain = serverAddress["mix"+str(x)].split("://")[1]
-            serverName = domain.replace(".", str(eleNumber)+".", 1)
+            serverName = domain.replace(".", str(ELS)+".", 1)
+            keyFolder = domain.replace(".", "00.", 1)
             prevBracket = 0
             counter = 0
             for line in nginxData:
@@ -444,12 +446,12 @@ def writeToNginxConfig():
             bracketIt = nginxData[counter:]
             del nginxData[counter:]
             
-            comments = ["  # Mix Server "+str(x) + str(eleNumber) + " \n", "  server {\n", 
+            comments = ["  # Mix Server "+str(x) + str(electionID) + " \n", "  server {\n", 
                         listenPort, "\n",
                         "    server_name "+ serverName + ";\n", "\n"]
             if onSSL:
-                comments.extend(["    ssl_certificate " + crtPath + serverName + ";\n",
-                            "    ssl_certificate_key " + crtPath + serverName + ";\n",
+                comments.extend(["    ssl_certificate " + crtPath + keyFolder + ";\n",
+                            "    ssl_certificate_key " + crtPath + keyFolder + ";\n",
                             "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                             "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                             "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
@@ -461,7 +463,8 @@ def writeToNginxConfig():
       
         ###### Voting Booth ######
         domain = serverAddress["votingbooth"].split("://")[1]
-        serverName = domain.replace(".", str(eleNumber)+".", 1)
+        serverName = domain.replace(".", str(ELS)+".", 1)
+        keyFolder = domain.replace(".", "00.", 1)
         prevBracket = 0
         counter = 0
         for line in nginxData:
@@ -471,12 +474,12 @@ def writeToNginxConfig():
         bracketIt = nginxData[counter:]
         del nginxData[counter:]
         
-        comments = ["  # Voting Booth " + str(eleNumber) + " \n", "  server {\n", 
+        comments = ["  # Voting Booth " + str(electionID) + " \n", "  server {\n", 
                     listenPort, "\n",
                     "    server_name "+ serverName + ";\n", "\n"]
         if onSSL:
-            comments.extend(["    ssl_certificate " + crtPath + serverName + ";\n",
-                        "    ssl_certificate_key " + crtPath + serverName + ";\n",
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + ";\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + ";\n",
                         "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                         "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
