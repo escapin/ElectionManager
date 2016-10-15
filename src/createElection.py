@@ -298,15 +298,10 @@ def updateTrustedDomains():
     vbdomain = serverAddress["votingbooth"].split("://")[1]
     vbdomain = vbdomain[:len(vbdomain)-1]
     varname = "trustedDomains"
-    authTrusts = 'var '+varname+' = ["'+csdomain+'"];'
     csTrusts = 'var '+varname+' = ["'+vbdomain+'","'+authdomain+'"];'
-    authFile = "/Authenticator/webapp/trustedDomains.js"
     csFile = "/CollectingServer/webapp/trustedDomains.js"
-    file = open(dstroot+authFile, 'w')
-    file.write(authTrusts)
-    file.close()
     file = open(dstroot+csFile, 'w')
-    file.write(authTrusts)
+    file.write(csTrusts)
     file.close()
 
 def createBallots():
