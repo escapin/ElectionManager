@@ -135,6 +135,8 @@ def getInput():
     global mockElection
     global startingTime
     global endingTime
+    global minChoices
+    global maxChoices
     
     global elecTitle
     global elecDescr
@@ -173,6 +175,8 @@ def getInput():
         randomness = electionArgs['userChosenRandomness']
         randomness = True if randomness == "true" else False
         password = electionArgs['password']
+        minChoices = 1
+        maxChoices = 1
         if "keys" in electionArgs:
             keys = electionArgs["keys"]
         else:
