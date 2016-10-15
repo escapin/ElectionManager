@@ -254,6 +254,8 @@ def writeManifest():
     jwrite.jwrite(sElectDir + manifest, "description", elecDescr)
     jwrite.jwrite(sElectDir + manifest, "question", elecQuestion)
     jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)
+    jwrite.jwriteAdv(sElectDir + manifest, "minChoicesPerVoter", minChoices)
+    jwrite.jwriteAdv(sElectDir + manifest, "maxChoicesPerVoter", maxChoices)
     jwrite.jwrite(sElectDir + manifest, "publishListOfVoters", publish)
     jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress["collectingserver"], "URI")
     jwrite.jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress["bulletinboard"], 0, "URI")
