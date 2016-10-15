@@ -294,9 +294,9 @@ def writesElectConfigs():
 def updateTrustedDomains():
     authdomain = serverAddress["authenticator"]
     csdomain = serverAddress["collectingserver"].split("://")[1]
-    csdomain = csdomain[:len(domain)-1]
+    csdomain = csdomain[:len(csdomain)-1]
     vbdomain = serverAddress["votingbooth"].split("://")[1]
-    vbdomain = vbdomain[:len(domain)-1]
+    vbdomain = vbdomain[:len(vbdomain)-1]
     varname = "trustedDomains"
     authTrusts = 'var '+varname+' = ["'+csdomain+'"];'
     csTrusts = 'var '+varname+' = ["'+vbdomain+'","'+authdomain+'"];'
