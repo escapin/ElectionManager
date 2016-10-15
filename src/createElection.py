@@ -317,7 +317,7 @@ def createBallots():
             userRandom = []
             userChoices = []
             for i in range(nChoices):
-                userChoice.append(random.randint(0,(len(eleChoices)-1)))
+                userChoices.append(random.randint(0,(len(eleChoices)-1)))
             userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if randomness else ""
             userEmail = "user"+str(x)+"@uni-trier.de"
             userChoices = str(userChoices).replace(" ", "").replace("u'", "").replace("'", "")
