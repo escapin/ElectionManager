@@ -57,9 +57,6 @@ def getELS(src):
         elections = jsonData["elections"]
         for x in range(len(elections)):
             usedELS.append(elections[x]["ELS"])
-            print("start test information::")
-            print(usedELS)
-            print("::end test information")
         if len(usedELS) >= maxElections:
             sys.exit("Maximum number of elections reached.")
         else:
