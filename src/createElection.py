@@ -291,7 +291,23 @@ def writesElectConfigs():
         jwrite.jwrite(dstroot + collectingConf, "sendOtpBack", True)
         jwrite.jwrite(dstroot + collectingConf, "sendEmail", False)
 
-    
+def updateTrustedDomains():
+    authdomain = serverAddress["authenticator"]
+    csdomain = serverAddress["collectingserver"].split("://")[1]
+    csdomain = csdomain[:len(domain)-1]
+    vbdomain = serverAddress["votingbooth"].split("://")[1]
+    vbdomain = vbdomain[:len(domain)-1]
+    varname = "trustedDomains"
+    authTrusts = 'var '+varname+' = ["'+csdomain+'"];'
+    csTrusts = 'var '+varname+' = ["'+vbdomain+'","'+authdomain+'"];'
+    authFile = "/Authenticator/webapp/trustedDomains.js"
+    csFile = "/CollectingServer/webapp/trustedDomains.js"
+    file = open(dstroot+authFile, 'w')
+    file.write(authTrusts)
+    file.close()
+    file = open(dstroot+csFile, 'w')
+    file.write(authTrusts)
+    file.close()
 
 def createBallots():
     if mockElection:
@@ -564,6 +580,7 @@ updateKeys()
 writeManifest()
 sElectCopy(IDlength)
 writesElectConfigs()
+updateTrustedDomains()
 createBallots()
 sElectStart()
 writeToHandlerConfig()
