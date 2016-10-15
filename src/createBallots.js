@@ -24,15 +24,23 @@ exports.TAG_VERIFCODEUSER = '03';
 var acceptedBallotsFile = process.argv[2];
 var userEmail = process.argv[3];
 var userRandomCode = process.argv[4];
-var userChoice = process.argv[5];
+var choices = process.argv[5];
+var userChoices = (choices.substring(1,choices.length-1)).split(",");
 var electionID = process.argv[6];
 var temp = process.argv[7];
 var mixServEncKeys = (temp.substring(1,temp.length-1)).split(",");
 
 /////////////////////////////////////////////////////////////////
-function createBallot (choice, userCode) {
+function createBallot (choices, userCode) {
 	// TODO choice now is an integer. It could be an arbitrary message
-    var choiceMsg = crypto.int32ToHexString(choice);
+	
+    // Sort choices by number
+    choices.sort(function(a,b){return a-b})
+	var choiceMsg = "";
+	for(var i=0; i < choices.length; i++){
+		choices[i] = crypto.int32ToHexString(choices[i]);
+		choiceMsg = choiceMsg + choices[i];
+	}
     var N = mixServEncKeys.length; // the number of mix servers
     var ciphertexts = new Array(N+1); // array with the chain of ciphertexts 
     var randomCoins = new Array(N); // array with the used random coins
@@ -67,13 +75,14 @@ function createBallot (choice, userCode) {
 
     return { electionID: electionID, 
              ballot: ballot, 
-             choice: choice, 
+             choice: choices, 
              userCode: userCode,
              receiptID: receiptID, 
              ciphertexts: ciphertexts,
              randomCoins: randomCoins};
 }
-var voted = createBallot(userChoice, userRandomCode);
+
+var voted = createBallot(userChoices, userRandomCode);
 
 var log = fs.createWriteStream(acceptedBallotsFile, {flags:'a', encoding:'utf8'});
 log.write(JSON.stringify({ email:userEmail, ballot:voted.ballot })+'\n', null,

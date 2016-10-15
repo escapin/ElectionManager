@@ -87,6 +87,8 @@ def getConfigData():
     global numMix
     global createdElections
     global nginxPort
+    global minChoices
+    global maxChoices
     
     global elecTitle
     global elecDescr
@@ -122,6 +124,8 @@ def getConfigData():
         eleChoices = jsonData["choices"]
         publish = jsonData["publishListOfVoters"]
         mixServers = jsonData["mixServers"]
+        minChoices = jsonData["minChoicesPerVoter"]
+        maxChoices = jsonData["maxChoicesPerVoter"]
         jsonFile.close()
     except IOError:
         sys.exit("ElectionManifest missing or corrupt")
@@ -309,10 +313,15 @@ def createBallots():
         mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
         ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
         for x in range(mockVoters):
-            userEmail = "user"+str(x)+"@uni-trier.de"
+            nChoices = random.randint(minChoices,maxChoices)
+            userRandom = []
+            userChoices = []
+            for i in range(len(nChoices)):
+                userChoice.append(random.randint(0,(len(eleChoices)-1)))
             userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if randomness else ""
-            userChoice = random.randint(0,(len(eleChoices)-1))
-            ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
+            userEmail = "user"+str(x)+"@uni-trier.de"
+            userChoices = str(userChoices).replace(" ", "").replace("u'", "").replace("'", "")
+            ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, userChoices, electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
         ballots.wait()
 
 
