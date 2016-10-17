@@ -301,13 +301,13 @@ def writesElectConfigs():
         jwrite.jwrite(dstroot + collectingConf, "sendOtpBack", True)
         jwrite.jwrite(dstroot + collectingConf, "sendEmail", False)
 
-def updateTrustedDomains():
+def updateTrustedOrigins():
     authdomain = serverAddress["authenticator"]
     vbdomain = serverAddress["votingbooth"]
     vbdomain = vbdomain[:len(vbdomain)-1]
-    varname = "trustedDomains"
+    varname = "trustedOrigins"
     csTrusts = 'var '+varname+' = ["'+vbdomain+'","'+authdomain+'"];'
-    csFile = "/CollectingServer/webapp/trustedDomains.js"
+    csFile = "/CollectingServer/webapp/trustedOrigins.js"
     file = open(dstroot+csFile, 'w')
     file.write(csTrusts)
     file.close()
@@ -588,7 +588,7 @@ updateKeys()
 writeManifest()
 sElectCopy(IDlength)
 writesElectConfigs()
-updateTrustedDomains()
+updateTrustedOrigins()
 createBallots()
 sElectStart()
 writeToHandlerConfig()
