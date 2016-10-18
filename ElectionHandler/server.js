@@ -253,23 +253,22 @@ function spawnServer(req, callback){
 	else if(task === "complete"){
 		var value = req.body.ID;
 		var pass = req.body.password;
-		var ports = "placeholder";
+		var rand = req.body.userChosenRandomness;
 	    var keypairs = [];
 		if(storedKeypairs.length > numMix){
 			for(i = 0; i < numMix+1; i++){
 				keypairs.push(storedKeypairs.pop());
 			}
-			req.body.keys = keypairs;
 		}
 	    //hash password
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
-		req.body.password = hash;
 		
 		var parameters = JSON.stringify(req.body);
-		
+		var additionalParam = {userChosenRandomness: rand, keys: keypairs, password: hash}
+
 		//call the python script to start the servers
-		session = spawn('python', [SRC_DIR+'createElection.py', ports, parameters]);
+		session = spawn('python', [SRC_DIR+'createElection.py', "completeElection", parameters, additionalParam]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
@@ -325,9 +324,9 @@ function spawnServer(req, callback){
 				keypairs.push(storedKeypairs.pop());
 			}
 		}
-		var mockParam = {mockElection: true, userChosenRandomness: rand, keys: keypairs}
+		var additionalParam = {userChosenRandomness: rand, keys: keypairs}
 		//call the python script to start the servers
-	    var session = spawn('python', [SRC_DIR+'createElection.py', JSON.stringify(mockParam)]);
+	    var session = spawn('python', [SRC_DIR+'createElection.py', "mockElection", "placeholder", JSON.stringify(additionalParam)]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();

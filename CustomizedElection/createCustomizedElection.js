@@ -6,12 +6,10 @@ var spawn = child_process.spawn;
 
 var manifestPath = process.argv[2];
 var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
+var parameters = JSON.stringify(electionManifest);
 
 var salt = bcrypt.genSaltSync(10);
 var hash = bcrypt.hashSync(process.argv[3], salt);
-
-electionManifest.password = hash
-var parameters = JSON.stringify(electionManifest);
 
 var hidden = process.argv[4]
 if (hidden === 'hidden'){
@@ -25,7 +23,9 @@ else{
 	process.exit()
 }
 
-session = spawn('python', ['../src/createElection.py', hidden, parameters]);
+var additionalParam = {userChosenRandomness: rand, password: hash, hidden}
+
+session = spawn('python', ['../src/createElection.py', "completeElection", parameters, additionalParam]);
 session.stdout.on('data', function (data) {
 	if(String(data).indexOf("OTP")>-1){
 		var time =  new Date();
