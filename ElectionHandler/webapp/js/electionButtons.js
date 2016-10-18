@@ -125,38 +125,6 @@ function electionButtons() {
     		enableButtons();
     	}
 	}
-	
-    function advancedElection() {
-    	disableButtons();
-		var ename = $('#e-name').val();
-		var edesc = $('#e-desc').val();
-		var startingTime = $('#start-time').val();
-		var endingTime = $('#end-time').val();
-		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
-		 .done(function(data){
-			$('#processing').fadeOut(150);
-			enableButtons();
-			data = JSON.parse(data);
-			if (data.task == "created") {
-				elections = data.elections;
-				value = null;
-				reloading(true);
-				$('#processing').hide();
-				$('#advanced').fadeOut(150);
-				$('welcome').show();
-			}
-			else{
-				alerting(data.error);
-				$('#processing').hide();
-			}
-		  })
-		 .fail(function(){
-			 enableButtons();
-			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ electionManager);
-		 });
-    }
     
     function completeElection(pass, rand) {
     	window.clearInterval(buttonEnable);
