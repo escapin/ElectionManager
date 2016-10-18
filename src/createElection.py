@@ -15,6 +15,36 @@ import re
 import jwrite
 import electionUtils
 
+'''
+The script can be called with 0 to 2 arguments
+[1] argument should be a string "mockElection" or "customElection", 
+    depending on whether it should be a simple test election without many arguments or not.
+    To avoid misspelling a mock election will be created as long as the string contains "mock" anywhere.
+
+[2] argument (not needed for mock elections) should be a stringified JSON object containing following keys
+    (which are all included in a proper ElectionManifest.json):
+        "title": string
+        "description": string
+        "startTime": string of format: "yy-mm-dd hh:mm UTC+0000", example: "2014-01-01 15:00 UTC+0000"
+        "endTime": string of format: "yy-mm-dd hh:mm UTC+0000", example: "2018-11-10 16:00 UTC+0000"
+        "voters": array/list of strings  
+        "publishListOfVoters": true or false (boolean)
+        "maxChoicesPerVoter": positive integer (theoretically including 0) no higher than the amount of choices
+        "minChoicesPerVoter": positive integer (theoretically including 0)
+        "question": string
+        "choices": array/list of strings
+
+[3] argument (optional) should be a stringified JSON object, with optional keys (any - even all - can be left out):
+        "password": string encrypted with 'bcrypt'
+        "userChosenRandomness" true or false (boolean)
+        "hidden": true or false (boolean)
+        "keys": array/list containing 1+<numberOfMixServers> (usually 1+3=4 total) JSON objects 
+                containing 4 corresponding keypairs:
+            "encryption_key": string with valid encription key
+            "verification_key": string with valid verification key
+            "signing_key": string with valid signing key
+            "decryption_key": string with valid decryption key
+'''
 
 def copy(src, dest):
     try:
@@ -95,7 +125,6 @@ def getConfigData():
     global elecQuestion
     global eleChoices
     global publish
-    global mixServers
     
     deployment = False
     serverAddr = False
@@ -123,7 +152,6 @@ def getConfigData():
         elecQuestion = jsonData["question"]
         eleChoices = jsonData["choices"]
         publish = jsonData["publishListOfVoters"]
-        mixServers = jsonData["mixServers"]
         minChoices = jsonData["minChoicesPerVoter"]
         maxChoices = jsonData["maxChoicesPerVoter"]
         jsonFile.close()
@@ -143,24 +171,15 @@ def getInput():
     global elecQuestion
     global eleChoices
     global publish
-    global mixServers
     global randomness
     global keys
     global hidden
     
     #get input parameters (if any)
-    password = "";
-    mockElection = True
     startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
     endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
-    randomness = False
-    if "mockElection" in sys.argv[1]:
-        mockArgs = json.loads(sys.argv[1])
-        randomness = mockArgs["userChosenRandomness"]
-        randomness = True if randomness == "true" else False
-        keys = mockArgs["keys"]
-    hidden = True if sys.argv[1] == "true" else False
-    if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
+    mockElection = True if len(sys.argv) < 2 or "mock" in sys.argv[1] else False
+    if not mockElection:
         electionArgs = json.loads(sys.argv[2])
         startingTime = electionArgs['startTime']
         endingTime = electionArgs['endTime']
@@ -172,16 +191,25 @@ def getInput():
         except:
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
-        randomness = electionArgs['userChosenRandomness']
-        randomness = True if randomness == "true" else False
-        password = electionArgs['password']
-        minChoices = 1
-        maxChoices = 1
-        if "keys" in electionArgs:
+        minChoices = electionArgs['minChoicesPerVoter']
+        maxChoices = electionArgs['maxChoicesPerVoter']
+
+    password = ""
+    randomness = False
+    keys = []
+    hidden = False
+    if len(sys.argv) > 3:
+        additionalArgs = json.loads(sys.argv[3])
+        if "password" in additionalArgs:
+            password = additionalArgs['password']
+        if "userChosenRandomness" in additionalArgs:
+            randomness = additionalArgs['userChosenRandomness']
+            randomness = True if randomness == "true" or randomness else False
+        if "keys" in additionalArgs:
             keys = electionArgs["keys"]
-        else:
-            keys = []
-        mockElection = False
+        if "hidden" in additionalArgs:
+            hidden = electionArgs["keys"]
+            hidden = True if hidden == "true" or hidden else False
 
 
 def getMixServerConfig():
