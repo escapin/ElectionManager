@@ -22,6 +22,10 @@ else{
 	console.log("wrong parameters: last argument should be 'hidden' or 'visible'");
 	process.exit()
 }
+var rand = false;
+if(process.argv.length > 5 && process.argv[5] === "random"){
+	rand = true;
+}
 
 var additionalParam = {userChosenRandomness: rand, password: hash, hidden}
 
