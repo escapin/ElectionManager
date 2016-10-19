@@ -17,6 +17,7 @@ import electionUtils
 
 '''
 The script can be called with 0 to 2 arguments
+
 [1] argument should be a string "mockElection" or "customElection", 
     depending on whether it should be a simple test election without many arguments or not.
     To avoid misspelling a mock election will be created as long as the string contains "mock" anywhere.
@@ -206,9 +207,9 @@ def getInput():
             randomness = additionalArgs['userChosenRandomness']
             randomness = True if randomness == "true" or randomness else False
         if "keys" in additionalArgs:
-            keys = electionArgs["keys"]
+            keys = additionalArgs["keys"]
         if "hidden" in additionalArgs:
-            hidden = electionArgs["keys"]
+            hidden = additionalArgs["keys"]
             hidden = True if hidden == "true" or hidden else False
 
 
