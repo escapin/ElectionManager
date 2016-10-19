@@ -192,6 +192,7 @@ def getInput():
         except:
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
+        publish = True if publish == "true" or publish == True else False
         minChoices = 1
         maxChoices = 1
         if "minChoicesPerVoter" in electionArgs:
