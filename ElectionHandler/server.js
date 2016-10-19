@@ -265,7 +265,7 @@ function spawnServer(req, callback){
 		var hash = bcrypt.hashSync(pass, salt);
 		
 		var parameters = JSON.stringify(req.body);
-		var additionalParam = {userChosenRandomness: rand, keys: keypairs, password: hash}
+		var additionalParam = JSON.stringify({userChosenRandomness: rand, keys: keypairs, password: hash})
 
 		//call the python script to start the servers
 		session = spawn('python', [SRC_DIR+'createElection.py', "completeElection", parameters, additionalParam]);
@@ -324,9 +324,9 @@ function spawnServer(req, callback){
 				keypairs.push(storedKeypairs.pop());
 			}
 		}
-		var additionalParam = {userChosenRandomness: rand, keys: keypairs}
+		var additionalParam = JSON.stringify({userChosenRandomness: rand, keys: keypairs})
 		//call the python script to start the servers
-	    var session = spawn('python', [SRC_DIR+'createElection.py', "mockElection", "placeholder", JSON.stringify(additionalParam)]);
+	    var session = spawn('python', [SRC_DIR+'createElection.py', "mockElection", "placeholder", additionalParam]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
