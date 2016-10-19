@@ -98,7 +98,7 @@ app.post('/election', function(req, res) {
 	
 });
 app.get('/election', function(req, res) {
-	console.log('accessing');
+	res.responseType = "json";
 	res.send({ready: true});
 });
 		
