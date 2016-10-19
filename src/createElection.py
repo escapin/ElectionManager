@@ -205,12 +205,12 @@ def getInput():
             password = additionalArgs['password']
         if "userChosenRandomness" in additionalArgs:
             randomness = additionalArgs['userChosenRandomness']
-            randomness = True if randomness == "true" or randomness else False
+            randomness = True if randomness == "true" or randomness == True else False
         if "keys" in additionalArgs:
             keys = additionalArgs["keys"]
         if "hidden" in additionalArgs:
             hidden = additionalArgs["keys"]
-            hidden = True if hidden == "true" or hidden else False
+            hidden = True if hidden == "true" or hidden == True else False
 
 
 def getMixServerConfig():
