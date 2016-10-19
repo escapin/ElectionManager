@@ -194,9 +194,9 @@ def getInput():
         publish = electionArgs['publishListOfVoters']
         minChoices = 1
         maxChoices = 1
-        if "minChoicesPerVoter" in additionalArgs:
+        if "minChoicesPerVoter" in electionArgs:
             minChoices = electionArgs['minChoicesPerVoter']
-        if "maxChoicesPerVoter" in additionalArgs:
+        if "maxChoicesPerVoter" in electionArgs:
             maxChoices = electionArgs['maxChoicesPerVoter']
 
     password = ""
