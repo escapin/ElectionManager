@@ -593,7 +593,6 @@ function electionButtons() {
 	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the buttons below to create a new election.";
 	     }
 	     else{
-	    	 console.log(elections.length);
 	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the <em>entry</em> of the election you want to manage or create a new one.";	    	 
 	     }
 	     
