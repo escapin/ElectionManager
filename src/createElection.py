@@ -192,8 +192,12 @@ def getInput():
         except:
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
-        minChoices = electionArgs['minChoicesPerVoter']
-        maxChoices = electionArgs['maxChoicesPerVoter']
+        minChoices = 1
+        maxChoices = 1
+        if "minChoicesPerVoter" in additionalArgs:
+            minChoices = electionArgs['minChoicesPerVoter']
+        if "maxChoicesPerVoter" in additionalArgs:
+            maxChoices = electionArgs['maxChoicesPerVoter']
 
     password = ""
     randomness = False
