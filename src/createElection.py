@@ -16,13 +16,13 @@ import jwrite
 import electionUtils
 
 '''
-The script can be called with 0 to 2 arguments
+The script can be called with 1 to 3 arguments
 
-[1] argument should be a string "mockElection" or "customElection", 
+[1] argument should be a either "mockElection" or "customElection",
     depending on whether it should be a simple test election without many arguments or not.
-    To avoid misspelling a mock election will be created as long as the string contains "mock" anywhere.
+    To avoid misspelling, a mock election will be created as long as the argument contains the string "mock".
 
-[2] argument (not needed for mock elections) should be a stringified JSON object containing following keys
+[2] argument (not needed for mock elections) should be a stringified JSON object containing the following elements
     (which are all included in a proper ElectionManifest.json):
         "title": string
         "description": string
@@ -30,21 +30,17 @@ The script can be called with 0 to 2 arguments
         "endTime": string of format: "yy-mm-dd hh:mm UTC+0000", example: "2018-11-10 16:00 UTC+0000"
         "voters": array/list of strings  
         "publishListOfVoters": true or false (boolean)
-        "maxChoicesPerVoter": positive integer (theoretically including 0) no higher than the amount of choices
-        "minChoicesPerVoter": positive integer (theoretically including 0)
+        "minChoicesPerVoter": positive integer
+        "maxChoicesPerVoter": positive integer no higher than the amount of choices
         "question": string
         "choices": array/list of strings
 
-[3] argument (optional) should be a stringified JSON object, with optional keys (any - even all - can be left out):
+[3] argument (optional) should be a stringified JSON object, with optional keys:
         "password": string encrypted with 'bcrypt'
         "userChosenRandomness" true or false (boolean)
         "hidden": true or false (boolean)
-        "keys": array/list containing 1+<numberOfMixServers> (usually 1+3=4 total) JSON objects 
-                containing 4 corresponding keypairs:
-            "encryption_key": string with valid encription key
-            "verification_key": string with valid verification key
-            "signing_key": string with valid signing key
-            "decryption_key": string with valid decryption key
+        "keys": array/list containing 1+<numberOfMixServers> (usually three mix servers) JSON objects
+                containing 4 corresponding keypairs: {encryption_key, verification_key, signing_key, decryption_key}
 '''
 
 def copy(src, dest):
