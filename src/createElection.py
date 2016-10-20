@@ -210,7 +210,7 @@ def getInput():
         if "keys" in additionalArgs:
             keys = additionalArgs["keys"]
         if "hidden" in additionalArgs:
-            hidden = additionalArgs["keys"]
+            hidden = additionalArgs["hidden"]
             hidden = True if hidden == "true" or hidden == True else False
 
 
