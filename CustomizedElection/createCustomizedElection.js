@@ -27,7 +27,7 @@ if(process.argv.length > 5 && process.argv[5] === "random"){
 	rand = true;
 }
 
-var additionalParam = {userChosenRandomness: rand, password: hash, hidden}
+var additionalParam = JSON.stringify({userChosenRandomness: rand, password: hash, hidden})
 
 session = spawn('python', ['../src/createElection.py', "completeElection", parameters, additionalParam]);
 session.stdout.on('data', function (data) {
