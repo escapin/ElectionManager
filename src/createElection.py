@@ -459,6 +459,10 @@ def writeToNginxConfig():
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
+        if not getELS:
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
         prevBracket = 0
         counter = 0
         for line in nginxData:
@@ -489,6 +493,10 @@ def writeToNginxConfig():
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
+        if not getELS:
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
         prevBracket = 0
         counter = 0
         for line in nginxData:
@@ -520,6 +528,10 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
             keyFolder = ".".join(keyFolder)
+            if not getELS:
+                keyFolder = domain.split(".")
+                del keyFolder[0]
+                keyFolder = ".".join(keyFolder)
             prevBracket = 0
             counter = 0
             for line in nginxData:
@@ -551,6 +563,10 @@ def writeToNginxConfig():
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
+        if not getELS:
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
         prevBracket = 0
         counter = 0
         for line in nginxData:
@@ -581,6 +597,10 @@ def writeToNginxConfig():
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
+        if not getELS:
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
         prevBracket = 0
         counter = 0
         for line in nginxData:
