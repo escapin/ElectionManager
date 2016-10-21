@@ -14,7 +14,6 @@ import string
 import re
 import jwrite
 import electionUtils
-from phply.phpast import Else
 
 '''
 The script can be called with 1 to 3 arguments
