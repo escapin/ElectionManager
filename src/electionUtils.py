@@ -89,8 +89,8 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
             jsonAddress["collectingserver"] = "http://localhost:"+str(nginxPort)+"/cs/"+str(ELS)+"/"
             jsonAddress["bulletinboard"] = "http://localhost:"+str(nginxPort)+"/bb/"+str(ELS)+"/"
             jsonAddress["votingbooth"] = "http://localhost:"+str(nginxPort)+"/"+str(ELS)+"/"
-            jsonAddress["authenticator"] = "http://localhost:"+str(nginxPort)+"/auth/"
-            jsonAddress["authchannel"] = "http://localhost:"+str(nginxPort)+"/authChannel/"
+            jsonAddress["authenticator"] = "http://localhost:"+str(nginxPort)+"/auth/"+str(ELS)+"/"
+            jsonAddress["authchannel"] = "http://localhost:"+str(nginxPort)+"/cs/"+str(ELS)+"/authChannel.html"
             jsonFile.close()
         else:
             jsonFile.close()
@@ -100,7 +100,7 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
             jsonAddress["collectingserver"] = addresses["collectingserver"].replace(".", str(ELS)+".", 1)+"/"
             jsonAddress["bulletinboard"] = addresses["bulletinboard"].replace(".", str(ELS)+".", 1)+"/"
             jsonAddress["votingbooth"] = addresses["votingbooth"].replace(".", str(ELS)+".", 1)+"/"
-            jsonAddress["authenticator"] = addresses["authenticator"]
+            jsonAddress["authenticator"] = addresses["authenticator"].replace(".", str(ELS)+".", 1)+"/"
             jsonAddress["authchannel"] = addresses["authchannel"].replace(".", str(ELS)+".", 1)
             for x in range(numMix):
                 jsonAddress["mix"+str(x)] = addresses["mix"+str(x)].replace(".", str(ELS)+".", 1)+"/"
@@ -124,7 +124,7 @@ def hashManifest(src):
     m.update(manifest_raw)
     return m.hexdigest()
 
-def link(dstroot, manifest, votingManifest):
+def link(dstroot, manifest, votingManifest, authManifest):
     os.mkdir(dstroot+"/mix/00")
     os.mkdir(dstroot+"/mix/01")
     os.mkdir(dstroot+"/mix/02")
@@ -145,4 +145,5 @@ def link(dstroot, manifest, votingManifest):
     
     os.remove(dstroot + votingManifest)
     os.symlink(dstroot + manifest, dstroot + votingManifest)
-
+    os.remove(dstroot + authManifest)
+    os.symlink(dstroot + manifest, dstroot + authManifest)

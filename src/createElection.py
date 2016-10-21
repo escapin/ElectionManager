@@ -14,6 +14,7 @@ import string
 import re
 import jwrite
 import electionUtils
+from phply.phpast import Else
 
 '''
 The script can be called with 1 to 3 arguments
@@ -39,13 +40,15 @@ The script can be called with 1 to 3 arguments
         "password": string encrypted with 'bcrypt'
         "userChosenRandomness" true or false (boolean)
         "hidden": true or false (boolean)
+        "subdomain": a subdomain all the servers will be on, this will replace the ELS,
+                therefore two election with the same subdomain should not be created (no check yet).
         "keys": array/list containing 1+<numberOfMixServers> (usually three mix servers) JSON objects
                 containing 4 corresponding keypairs: {encryption_key, verification_key, signing_key, decryption_key}
 '''
 
 def copy(src, dest):
     try:
-        shutil.copytree(src, dest, symlinks=False, ignore=ignore_patterns("*.py", "00", "01", "02", "Authenticator", "tests"))
+        shutil.copytree(src, dest, symlinks=False, ignore=ignore_patterns("*.py", "00", "01", "02", "tests"))
     except OSError as e:
         # source is a file, not a directory
         if e.errno == errno.ENOTDIR:
@@ -79,6 +82,8 @@ def setConfigFiles():
     global bulletinConf
     global votingManifest
     global votingConf
+    global authManifest
+    global authConf
     global mixConf
 
     # the root dir is three folders back
@@ -102,7 +107,9 @@ def setConfigFiles():
     collectingConf = "/CollectingServer/config.json"
     bulletinConf = "/BulletinBoard/config.json"
     votingManifest = "/VotingBooth/ElectionManifest.json"     
-    votingConf = "/VotingBooth/config.json"  
+    votingConf = "/VotingBooth/config.json" 
+    authManifest = "/Authenticator/ElectionManifest.json"     
+    authConf = "/Authenticator/config.json" 
     mixConf = []
     
 def getConfigData():
@@ -171,6 +178,8 @@ def getInput():
     global randomness
     global keys
     global hidden
+    global ELS
+    global getELS
     
     #get input parameters (if any)
     startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
@@ -200,6 +209,7 @@ def getInput():
     randomness = False
     keys = []
     hidden = False
+    getELS = True
     if len(sys.argv) > 3:
         additionalArgs = json.loads(sys.argv[3])
         if "password" in additionalArgs:
@@ -212,7 +222,9 @@ def getInput():
         if "hidden" in additionalArgs:
             hidden = additionalArgs["hidden"]
             hidden = True if hidden == "true" or hidden == True else False
-
+        if "subdomain" in additionalArgs:
+            ELS = "."+additionalArgs["subdomain"]
+            getELS = False
 
 def getMixServerConfig():
     global mixConf
@@ -233,7 +245,8 @@ def getServerLocations():
     
     #get server URI's
     ports = electionUtils.usePorts(electionConfig, 3+numMix)
-    ELS = electionUtils.getELS(electionConfig)                      #number between 00 and 100/maxElections, corresponds with subdomains
+    if getELS:
+        ELS = electionUtils.getELS(electionConfig)                      #number between 00 and 100/maxElections, corresponds with subdomains
     serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
     #time stamp for folder path
     tStamp = startingTime.replace("-", "").replace(":", "").split()
@@ -308,7 +321,7 @@ def sElectCopy(iDlength):
         dstroot = os.path.join(rootDirProject, dstFolder + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
         try:
             copy(sElectDir, dstroot)
-            electionUtils.link(dstroot, manifest, votingManifest)
+            electionUtils.link(dstroot, manifest, votingManifest, authManifest)
             break
         except:
             iDlength = iDlength+1
@@ -321,6 +334,8 @@ def writesElectConfigs():
     jwrite.jwrite(dstroot + votingConf, "authenticator", serverAddress["authenticator"])
     jwrite.jwrite(dstroot + votingConf, "authChannel", serverAddress["authchannel"])
     jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", randomness)
+    jwrite.jwrite(dstroot + authConf, "authChannel", serverAddress["authchannel"])
+    jwrite.jwrite(dstroot + authConf, "votingBooth", serverAddress["votingbooth"])
     jwrite.jwrite(dstroot + collectingConf, "serverAdminPassword", password)
     for x in range(numMix):     
         jwrite.jwrite(dstroot + mixConf[x], "port", ports[x+2])
@@ -328,13 +343,19 @@ def writesElectConfigs():
     #change user randomness if not a mock election
     if mockElection:
         jwrite.jwrite(dstroot + votingConf, "showOtp", True)
+        jwrite.jwrite(dstroot + authConf, "showOtp", True)
         jwrite.jwrite(dstroot + collectingConf, "sendOtpBack", True)
         jwrite.jwrite(dstroot + collectingConf, "sendEmail", False)
 
 def updateTrustedOrigins():
     authdomain = serverAddress["authenticator"]
+    temp = authdomain.split("://")
+    temp[1] = temp[1].split("/")[0]
+    authdomain = "://".join(temp)
     vbdomain = serverAddress["votingbooth"]
-    vbdomain = vbdomain[:len(vbdomain)-1]
+    temp = authdomain.split("://")
+    temp[1] = temp[1].split("/")[0]
+    vbdomain = "://".join(temp)
     varname = "trustedOrigins"
     csTrusts = 'var '+varname+' = ["'+vbdomain+'","'+authdomain+'"];'
     csFile = "/CollectingServer/webapp/trustedOrigins.js"
@@ -371,6 +392,7 @@ def sElectStart():
     #start all node servers
     subprocess.Popen(["node", "compileEJS.js"], cwd=(dstroot+"/VotingBooth/webapp/ejs"))
     subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
+    subprocess.call([dstroot + "/Authenticator/refresh.sh"], cwd=(dstroot+"/Authenticator"))
     with open(logfolder+"/ColllectingServer.log", 'w') as file_out:
         if mockElection:
             col = subprocess.Popen(["node", "collectingServer.js", "--resume"], stdout=file_out, cwd=(dstroot+"/CollectingServer"))
@@ -534,7 +556,7 @@ def writeToNginxConfig():
         counter = 0
         for line in nginxData:
             if "end voting booth" in line:
-        	break
+        	   break
             counter = counter + 1
         bracketIt = nginxData[counter:]
         del nginxData[counter:]
@@ -550,6 +572,36 @@ def writeToNginxConfig():
                         "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
         comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
         comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"])
+        comments.extend(bracketIt)
+        nginxData.extend(comments)
+        nginxFile.seek(0)
+        
+        ###### Authenticator ######
+        domain = serverAddress["authenticator"].split("://")[1]
+        domain = domain[:len(domain)-1]
+        keyFolder = domain.split(".")
+        keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
+        keyFolder = ".".join(keyFolder)
+        prevBracket = 0
+        counter = 0
+        for line in nginxData:
+            if "end authenticator" in line:
+                break
+            counter = counter + 1
+        bracketIt = nginxData[counter:]
+        del nginxData[counter:]
+        
+        comments = ["  # Authenticator " + str(electionID) + " \n", "  server {\n", 
+                    listenPort, "\n",
+                    "    server_name "+ domain + ";\n", "\n"]
+        if onSSL:
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
+                        "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                        "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                        "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/Authenticator/webapp/;\n", "        index authenticator.html;\n","    }\n", "\n", "  }\n", "\n"])
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
@@ -595,6 +647,22 @@ def writeToNginxConfig():
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)    
+        
+        prevBracket = 0
+        counter = 0
+        for line in nginxData:
+            if "}" in line:
+                prevBracket = counter
+            if "end main server" in line:
+                break
+            counter = counter + 1
+        bracketIt = nginxData[prevBracket:]
+        del nginxData[prevBracket:]
+        comments = ["    # Authenticator " + electionID + " \n", 
+                    "    location " + "/" + "auth/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/Authenticator/webapp/;\n", "        index authenticator.html;\n","    }\n", "\n"]
+        comments.extend(bracketIt)
+        nginxData.extend(comments)
+        nginxFile.seek(0)   
         
         nginxFile.writelines(nginxData)
         nginxFile.close()
