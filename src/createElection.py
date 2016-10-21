@@ -352,7 +352,7 @@ def updateTrustedOrigins():
     temp[1] = temp[1].split("/")[0]
     authdomain = "://".join(temp)
     vbdomain = serverAddress["votingbooth"]
-    temp = authdomain.split("://")
+    temp = vbdomain.split("://")
     temp[1] = temp[1].split("/")[0]
     vbdomain = "://".join(temp)
     varname = "trustedOrigins"
