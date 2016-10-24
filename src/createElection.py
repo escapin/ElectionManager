@@ -184,6 +184,7 @@ def getInput():
     #get input parameters (if any)
     startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
     endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
+    voters = []
     mockElection = True if len(sys.argv) < 2 or "mock" in sys.argv[1] else False
     if not mockElection:
         electionArgs = json.loads(sys.argv[2])
@@ -208,8 +209,7 @@ def getInput():
             voters = electionArgs['voters']
         elif "voters[]" in electionArgs:
             voters = electionArgs['voters[]']
-        else:
-            voters = []    
+ 
 
     password = ""
     randomness = False
