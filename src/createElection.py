@@ -172,6 +172,7 @@ def getInput():
     global elecTitle
     global elecDescr
     global elecQuestion
+    global voters
     global eleChoices
     global publish
     global randomness
@@ -203,6 +204,12 @@ def getInput():
             minChoices = electionArgs['minChoicesPerVoter']
         if "maxChoicesPerVoter" in electionArgs:
             maxChoices = electionArgs['maxChoicesPerVoter']
+        if "voters" in electionArgs:
+            voters = electionArgs['voters']
+        elif "voters[]" in electionArgs:
+            voters = electionArgs['voters[]']
+        else:
+            voters = []    
 
     password = ""
     randomness = False
@@ -294,6 +301,7 @@ def writeManifest():
     jwrite.jwrite(sElectDir + manifest, "endTime", endingTime)
     jwrite.jwrite(sElectDir + manifest, "title", elecTitle)
     jwrite.jwrite(sElectDir + manifest, "description", elecDescr)
+    jwrite.jwrite(sElectDir + manifest, "voters", voters)
     jwrite.jwrite(sElectDir + manifest, "question", elecQuestion)
     jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)
     jwrite.jwriteAdv(sElectDir + manifest, "minChoicesPerVoter", minChoices)
