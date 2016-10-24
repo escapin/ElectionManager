@@ -382,7 +382,7 @@ def createBallots():
             userChoices = []
             for i in range(nChoices):
                 temp = random.randint(0,(len(eleChoices)-1))
-                while temp in userChoice:
+                while temp in userChoices:
                     temp = random.randint(0,(len(eleChoices)-1))
                 userChoices.append(temp)
             userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if randomness else ""
