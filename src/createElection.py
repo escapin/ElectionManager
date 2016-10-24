@@ -377,8 +377,8 @@ def createBallots():
         mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
         ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
         for x in range(mockVoters):
-            maxChoices = maxChoices if maxChoices < len(eleChoices) else len(eleChoices)
-            nChoices = random.randint(minChoices,maxChoices)
+            max = maxChoices if maxChoices < len(eleChoices) else len(eleChoices)
+            nChoices = random.randint(minChoices,max)
             userRandom = []
             userChoices = []
             for i in range(nChoices):
