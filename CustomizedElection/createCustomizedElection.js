@@ -6,7 +6,7 @@ var spawn = child_process.spawn;
 
 var parameters;
 var hash;
-var sdomain;
+var sdomain = "";
 var rand = false;
 var hide = false;
 for(var i = 0; i < process.argv.length; i++){
