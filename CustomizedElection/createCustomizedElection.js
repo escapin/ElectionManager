@@ -34,10 +34,7 @@ for(var i = 0; i < process.argv.length; i++){
 }
 
 var additionalParam = {userChosenRandomness: rand, password: hash, subdomain: sdomain, hidden: hide}
-if(process.argv.length > 6){
-	additionalParam.subdomain = process.argv[6];
-}
-var additionalParam = JSON.stringify(additionalParam);
+additionalParam = JSON.stringify(additionalParam);
 
 session = spawn('python', ['../src/createElection.py', "completeElection", parameters, additionalParam]);
 session.stdout.on('data', function (data) {
