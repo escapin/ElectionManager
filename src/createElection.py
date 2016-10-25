@@ -229,8 +229,9 @@ def getInput():
             hidden = additionalArgs["hidden"]
             hidden = True if hidden == "true" or hidden == True else False
         if "subdomain" in additionalArgs:
-            ELS = "."+additionalArgs["subdomain"]
-            getELS = False
+            if len(additionalArgs["subdomain"]) > 0:
+                ELS = "."+additionalArgs["subdomain"]
+                getELS = False
 
 def getMixServerConfig():
     global mixConf
