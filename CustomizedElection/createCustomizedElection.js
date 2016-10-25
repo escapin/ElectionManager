@@ -4,29 +4,36 @@ var child_process = require("child_process");
 var spawn = child_process.spawn;
 
 
-var manifestPath = process.argv[2];
-var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
-var parameters = JSON.stringify(electionManifest);
-
-var salt = bcrypt.genSaltSync(10);
-var hash = bcrypt.hashSync(process.argv[3], salt);
-
-var hidden = process.argv[4]
-if (hidden === 'hidden'){
-	hidden = true;
-}
-else if(hidden === 'visible'){
-	hidden = false;
-}
-else{
-	console.log("wrong parameters: last argument should be 'hidden' or 'visible'");
-	process.exit()
-}
+var parameters;
+var hash;
+var sdomain;
 var rand = false;
-if(process.argv.length > 5 && process.argv[5] === "random"){
-	rand = true;
+var hide = false;
+for(var i = 0; i < process.argv.length; i++){
+	if(process.argv[i] === '-m'){
+		var manifestPath = process.argv[i+1];
+		var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
+		parameters = JSON.stringify(electionManifest);
+		i++;
+	}
+	else if(process.argv[i] === '-p'){
+		var salt = bcrypt.genSaltSync(10);
+		hash = bcrypt.hashSync(process.argv[i+1], salt);
+		i++;
+	}
+	else if(process.argv[i] === '-s'){
+		sdomain = process.argv[i+1];
+		i++;
+	}
+	else if(process.argv[i] === '-r'){
+		rand = true;
+	}
+	else if(process.argv[i] === '-h'){
+		hide = true;
+	}
 }
-var additionalParam = {userChosenRandomness: rand, password: hash, hidden}
+
+var additionalParam = {userChosenRandomness: rand, password: hash, subdomain: sdomain, hidden: hide}
 if(process.argv.length > 6){
 	additionalParam.subdomain = process.argv[6];
 }
