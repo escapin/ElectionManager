@@ -172,6 +172,7 @@ def getInput():
     global elecTitle
     global elecDescr
     global elecQuestion
+    global furtherInfo
     global voters
     global eleChoices
     global publish
@@ -209,6 +210,8 @@ def getInput():
             voters = electionArgs['voters']
         elif "voters[]" in electionArgs:
             voters = electionArgs['voters[]']
+        if "furtherInfo" in electionArgs:
+        	furtherInfo = electionArgs['furtherInfo']
  
 
     password = ""
@@ -305,6 +308,7 @@ def writeManifest():
     jwrite.jwrite(sElectDir + manifest, "voters", voters)
     jwrite.jwrite(sElectDir + manifest, "question", elecQuestion)
     jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)
+    jwrite.jwrite(sElectDir + manifest, "furtherInfo", furtherInfo)
     jwrite.jwriteAdv(sElectDir + manifest, "minChoicesPerVoter", minChoices)
     jwrite.jwriteAdv(sElectDir + manifest, "maxChoicesPerVoter", maxChoices)
     jwrite.jwrite(sElectDir + manifest, "publishListOfVoters", publish)
