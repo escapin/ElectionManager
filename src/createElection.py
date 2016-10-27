@@ -513,7 +513,7 @@ def writeToNginxConfig():
             
             comments = ["  # Redirect http " + str(electionID) + " \n", "  server {\n", 
                         "    listen 8080;", "\n",
-                        "    server_name "+ vb + " " + keyFolder + ";\n", "\n"]
+                        "    server_name "+ domain + " " + keyFolder + ";\n", "\n"]
             comments.extend(["    return 301 " + vb, ";\n", "  }\n", "\n"])
             comments.extend(bracketIt)
             nginxData.extend(comments)
