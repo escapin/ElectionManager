@@ -472,7 +472,9 @@ def writeToNginxConfig():
         
         ###### Redirect ######
         if not getELS:
-            domain = serverAddress["collectingserver"].split("://")[1]
+            vb = serverAddress["votingbooth"]
+            vb = vb[:len(vb)-1]
+            domain = serverAddress["votingbooth"].split("://")[1]
             domain = domain[:len(domain)-1]
             keyFolder = domain.split(".")
             del keyFolder[0]
@@ -486,7 +488,7 @@ def writeToNginxConfig():
             bracketIt = nginxData[counter:]
             del nginxData[counter:]
             
-            comments = ["  # Redirect " + str(electionID) + " \n", "  server {\n", 
+            comments = ["  # Redirect https " + str(electionID) + " \n", "  server {\n", 
                         listenPort, "\n",
                         "    server_name "+ keyFolder + ";\n", "\n"]
             if onSSL:
@@ -495,7 +497,24 @@ def writeToNginxConfig():
                             "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
                             "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
                             "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
-            comments.extend(["    return 302 " + serverAddress["votingbooth"][:len(serverAddress["votingbooth"])-1], "  }\n", "\n"])
+            comments.extend(["    return 302 " + vb, ";\n", "  }\n", "\n"])
+            comments.extend(bracketIt)
+            nginxData.extend(comments)
+            nginxFile.seek(0)
+            
+            prevBracket = 0
+            counter = 0
+            for line in nginxData:
+                if "end main server" in line:
+                    break
+                counter = counter + 1
+            bracketIt = nginxData[counter:]
+            del nginxData[counter:]
+            
+            comments = ["  # Redirect http " + str(electionID) + " \n", "  server {\n", 
+                        "    listen 8080;", "\n",
+                        "    server_name "+ vb + " " + keyFolder + ";\n", "\n"]
+            comments.extend(["    return 301 " + vb, ";\n", "  }\n", "\n"])
             comments.extend(bracketIt)
             nginxData.extend(comments)
             nginxFile.seek(0)
