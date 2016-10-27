@@ -480,7 +480,7 @@ def writeToNginxConfig():
             prevBracket = 0
             counter = 0
             for line in nginxData:
-                if "end collecting server" in line:
+                if "end main server" in line:
                     break
                 counter = counter + 1
             bracketIt = nginxData[counter:]
