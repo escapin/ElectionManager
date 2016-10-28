@@ -1,0 +1,3 @@
+node removeCustomizedElection.js <electionID-7digit> <pwd> hidden
+
+node createCustomizedElection.js -m ../../ElectionManifest-test02.json -p Gearhead -s disney -h
