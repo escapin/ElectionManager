@@ -157,6 +157,7 @@ def getConfigData():
         publish = jsonData["publishListOfVoters"]
         minChoices = jsonData["minChoicesPerVoter"]
         maxChoices = jsonData["maxChoicesPerVoter"]
+        furtherInfo = jsonData["furtherInfo"]
         jsonFile.close()
     except IOError:
         sys.exit("ElectionManifest missing or corrupt")
