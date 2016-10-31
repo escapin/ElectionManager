@@ -126,6 +126,7 @@ def getConfigData():
     global elecTitle
     global elecDescr
     global elecQuestion
+    global furtherInfo
     global eleChoices
     global publish
     
