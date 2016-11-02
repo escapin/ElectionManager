@@ -3,6 +3,21 @@ var fs = require('fs');
 var child_process = require("child_process");
 var spawn = child_process.spawn;
 
+/**
+The script can be called with 2 to 4 arguments
+
+SYNOPSIS
+	node createCustomizedElection.js -m PATH/TO/MANIFEST-p PASSWORD [-h [-r]]
+
+OPTIONS:
+	-m PATH/TO/MANIFEST: PATH/TO/MANIFEST will be used as the election manifest for the election
+	-p PASSWORD: set password to close and remove the election to PASSWORD
+	[-s SUBDOMAIN: the election will be displayed at SUBDOMAIN.serverdomain 
+		(server domain is set in deployment/serverAddresses.json), no ELS will be used, optional argument]
+	[-h: the election will be hidden from the ElectionManager, optional argument]
+	[-r: user has to enter part of the verification code, userchosenRandomness set to true, optional argument]
+
+**/
 
 var parameters;
 var hash;
