@@ -13,7 +13,7 @@ SYNOPSIS
 OPTIONS:
 	-e ELECTIONID: the electionID for the election, at least 7 digits of the electionID are required
 	-p PASSWORD: the password to remove the election
-	[-h: if the election is hidden, this argument is required to remove it]
+	[-h]: if the election is hidden, this argument is required to remove it
 **/
 
 

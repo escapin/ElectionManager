@@ -7,9 +7,9 @@ var spawn = child_process.spawn;
 The script can be called with 2 to 4 arguments
 
 SYNOPSIS
-	node createCustomizedElection.js -m PATH/TO/MANIFEST-p PASSWORD [-h [-r]]
+	node createCustomizedElection.js -m PATH/TO/MANIFEST -p PASSWORD [-s SUBDOMAIN] [-h] [-r]
 
-OPTIONS:
+DESCRIPTION:
 	-m PATH/TO/MANIFEST: PATH/TO/MANIFEST will be used as the election manifest for the election
 	-p PASSWORD: set password to close and remove the election to PASSWORD
 	[-s SUBDOMAIN: the election will be displayed at SUBDOMAIN.serverdomain 
