@@ -457,11 +457,28 @@ def writeToHandlerConfig():
         #write details in different file to not show in the Election Manager
         eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "processIDs": newPIDs, "used-ports": ports}
         jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
+
+def redirectHttp(nginxData, electionID, listenPort, domainIN, urlOUT, code):
+    counter = 0
+    for line in nginxData:
+        if "end main server" in line:
+            break
+        counter = counter + 1
+    bracketIt = nginxData[counter:]
+    del nginxData[counter:]
     
+    comments = ["  # Redirect http " + str(electionID) + " \n", "  server {\n", 
+                "    listen "+str(listenPort)+";", "\n",
+                "    server_name "+ " ".join(domainIN) + ";\n", "\n"]
+    comments.extend(["    return " +str(code)+ " " + urlOUT, ";\n", "  }\n", "\n"])
+    comments.extend(bracketIt)
+    nginxData.extend(comments)
+    
+    return nginxData
 
 def writeToNginxConfig():
     onSSL = True
-    crtPath = "/etc/letsencrypt/live/"
+    crtPath = serverAddress["letsencrypt"]
     listenPort = "    listen " + str(nginxPort)
     if onSSL:
         listenPort = listenPort + " ssl"
@@ -481,7 +498,6 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
-            prevBracket = 0
             counter = 0
             for line in nginxData:
                 if "end main server" in line:
@@ -504,7 +520,7 @@ def writeToNginxConfig():
             nginxData.extend(comments)
             nginxFile.seek(0)
             
-            prevBracket = 0
+            '''
             counter = 0
             for line in nginxData:
                 if "end main server" in line:
@@ -516,11 +532,41 @@ def writeToNginxConfig():
             comments = ["  # Redirect http " + str(electionID) + " \n", "  server {\n", 
                         "    listen 8080;", "\n",
                         "    server_name "+ domain + " " + keyFolder + ";\n", "\n"]
-            comments.extend(["    return 301 " + vb, ";\n", "  }\n", "\n"])
+            comments.extend(["    return 302 " + vb, ";\n", "  }\n", "\n"])
             comments.extend(bracketIt)
             nginxData.extend(comments)
             nginxFile.seek(0)
-    
+            '''
+            
+            csdomain = serverAddress["collectingserver"].split("://")[1]
+            csdomain = csdomain[:len(csdomain)-1]
+            bbdomain = serverAddress["bulletinboard"].split("://")[1]
+            bbdomain = bbdomain[:len(bbdomain)-1]
+            authdomain = serverAddress["authenticator"].split("://")[1]
+            authdomain = authdomain[:len(authdomain)-1]
+            cs = serverAddress["collectingserver"]
+            cs = cs[:len(cs)-1]
+            bb = serverAddress["bulletinboard"]
+            bb = bb[:len(bb)-1]
+            auth = serverAddress["bulletinboard"]
+            auth = auth[:len(auth)-1]
+            
+            nginxData = redirectHttp(nginxData, electionID, 8080, [domain, keyFolder], vb, 302)
+            nginxFile.seek(0)
+            nginxData = redirectHttp(nginxData, electionID, 8080, [csdomain], cs, 302)
+            nginxFile.seek(0)
+            nginxData = redirectHttp(nginxData, electionID, 8080, [bbdomain], bb, 302)
+            nginxFile.seek(0)
+            nginxData = redirectHttp(nginxData, electionID, 8080, [authdomain], auth, 302)
+            nginxFile.seek(0)
+            for x in range(numMix):
+                mxdomain = serverAddress["mix"+str(x)].split("://")[1]
+                mxdomain = mxdomain[:len(mxdomain)-1]
+                mx = serverAddress["mix"+str(x)]
+                mx = mx[:len(mx)-1]
+                redirectHttp(nginxData, electionID, 8080, [mxdomain], mx, 302)
+                nginxFile.seek(0)
+                
         ###### Collecting server ######
         domain = serverAddress["collectingserver"].split("://")[1]
         domain = domain[:len(domain)-1]
@@ -531,7 +577,6 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
-        prevBracket = 0
         counter = 0
         for line in nginxData:
             if "end collecting server" in line:
@@ -565,7 +610,6 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
-        prevBracket = 0
         counter = 0
         for line in nginxData:
             if "end bulletin board" in line:
@@ -600,7 +644,6 @@ def writeToNginxConfig():
                 keyFolder = domain.split(".")
                 del keyFolder[0]
                 keyFolder = ".".join(keyFolder)
-            prevBracket = 0
             counter = 0
             for line in nginxData:
                 if "end mix server " + str(x) in line:
@@ -635,7 +678,6 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
-        prevBracket = 0
         counter = 0
         for line in nginxData:
             if "end voting booth" in line:
@@ -669,7 +711,6 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
-        prevBracket = 0
         counter = 0
         for line in nginxData:
             if "end authenticator" in line:
