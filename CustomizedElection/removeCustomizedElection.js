@@ -24,7 +24,7 @@ var pass;
 var hide = false;
 for(var i = 0; i < process.argv.length; i++){
 	if(process.argv[i] === '-e'){
-		eleID = process.argv[i+1].slice(0,7);
+		eleID = process.argv[i+1].slice(0,7).toLowerCase();
 		i++;
 	}
 	else if(process.argv[i] === '-p'){
