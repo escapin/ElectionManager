@@ -412,7 +412,7 @@ def sElectStart():
     subprocess.Popen(["node", "compileEJS.js"], cwd=(dstroot+"/VotingBooth/webapp/ejs"))
     subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
     subprocess.call([dstroot + "/Authenticator/refresh.sh"], cwd=(dstroot+"/Authenticator"))
-    with open(logfolder+"/ColllectingServer.log", 'w') as file_out:
+    with open(logfolder+"/CollectingServer.log", 'w') as file_out:
         if mockElection:
             col = subprocess.Popen(["node", "collectingServer.js", "--resume"], stdout=file_out, cwd=(dstroot+"/CollectingServer"))
         else:
