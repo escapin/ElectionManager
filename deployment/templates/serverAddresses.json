@@ -1,6 +1,6 @@
 {
-	"electionHandler": "http://localhost/electionManager",
-	"server-address": {
+    "electionHandler": "http://localhost/electionManager",
+    "server-address": {
         "mix1": "http://localhost/m1", 
         "mix2": "http://localhost/m2", 
         "mix0": "http://localhost/m0", 
@@ -11,6 +11,5 @@
         "votingbooth": "http://localhost"
     },
     "ssl": false,
-    "ssl-key": "PATH/TO/unencrypted.key",
-    "ssl-crt": "PATH/TO/chained.crt"
+    "tls_cert_path": "/PATH/TO/TLS/CERTS/"
 }
