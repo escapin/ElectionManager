@@ -102,7 +102,7 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
             jsonAddress["votingbooth"] = addresses["votingbooth"].replace(".", str(ELS)+".", 1)+"/"
             jsonAddress["authenticator"] = addresses["authenticator"].replace(".", str(ELS)+".", 1)+"/"
             jsonAddress["authchannel"] = addresses["authchannel"].replace(".", str(ELS)+".", 1)
-            jsonAddress["letsencrypt"] = jsonData["letsencrypt"]
+            jsonAddress["tlspath"] = jsonData["tls_cert_path"]
             for x in range(numMix):
                 jsonAddress["mix"+str(x)] = addresses["mix"+str(x)].replace(".", str(ELS)+".", 1)+"/"
 

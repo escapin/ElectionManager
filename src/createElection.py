@@ -479,7 +479,7 @@ def redirectHttp(nginxData, electionID, listenPort, domainIN, urlOUT, code):
 
 def writeToNginxConfig():
     onSSL = True
-    crtPath = serverAddress["letsencrypt"]
+    crtPath = serverAddress["tlspath"]
     listenPort = "    listen " + str(nginxPort)
     if onSSL:
         listenPort = listenPort + " ssl"
