@@ -823,7 +823,7 @@ writeToNginxConfig()
 
 #prints election details to server.js
 electionUrls = {"ElectionIdentifier": electionUtils.hashManifest(sElectDir+manifest), "electionID": electionID,
-                "VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"]+"/admin/panel", 
+                "VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"]+"admin/panel",
                 "BulletinBoard": serverAddress["bulletinboard"], "hidden": hidden}
 print("electionUrls.json:\n"+json.dumps(electionUrls))
 print("electionInfo.json:\n"+json.dumps(eleInfo))
