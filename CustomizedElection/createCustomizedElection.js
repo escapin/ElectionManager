@@ -24,16 +24,27 @@ var hash;
 var sdomain = "";
 var rand = false;
 var hide = false;
+var manifestParsed = false;
+var passwordHashed = false;
 for(var i = 0; i < process.argv.length; i++){
 	if(process.argv[i] === '-m'){
 		var manifestPath = process.argv[i+1];
-		var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
+		try{
+			var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
+		} catch (err) {
+			if (err.code !== 'ENOENT') throw err;
+			// handling file not found
+			console.log("ERROR: file '" + manifestPath + "' not found!");
+			process.exit(1);
+		}
 		parameters = JSON.stringify(electionManifest);
+		manifestParsed=true;
 		i++;
 	}
 	else if(process.argv[i] === '-p'){
 		var salt = bcrypt.genSaltSync(10);
 		hash = bcrypt.hashSync(process.argv[i+1], salt);
+		passwordHashed=true;
 		i++;
 	}
 	else if(process.argv[i] === '-s'){
@@ -46,6 +57,17 @@ for(var i = 0; i < process.argv.length; i++){
 	else if(process.argv[i] === '-h'){
 		hide = true;
 	}
+}
+
+if(!manifestParsed){
+	console.log('ERROR: no manifest provided.');
+	console.log('Usage:\n\t node createCustomizedElection -m PATH/TO/MANIFEST -p PASSWORD [-s SUBDOMAIN] [-h] [-r]');
+	process.exit(1);
+}
+if(!passwordHashed){
+	console.log('ERROR: no password to close/remove the election provided.');
+	console.log('Usage:\n\t node createCustomizedElection -m PATH/TO/MANIFEST -p PASSWORD [-s SUBDOMAIN] [-h] [-r]');
+	process.exit(1);
 }
 
 var additionalParam = {userChosenRandomness: rand, password: hash, subdomain: sdomain, hidden: hide}
