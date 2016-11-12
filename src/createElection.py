@@ -33,6 +33,7 @@ The script can be called with 1 to 3 arguments
         "minChoicesPerVoter": positive integer
         "maxChoicesPerVoter": positive integer no higher than the amount of choices
         "question": string
+        "furtherInfo" : string
         "choices": array/list of strings
 
 [3] argument (optional) should be a stringified JSON object, with optional keys:
@@ -85,7 +86,7 @@ def setConfigFiles():
     global authConf
     global mixConf
 
-    # the root dir is three folders back
+    # the root dir is two folders back
     rootDirProject = os.path.realpath(__file__)
     for i in range(2):
         rootDirProject=os.path.split(rootDirProject)[0]
