@@ -34,12 +34,12 @@ var mixServEncKeys = (temp.substring(1,temp.length-1)).split(",");
 function createBallot (choices, userCode) {
 	// TODO choice now is an integer. It could be an arbitrary message
 	
-    // Sort choices by number
-    choices.sort(function(a,b){return a-b})
-	var choiceMsg = "";
+    // sort and remove duplicates and sort choices by number
+    choices = $.unique(choices);
+	var choiceMsg = "ffffffff"; // "ffffffff" is used in front of the concatenated choices as a delimiter
 	for(var i=0; i < choices.length; i++){
 		choices[i] = crypto.int32ToHexString(choices[i]);
-		choiceMsg = choiceMsg + choices[i];
+		choiceMsg = pair(choiceMsg, choices[i]);
 	}
     var N = mixServEncKeys.length; // the number of mix servers
     var ciphertexts = new Array(N+1); // array with the chain of ciphertexts 
