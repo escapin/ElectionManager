@@ -90,7 +90,7 @@ def shutdownServers():
     nPIDs = getProcIDs(config, "processIDs", electionID)
     for x in nPIDs:
         try:
-            os.kill(x, SIGKILL)
+            os.kill(nPIDs[x], SIGKILL)
         except:
             pass
 

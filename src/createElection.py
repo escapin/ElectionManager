@@ -339,7 +339,10 @@ def sElectCopy(iDlength):
             break
         except:
             iDlength = iDlength+1
-
+            
+    #if "http://localhost" not in serverAddress["collectingserver"]:
+    #    ELS = electionID
+    #    serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
         
 def writesElectConfigs():
     #modify Server ports
@@ -426,9 +429,9 @@ def sElectStart():
                 mix.append(subprocess.Popen(["node", "mixServer.js"], stdout=file_out, cwd=(dstroot+"/mix/"+str(x))))
     with open(logfolder+"/BulletinBoard.log", 'w') as file_out:
         bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-        newPIDs = [col.pid, bb.pid]
+        newPIDs = {"cs": col.pid, "bb": bb.pid}
         for x in range(numMix):
-            newPIDs.append(mix[x].pid)   
+            newPIDs["m"+str(x)] = mix[x].pid   
 
 
 def writeToHandlerConfig():
