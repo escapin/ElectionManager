@@ -97,7 +97,7 @@ def setConfigFiles():
     electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
     defaultManifest = rootDirProject + "/_configFiles_/ElectionManifest.json"
     electionURI = rootDirProject + "/_configFiles_/electionsURI.json"
-    electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
+    electionInfoHidden = rootDirProject + "/_configFiles_/electionHiddenInfo.json"
     nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
     passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
     nginxLog = rootDirProject + "/nginx_config/log"
@@ -329,7 +329,6 @@ def sElectCopy(iDlength):
     if hidden:
         dstFolder = "elections_hidden/"
         
-    
     #get ID after modifying Manifest
     while(iDlength < 40):
         electionID = electionUtils.getID(sElectDir + manifest, iDlength)
@@ -478,15 +477,16 @@ def redirectHttp(nginxData, electionID, listenPort, domainIN, urlOUT, code):
     return nginxData
 
 def writeToNginxConfig():
-    onSSL = True
-    crtPath = serverAddress["tlspath"]
-    listenPort = "    listen " + str(nginxPort)
-    if onSSL:
-        listenPort = listenPort + " ssl"
-    listenPort = listenPort + ";\n"
     
     #modify nginx File
     if "http://localhost" not in serverAddress["collectingserver"]:
+        onSSL = True
+        crtPath = serverAddress["tlspath"]
+        listenPort = "    listen " + str(nginxPort)
+        if onSSL:
+            listenPort = listenPort + " ssl"
+        listenPort = listenPort + ";\n"
+        
         nginxFile = open(nginxConf, 'r+')
         nginxData = nginxFile.readlines()
         

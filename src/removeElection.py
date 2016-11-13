@@ -66,7 +66,7 @@ def setConfigFiles():
                  
     electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
     electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
-    electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
+    electionInfoHidden = rootDirProject + "/_configFiles_/electionHiddenInfo.json"
     electionURI = rootDirProject + "/_configFiles_/electionsURI.json"
     nginxConf = rootDirProject + "/nginx_config/nginx_select.conf"
     passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
