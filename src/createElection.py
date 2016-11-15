@@ -142,7 +142,7 @@ def getConfigData():
         createdElections = jsonData["electionsCreated"]
         nginxPort = jsonData["nginx-port"]
         if jsonData["deployment"] is True:
-            serverAddr = rootDirProject + "/deployment/serverAddresses.json"
+            serverAddr = rootDirProject + "/_configFiles_/serverAddresses.json"
             deployment = True
         jsonFile.close()
     except IOError:

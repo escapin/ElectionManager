@@ -8,6 +8,7 @@ handler:
 	cd ElectionHandler; make
 	mkdir -p _configFiles_
 	cp templates/config.json _configFiles_/handlerConfigFile.json
+	cp templates/serverAddresses.json _configFiles_/
 	mkdir -p elections
 
 custom:
