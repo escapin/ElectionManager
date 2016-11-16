@@ -6,13 +6,11 @@ remove **secure** and **verifiable** elections powered by sElect.
 
 ## Dependencies
 
-* node.js and npm (tested on v4.3.1 and 1.4.21, respectively)
-* python (tested on v.2.7.6)
-* nginx (tested on v1.9.10)
+* node.js and npm (tested on v4.2.6 and 3.5.2, respectively)
+* python (tested on v.2.7.12)
+* nginx (tested on v1.10.0)
 * git and wget (only for downloading the proper files and library)
-* further dependencies needed for the sElect system:
-  * Java JDK (tested with both openjdk-7 and oraclejdk-8).
-  * Java Cryptography Extension (only for oraclejdk).
+* Java JDK (tested with openjdk-9.
 
 The system has been developed and deployed on Ubuntu Server 14.04.2 LTS.
 
