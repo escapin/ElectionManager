@@ -93,8 +93,8 @@ for x in range (len(elecs)):
         bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
     
     newPIDs = {"cs": col.pid, "bb": bb.pid}
-    for x in range(numMix):
-        newPIDs["m"+str(x)] = mix[x].pid 
+    for k in range(numMix):
+        newPIDs["m"+str(k)] = mix[k].pid 
     #print(str(x+1) + ". started " + str(electionID))
     jwriteAdv(electionConfig, "elections", newPIDs, x, "processIDs")
 
