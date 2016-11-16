@@ -20,3 +20,6 @@ ElectionHandler/webapp/pure/
 ElectionHandler/webapp/ref/
 ElectionHandler/webapp/roboto/*.ttf
 *.pyc
+*favicon*
+*apple-icon*
+*android-icon*

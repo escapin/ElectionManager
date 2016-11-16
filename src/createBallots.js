@@ -6,9 +6,10 @@ var strHexConversion = require('../sElect/node_modules/strHexConversion');
 var unpair = crypto.deconcatenate;
 var verif = crypto.verifsig;
 
+var receiptID_LENGTH=10; // length of the verification code in case 'userChosenRandomness' is false 
+// (if this number is odd, the next even integer is taken)
 
 //SHORTCUTS
-
 var pair = crypto.concatenate;
 var enc  = crypto.pke_encrypt;
 var dec  = crypto.pke_decrypt;
@@ -24,15 +25,23 @@ exports.TAG_VERIFCODEUSER = '03';
 var acceptedBallotsFile = process.argv[2];
 var userEmail = process.argv[3];
 var userRandomCode = process.argv[4];
-var userChoice = process.argv[5];
+var choices = process.argv[5];
+var userChoices = (choices.substring(1,choices.length-1)).split(",");
 var electionID = process.argv[6];
 var temp = process.argv[7];
 var mixServEncKeys = (temp.substring(1,temp.length-1)).split(",");
 
 /////////////////////////////////////////////////////////////////
-function createBallot (choice, userCode) {
+function createBallot (choices, userCode) {
 	// TODO choice now is an integer. It could be an arbitrary message
-    var choiceMsg = crypto.int32ToHexString(choice);
+	
+    // sort choices by number
+	choices.sort(function(a,b){return a-b})
+	var choiceMsg = "ffffffff"; // "ffffffff" is used in front of the concatenated choices as a delimiter
+	for(var i=0; i < choices.length; i++){
+		choices[i] = crypto.int32ToHexString(choices[i]);
+		choiceMsg = pair(choiceMsg, choices[i]);
+	}
     var N = mixServEncKeys.length; // the number of mix servers
     var ciphertexts = new Array(N+1); // array with the chain of ciphertexts 
     var randomCoins = new Array(N); // array with the used random coins
@@ -48,7 +57,10 @@ function createBallot (choice, userCode) {
     
     } else {	// verificationCode := (TAG_VERIFCODEAUTO, receiptID)
     	var userCode = ''; // NOTE: if userCode doesn't exist, it is set to the empty string
-    	var receiptID = crypto.nonce().slice(0,18);
+    	if(receiptID_LENGTH%2 == 0)
+        	var receiptID = crypto.nonce().slice(0, receiptID_LENGTH);
+        else
+        	var receiptID = crypto.nonce().slice(0, receiptID_LENGTH+1);
     	
     	var verificationCode = pair(exports.TAG_VERIFCODEAUTO, receiptID);
     }
@@ -67,13 +79,14 @@ function createBallot (choice, userCode) {
 
     return { electionID: electionID, 
              ballot: ballot, 
-             choice: choice, 
+             choice: choices, 
              userCode: userCode,
              receiptID: receiptID, 
              ciphertexts: ciphertexts,
              randomCoins: randomCoins};
 }
-var voted = createBallot(userChoice, userRandomCode);
+
+var voted = createBallot(userChoices, userRandomCode);
 
 var log = fs.createWriteStream(acceptedBallotsFile, {flags:'a', encoding:'utf8'});
 log.write(JSON.stringify({ email:userEmail, ballot:voted.ballot })+'\n', null,

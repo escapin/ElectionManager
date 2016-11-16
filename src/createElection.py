@@ -15,10 +15,40 @@ import re
 import jwrite
 import electionUtils
 
+'''
+The script can be called with 1 to 3 arguments
+
+[1] argument should be a either "mockElection" or "customElection",
+    depending on whether it should be a simple test election without many arguments or not.
+    To avoid misspelling, a mock election will be created as long as the argument contains the string "mock".
+
+[2] argument (not needed for mock elections) should be a stringified JSON object containing the following elements
+    (which are all included in a proper ElectionManifest.json):
+        "title": string
+        "description": string
+        "startTime": string of format: "yy-mm-dd hh:mm UTC+0000", example: "2014-01-01 15:00 UTC+0000"
+        "endTime": string of format: "yy-mm-dd hh:mm UTC+0000", example: "2018-11-10 16:00 UTC+0000"
+        "voters": array/list of strings  
+        "publishListOfVoters": true or false (boolean)
+        "minChoicesPerVoter": positive integer
+        "maxChoicesPerVoter": positive integer no higher than the amount of choices
+        "question": string
+        "furtherInfo" : string
+        "choices": array/list of strings
+
+[3] argument (optional) should be a stringified JSON object, with optional keys:
+        "password": string encrypted with 'bcrypt'
+        "userChosenRandomness" true or false (boolean)
+        "hidden": true or false (boolean)
+        "subdomain": a subdomain all the servers will be on, this will replace the ELS,
+                therefore two election with the same subdomain should not be created (no check yet).
+        "keys": array/list containing 1+<numberOfMixServers> (usually three mix servers) JSON objects
+                containing 4 corresponding keypairs: {encryption_key, verification_key, signing_key, decryption_key}
+'''
 
 def copy(src, dest):
     try:
-        shutil.copytree(src, dest, symlinks=False, ignore=ignore_patterns("*.py", "00", "01", "02", "ElectionHandler", "nginx*"))
+        shutil.copytree(src, dest, symlinks=False, ignore=ignore_patterns("*.py", "00", "01", "02", "tests"))
     except OSError as e:
         # source is a file, not a directory
         if e.errno == errno.ENOTDIR:
@@ -52,9 +82,11 @@ def setConfigFiles():
     global bulletinConf
     global votingManifest
     global votingConf
+    global authManifest
+    global authConf
     global mixConf
 
-    # the root dir is three folders back
+    # the root dir is two folders back
     rootDirProject = os.path.realpath(__file__)
     for i in range(2):
         rootDirProject=os.path.split(rootDirProject)[0]
@@ -65,7 +97,7 @@ def setConfigFiles():
     electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
     defaultManifest = rootDirProject + "/_configFiles_/ElectionManifest.json"
     electionURI = rootDirProject + "/_configFiles_/electionsURI.json"
-    electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
+    electionInfoHidden = rootDirProject + "/_configFiles_/electionHiddenInfo.json"
     nginxConf =  rootDirProject + "/nginx_config/nginx_select.conf"
     passList =  rootDirProject + "/ElectionHandler/_data_/pwd.json"
     nginxLog = rootDirProject + "/nginx_config/log"
@@ -75,7 +107,9 @@ def setConfigFiles():
     collectingConf = "/CollectingServer/config.json"
     bulletinConf = "/BulletinBoard/config.json"
     votingManifest = "/VotingBooth/ElectionManifest.json"     
-    votingConf = "/VotingBooth/config.json"  
+    votingConf = "/VotingBooth/config.json" 
+    authManifest = "/Authenticator/ElectionManifest.json"     
+    authConf = "/Authenticator/config.json" 
     mixConf = []
     
 def getConfigData():
@@ -87,13 +121,15 @@ def getConfigData():
     global numMix
     global createdElections
     global nginxPort
+    global minChoices
+    global maxChoices
     
     global elecTitle
     global elecDescr
     global elecQuestion
+    global furtherInfo
     global eleChoices
     global publish
-    global mixServers
     
     deployment = False
     serverAddr = False
@@ -106,7 +142,7 @@ def getConfigData():
         createdElections = jsonData["electionsCreated"]
         nginxPort = jsonData["nginx-port"]
         if jsonData["deployment"] is True:
-            serverAddr = rootDirProject + "/deployment/serverAddresses.json"
+            serverAddr = rootDirProject + "/_configFiles_/serverAddresses.json"
             deployment = True
         jsonFile.close()
     except IOError:
@@ -121,7 +157,9 @@ def getConfigData():
         elecQuestion = jsonData["question"]
         eleChoices = jsonData["choices"]
         publish = jsonData["publishListOfVoters"]
-        mixServers = jsonData["mixServers"]
+        minChoices = jsonData["minChoicesPerVoter"]
+        maxChoices = jsonData["maxChoicesPerVoter"]
+        furtherInfo = jsonData["furtherInfo"]
         jsonFile.close()
     except IOError:
         sys.exit("ElectionManifest missing or corrupt")
@@ -131,30 +169,28 @@ def getInput():
     global mockElection
     global startingTime
     global endingTime
+    global minChoices
+    global maxChoices
     
     global elecTitle
     global elecDescr
     global elecQuestion
+    global furtherInfo
+    global voters
     global eleChoices
     global publish
-    global mixServers
     global randomness
     global keys
     global hidden
+    global ELS
+    global getELS
     
     #get input parameters (if any)
-    password = "";
-    mockElection = True
     startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
     endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
-    randomness = False
-    if "mockElection" in sys.argv[1]:
-        mockArgs = json.loads(sys.argv[1])
-        randomness = mockArgs["userChosenRandomness"]
-        randomness = True if randomness == "true" else False
-        keys = mockArgs["keys"]
-    hidden = True if sys.argv[1] == "true" else False
-    if(len(sys.argv) > 2 and len(sys.argv[2]) > 1 ):
+    voters = []
+    mockElection = True if len(sys.argv) < 2 or "mock" in sys.argv[1] else False
+    if not mockElection:
         electionArgs = json.loads(sys.argv[2])
         startingTime = electionArgs['startTime']
         endingTime = electionArgs['endTime']
@@ -166,12 +202,42 @@ def getInput():
         except:
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
-        randomness = electionArgs['userChosenRandomness']
-        password = electionArgs['password']
-        if "keys" in electionArgs:
-            keys = electionArgs["keys"]
-        mockElection = False
-    
+        publish = True if publish == "true" or publish == True else False
+        minChoices = 1
+        maxChoices = 1
+        if "minChoicesPerVoter" in electionArgs:
+            minChoices = electionArgs['minChoicesPerVoter']
+        if "maxChoicesPerVoter" in electionArgs:
+            maxChoices = electionArgs['maxChoicesPerVoter']
+        if "voters" in electionArgs:
+            voters = electionArgs['voters']
+        elif "voters[]" in electionArgs:
+            voters = electionArgs['voters[]']
+        if "furtherInfo" in electionArgs:
+        	furtherInfo = electionArgs['furtherInfo']
+ 
+
+    password = ""
+    randomness = False
+    keys = []
+    hidden = False
+    getELS = True
+    if len(sys.argv) > 3:
+        additionalArgs = json.loads(sys.argv[3])
+        if "password" in additionalArgs:
+            password = additionalArgs['password']
+        if "userChosenRandomness" in additionalArgs:
+            randomness = additionalArgs['userChosenRandomness']
+            randomness = True if randomness == "true" or randomness == True else False
+        if "keys" in additionalArgs:
+            keys = additionalArgs["keys"]
+        if "hidden" in additionalArgs:
+            hidden = additionalArgs["hidden"]
+            hidden = True if hidden == "true" or hidden == True else False
+        if "subdomain" in additionalArgs:
+            if len(additionalArgs["subdomain"]) > 0:
+                ELS = "."+additionalArgs["subdomain"]
+                getELS = False
 
 def getMixServerConfig():
     global mixConf
@@ -192,7 +258,8 @@ def getServerLocations():
     
     #get server URI's
     ports = electionUtils.usePorts(electionConfig, 3+numMix)
-    ELS = ports[len(ports)-1]                                   #for the demo version the ELS will be the port of VotingBooth
+    if getELS:
+        ELS = electionUtils.getELS(electionConfig)                      #number between 00 and 100/maxElections, corresponds with subdomains
     serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
     #time stamp for folder path
     tStamp = startingTime.replace("-", "").replace(":", "").split()
@@ -241,9 +308,12 @@ def writeManifest():
     jwrite.jwrite(sElectDir + manifest, "endTime", endingTime)
     jwrite.jwrite(sElectDir + manifest, "title", elecTitle)
     jwrite.jwrite(sElectDir + manifest, "description", elecDescr)
+    jwrite.jwrite(sElectDir + manifest, "voters", voters)
     jwrite.jwrite(sElectDir + manifest, "question", elecQuestion)
     jwrite.jwrite(sElectDir + manifest, "choices", eleChoices)
-    jwrite.jwrite(sElectDir + manifest, "userChosenRandomness", randomness)
+    jwrite.jwrite(sElectDir + manifest, "furtherInfo", furtherInfo)
+    jwrite.jwriteAdv(sElectDir + manifest, "minChoicesPerVoter", minChoices)
+    jwrite.jwriteAdv(sElectDir + manifest, "maxChoicesPerVoter", maxChoices)
     jwrite.jwrite(sElectDir + manifest, "publishListOfVoters", publish)
     jwrite.jwriteAdv(sElectDir + manifest, "collectingServer", serverAddress["collectingserver"], "URI")
     jwrite.jwriteAdv(sElectDir + manifest, "bulletinBoards", serverAddress["bulletinboard"], 0, "URI")
@@ -259,56 +329,77 @@ def sElectCopy(iDlength):
     if hidden:
         dstFolder = "elections_hidden/"
         
-    
     #get ID after modifying Manifest
     while(iDlength < 40):
         electionID = electionUtils.getID(sElectDir + manifest, iDlength)
         dstroot = os.path.join(rootDirProject, dstFolder + tStamp[0]+tStamp[1] + "_" + electionID + "_" + os.path.split(sElectDir)[1])
         try:
             copy(sElectDir, dstroot)
-            electionUtils.link(dstroot, manifest, votingManifest)
+            electionUtils.link(dstroot, manifest, votingManifest, authManifest)
             break
         except:
             iDlength = iDlength+1
-
+            
+    #if "http://localhost" not in serverAddress["collectingserver"]:
+    #    ELS = electionID
+    #    serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
         
 def writesElectConfigs():
     #modify Server ports
     jwrite.jwrite(dstroot + collectingConf, "port", ports[0])
     jwrite.jwrite(dstroot + bulletinConf, "port", ports[1])
-    jwrite.jwrite(dstroot + votingConf, "authenticate", serverAddress["votingbooth"])
+    jwrite.jwrite(dstroot + votingConf, "authenticator", serverAddress["authenticator"])
+    jwrite.jwrite(dstroot + votingConf, "authChannel", serverAddress["authchannel"])
+    jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", randomness)
+    jwrite.jwrite(dstroot + authConf, "authChannel", serverAddress["authchannel"])
+    jwrite.jwrite(dstroot + authConf, "votingBooth", serverAddress["votingbooth"])
     jwrite.jwrite(dstroot + collectingConf, "serverAdminPassword", password)
     for x in range(numMix):     
         jwrite.jwrite(dstroot + mixConf[x], "port", ports[x+2])
         
     #change user randomness if not a mock election
-    if not mockElection:
-        jwrite.jwrite(dstroot + votingConf, "userChosenRandomness", randomness)
-    else:
+    if mockElection:
         jwrite.jwrite(dstroot + votingConf, "showOtp", True)
+        jwrite.jwrite(dstroot + authConf, "showOtp", True)
         jwrite.jwrite(dstroot + collectingConf, "sendOtpBack", True)
-    
+        jwrite.jwrite(dstroot + collectingConf, "sendEmail", False)
+
+def updateTrustedOrigins():
+    authdomain = serverAddress["authenticator"]
+    temp = authdomain.split("://")
+    temp[1] = temp[1].split("/")[0]
+    authdomain = "://".join(temp)
+    vbdomain = serverAddress["votingbooth"]
+    temp = vbdomain.split("://")
+    temp[1] = temp[1].split("/")[0]
+    vbdomain = "://".join(temp)
+    varname = "trustedOrigins"
+    csTrusts = 'var '+varname+' = ["'+vbdomain+'","'+authdomain+'"];'
+    csFile = "/CollectingServer/webapp/trustedOrigins.js"
+    file = open(dstroot+csFile, 'w')
+    file.write(csTrusts)
+    file.close()
 
 def createBallots():
     if mockElection:
-        #check if random or not
-        isRand = False
-        try:
-            jsonFile = open(sElectDir+manifest, 'r')
-            jsonData = json.load(jsonFile, object_pairs_hook=collections.OrderedDict)
-            isRand = jsonData["userChosenRandomness"]
-            jsonFile.close()
-        except IOError:
-            sys.exit("ElectionManifest.json missing or corrupt")
         #create Ballots
         os.mkdir(dstroot+"/CollectingServer/_data_")
         mixServerEncKeyString = str(mixServerEncKey).replace(" ", "").replace("u'", "").replace("'", "")
         ballotFile = dstroot+"/CollectingServer/_data_/accepted_ballots.log"
         for x in range(mockVoters):
+            max = maxChoices if maxChoices < len(eleChoices) else len(eleChoices)
+            nChoices = random.randint(minChoices,max)
+            userRandom = []
+            userChoices = []
+            for i in range(nChoices):
+                temp = random.randint(0,(len(eleChoices)-1))
+                while temp in userChoices:
+                    temp = random.randint(0,(len(eleChoices)-1))
+                userChoices.append(temp)
+            userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if randomness else ""
             userEmail = "user"+str(x)+"@uni-trier.de"
-            userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if isRand else ""
-            userChoice = random.randint(0,(len(eleChoices)-1))
-            ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, str(userChoice), electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
+            userChoices = str(userChoices).replace(" ", "").replace("u'", "").replace("'", "")
+            ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, userChoices, electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
         ballots.wait()
 
 
@@ -320,9 +411,10 @@ def sElectStart():
     logfolder = dstroot+"/LOG"
     
     #start all node servers
-    
+    subprocess.Popen(["node", "compileEJS.js"], cwd=(dstroot+"/VotingBooth/webapp/ejs"))
     subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
-    with open(logfolder+"/ColllectingServer.log", 'w') as file_out:
+    subprocess.call([dstroot + "/Authenticator/refresh.sh"], cwd=(dstroot+"/Authenticator"))
+    with open(logfolder+"/CollectingServer.log", 'w') as file_out:
         if mockElection:
             col = subprocess.Popen(["node", "collectingServer.js", "--resume"], stdout=file_out, cwd=(dstroot+"/CollectingServer"))
         else:
@@ -337,9 +429,9 @@ def sElectStart():
                 mix.append(subprocess.Popen(["node", "mixServer.js"], stdout=file_out, cwd=(dstroot+"/mix/"+str(x))))
     with open(logfolder+"/BulletinBoard.log", 'w') as file_out:
         bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
-        newPIDs = [col.pid, bb.pid]
+        newPIDs = {"cs": col.pid, "bb": bb.pid}
         for x in range(numMix):
-            newPIDs.append(mix[x].pid)   
+            newPIDs["m"+str(x)] = mix[x].pid   
 
 
 def writeToHandlerConfig():
@@ -368,73 +460,283 @@ def writeToHandlerConfig():
         #write details in different file to not show in the Election Manager
         eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "processIDs": newPIDs, "used-ports": ports}
         jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
+
+def redirectHttp(nginxData, electionID, listenPort, domainIN, urlOUT, code):
+    counter = 0
+    for line in nginxData:
+        if "end main server" in line:
+            break
+        counter = counter + 1
+    bracketIt = nginxData[counter:]
+    del nginxData[counter:]
     
+    comments = ["  # Redirect http " + str(electionID) + " \n", "  server {\n", 
+                "    listen "+str(listenPort)+";", "\n",
+                "    server_name "+ " ".join(domainIN) + ";\n", "\n"]
+    comments.extend(["    return " +str(code)+ " " + urlOUT, ";\n", "  }\n", "\n"])
+    comments.extend(bracketIt)
+    nginxData.extend(comments)
+    
+    return nginxData
+
 def writeToNginxConfig():
+    
     #modify nginx File
     if "http://localhost" not in serverAddress["collectingserver"]:
+        onSSL = True
+        crtPath = serverAddress["tlspath"]
+        listenPort = "    listen " + str(nginxPort)
+        if onSSL:
+            listenPort = listenPort + " ssl"
+        listenPort = listenPort + ";\n"
+        
         nginxFile = open(nginxConf, 'r+')
         nginxData = nginxFile.readlines()
-        prevBracket = 0
+        
+        ###### Redirect ######
+        if not getELS:
+            vb = serverAddress["votingbooth"]
+            vb = vb[:len(vb)-1]
+            domain = serverAddress["votingbooth"].split("://")[1]
+            domain = domain[:len(domain)-1]
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
+            counter = 0
+            for line in nginxData:
+                if "end main server" in line:
+                    break
+                counter = counter + 1
+            bracketIt = nginxData[counter:]
+            del nginxData[counter:]
+            
+            comments = ["  # Redirect https " + str(electionID) + " \n", "  server {\n", 
+                        listenPort, "\n",
+                        "    server_name "+ keyFolder + ";\n", "\n"]
+            if onSSL:
+                comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                            "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
+                            "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                            "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                            "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+            comments.extend(["    return 302 " + vb, ";\n", "  }\n", "\n"])
+            comments.extend(bracketIt)
+            nginxData.extend(comments)
+            nginxFile.seek(0)
+            
+            '''
+            counter = 0
+            for line in nginxData:
+                if "end main server" in line:
+                    break
+                counter = counter + 1
+            bracketIt = nginxData[counter:]
+            del nginxData[counter:]
+            
+            comments = ["  # Redirect http " + str(electionID) + " \n", "  server {\n", 
+                        "    listen 8080;", "\n",
+                        "    server_name "+ domain + " " + keyFolder + ";\n", "\n"]
+            comments.extend(["    return 302 " + vb, ";\n", "  }\n", "\n"])
+            comments.extend(bracketIt)
+            nginxData.extend(comments)
+            nginxFile.seek(0)
+            '''
+            
+            csdomain = serverAddress["collectingserver"].split("://")[1]
+            csdomain = csdomain[:len(csdomain)-1]
+            bbdomain = serverAddress["bulletinboard"].split("://")[1]
+            bbdomain = bbdomain[:len(bbdomain)-1]
+            authdomain = serverAddress["authenticator"].split("://")[1]
+            authdomain = authdomain[:len(authdomain)-1]
+            cs = serverAddress["collectingserver"]
+            cs = cs[:len(cs)-1]
+            bb = serverAddress["bulletinboard"]
+            bb = bb[:len(bb)-1]
+            auth = serverAddress["bulletinboard"]
+            auth = auth[:len(auth)-1]
+            
+            nginxData = redirectHttp(nginxData, electionID, 8080, [domain, keyFolder], vb, 302)
+            nginxFile.seek(0)
+            nginxData = redirectHttp(nginxData, electionID, 8080, [csdomain], cs, 302)
+            nginxFile.seek(0)
+            nginxData = redirectHttp(nginxData, electionID, 8080, [bbdomain], bb, 302)
+            nginxFile.seek(0)
+            nginxData = redirectHttp(nginxData, electionID, 8080, [authdomain], auth, 302)
+            nginxFile.seek(0)
+            for x in range(numMix):
+                mxdomain = serverAddress["mix"+str(x)].split("://")[1]
+                mxdomain = mxdomain[:len(mxdomain)-1]
+                mx = serverAddress["mix"+str(x)]
+                mx = mx[:len(mx)-1]
+                redirectHttp(nginxData, electionID, 8080, [mxdomain], mx, 302)
+                nginxFile.seek(0)
+                
+        ###### Collecting server ######
+        domain = serverAddress["collectingserver"].split("://")[1]
+        domain = domain[:len(domain)-1]
+        keyFolder = domain.split(".")
+        keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
+        keyFolder = ".".join(keyFolder)
+        if not getELS:
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
         counter = 0
         for line in nginxData:
-            if "}" in line:
-                prevBracket = counter
             if "end collecting server" in line:
                 break
             counter = counter + 1
-        bracketIt = nginxData[prevBracket:]
-        del nginxData[prevBracket:]
-        comments = ["    # Collecting server " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n"]
+        bracketIt = nginxData[counter:]
+        del nginxData[counter:]
+        
+        comments = ["  # Collecting Server " + str(electionID) + " \n", "  server {\n", 
+                    listenPort, "\n",
+                    "    server_name "+ domain + ";\n", "\n"]
+        if onSSL:
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
+                        "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                        "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                        "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[0]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])        
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
     
-        prevBracket = 0
+        ###### Bulletin board ######
+        domain = serverAddress["bulletinboard"].split("://")[1]
+        domain = domain[:len(domain)-1]
+        keyFolder = domain.split(".")
+        keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
+        keyFolder = ".".join(keyFolder)
+        if not getELS:
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
         counter = 0
         for line in nginxData:
-            if "}" in line:
-                prevBracket = counter
             if "end bulletin board" in line:
                 break
             counter = counter + 1
-        bracketIt = nginxData[prevBracket:]
-        del nginxData[prevBracket:]
-        comments = ["    # Bulletin board " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n"]
+        bracketIt = nginxData[counter:]
+        del nginxData[counter:]
+        
+        comments = ["  # Bulletin Board " + str(electionID) + " \n", "  server {\n", 
+                    listenPort, "\n",
+                    "    server_name "+ domain + ";\n", "\n"]
+        if onSSL:
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
+                        "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                        "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                        "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[1]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
     
+        ###### Mix Server ######
         for x in range(numMix):
-            prevBracket = 0
+            domain = serverAddress["mix"+str(x)].split("://")[1]
+            domain = domain[:len(domain)-1]
+            keyFolder = domain.split(".")
+            keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
+            keyFolder = ".".join(keyFolder)
+            if not getELS:
+                keyFolder = domain.split(".")
+                del keyFolder[0]
+                keyFolder = ".".join(keyFolder)
             counter = 0
             for line in nginxData:
-                if "}" in line:
-                    prevBracket = counter
-                if "end mix server "+str(x) in line:
+                if "end mix server " + str(x) in line:
                     break
                 counter = counter + 1
-            bracketIt = nginxData[prevBracket:]
-            del nginxData[prevBracket:]
-            comments = ["    # Mix server " + electionID + " #"+str(x)+"\n", "    location " + "/" + str(ELS) + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n"]
+            bracketIt = nginxData[counter:]
+            del nginxData[counter:]
+            
+            comments = ["  # Mix Server "+str(x) +" "+ str(electionID) + " \n", "  server {\n", 
+                        listenPort, "\n",
+                        "    server_name "+ domain + ";\n", "\n"]
+            if onSSL:
+                comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+	                    "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
+                            "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                            "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                            "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+            comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
+            comments.extend(["    location " + "/ {\n", "        proxy_pass " + "http://localhost" + ":" + str(ports[x+2]) + "/;\n", "    }\n", "\n", "  }\n", "\n"])
             comments.extend(bracketIt)
             nginxData.extend(comments)
             nginxFile.seek(0)
       
-        prevBracket = 0
+      
+        ###### Voting Booth ######
+        domain = serverAddress["votingbooth"].split("://")[1]
+        domain = domain[:len(domain)-1]
+        keyFolder = domain.split(".")
+        keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
+        keyFolder = ".".join(keyFolder)
+        if not getELS:
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
         counter = 0
         for line in nginxData:
-            if "}" in line:
-                prevBracket = counter
             if "end voting booth" in line:
-                break
+        	   break
             counter = counter + 1
-        bracketIt = nginxData[prevBracket:]
-        del nginxData[prevBracket:]
-        comments = ["    # Voting Booth " + electionID + " \n", "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+        bracketIt = nginxData[counter:]
+        del nginxData[counter:]
+        
+        comments = ["  # Voting Booth " + str(electionID) + " \n", "  server {\n", 
+                    listenPort, "\n",
+                    "    server_name "+ domain + ";\n", "\n"]
+        if onSSL:
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
+                        "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                        "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                        "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n", "  }\n", "\n"])
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)
         
+        ###### Authenticator ######
+        domain = serverAddress["authenticator"].split("://")[1]
+        domain = domain[:len(domain)-1]
+        keyFolder = domain.split(".")
+        keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
+        keyFolder = ".".join(keyFolder)
+        if not getELS:
+            keyFolder = domain.split(".")
+            del keyFolder[0]
+            keyFolder = ".".join(keyFolder)
+        counter = 0
+        for line in nginxData:
+            if "end authenticator" in line:
+                break
+            counter = counter + 1
+        bracketIt = nginxData[counter:]
+        del nginxData[counter:]
+        
+        comments = ["  # Authenticator " + str(electionID) + " \n", "  server {\n", 
+                    listenPort, "\n",
+                    "    server_name "+ domain + ";\n", "\n"]
+        if onSSL:
+            comments.extend(["    ssl_certificate " + crtPath + keyFolder + "/fullchain.pem;\n",
+                        "    ssl_certificate_key " + crtPath + keyFolder + "/privkey.pem;\n",
+                        "    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                        "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                        "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"])
+        comments.extend(["    location " + "~ /.well-known {\n", "        allow all;\n ", "    }\n", "\n"])
+        comments.extend(["    location " + "/ {\n", "        alias " + dstroot + "/Authenticator/webapp/;\n", "        index authenticator.html;\n","    }\n", "\n", "  }\n", "\n"])
+        comments.extend(bracketIt)
+        nginxData.extend(comments)
+        nginxFile.seek(0)
         
         nginxFile.writelines(nginxData)
         nginxFile.close()
@@ -478,9 +780,25 @@ def writeToNginxConfig():
         nginxData.extend(comments)
         nginxFile.seek(0)    
         
+        prevBracket = 0
+        counter = 0
+        for line in nginxData:
+            if "}" in line:
+                prevBracket = counter
+            if "end main server" in line:
+                break
+            counter = counter + 1
+        bracketIt = nginxData[prevBracket:]
+        del nginxData[prevBracket:]
+        comments = ["    # Authenticator " + electionID + " \n", 
+                    "    location " + "/" + "auth/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/Authenticator/webapp/;\n", "        index authenticator.html;\n","    }\n", "\n"]
+        comments.extend(bracketIt)
+        nginxData.extend(comments)
+        nginxFile.seek(0)   
+        
         nginxFile.writelines(nginxData)
         nginxFile.close()
-    
+        
     
     #refresh nginx 
     #TODO: fix /usr/sbin nginx issue
@@ -500,6 +818,7 @@ updateKeys()
 writeManifest()
 sElectCopy(IDlength)
 writesElectConfigs()
+updateTrustedOrigins()
 createBallots()
 sElectStart()
 writeToHandlerConfig()
@@ -507,7 +826,7 @@ writeToNginxConfig()
 
 #prints election details to server.js
 electionUrls = {"ElectionIdentifier": electionUtils.hashManifest(sElectDir+manifest), "electionID": electionID,
-                "VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"]+"/admin/panel", 
+                "VotingBooth": serverAddress["votingbooth"], "CollectingServer": serverAddress["collectingserver"]+"admin/panel",
                 "BulletinBoard": serverAddress["bulletinboard"], "hidden": hidden}
 print("electionUrls.json:\n"+json.dumps(electionUrls))
 print("electionInfo.json:\n"+json.dumps(eleInfo))

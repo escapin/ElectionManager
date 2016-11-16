@@ -66,7 +66,7 @@ def setConfigFiles():
                  
     electionConfig = rootDirProject + "/_configFiles_/handlerConfigFile.json"
     electionInfo = rootDirProject + "/_configFiles_/electionInfo.json"
-    electionInfoHidden = rootDirProject + "/elections_hidden/electionInfo.json"
+    electionInfoHidden = rootDirProject + "/_configFiles_/electionHiddenInfo.json"
     electionURI = rootDirProject + "/_configFiles_/electionsURI.json"
     nginxConf = rootDirProject + "/nginx_config/nginx_select.conf"
     passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
@@ -90,7 +90,7 @@ def shutdownServers():
     nPIDs = getProcIDs(config, "processIDs", electionID)
     for x in nPIDs:
         try:
-            os.kill(x, SIGKILL)
+            os.kill(nPIDs[x], SIGKILL)
         except:
             pass
 
@@ -118,6 +118,9 @@ def writeToHandlerConfig():
         jsonFile.close()
     except IOError:
         sys.exit("electionsURI.json missing or corrupt")
+    except KeyError:
+        pass
+	#print(electionID + "not found i electionsURI.json, continue without removing.")
     if not hidden:
         jwrite.jRemElec(electionConfig, electionID)
         eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)

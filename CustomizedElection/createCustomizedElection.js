@@ -3,29 +3,77 @@ var fs = require('fs');
 var child_process = require("child_process");
 var spawn = child_process.spawn;
 
+/**
+The script can be called with 2 to 4 arguments
 
-var manifestPath = process.argv[2];
-var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
+SYNOPSIS
+	node createCustomizedElection.js -m PATH/TO/MANIFEST -p PASSWORD [-s SUBDOMAIN] [-h] [-r]
 
-var salt = bcrypt.genSaltSync(10);
-var hash = bcrypt.hashSync(process.argv[3], salt);
+DESCRIPTION:
+	-m PATH/TO/MANIFEST: PATH/TO/MANIFEST will be used as the election manifest for the election
+	-p PASSWORD: set password to close and remove the election to PASSWORD
+	[-s SUBDOMAIN: the election will be displayed at SUBDOMAIN.serverdomain 
+		(server domain is set in deployment/serverAddresses.json), no ELS will be used, optional argument]
+	[-h: the election will be hidden from the ElectionManager, optional argument]
+	[-r: user has to enter part of the verification code, userchosenRandomness set to true, optional argument]
 
-electionManifest.password = hash
-var parameters = JSON.stringify(electionManifest);
+**/
 
-var hidden = process.argv[4]
-if (hidden === 'hidden'){
-	hidden = true;
+var parameters;
+var hash;
+var sdomain = "";
+var rand = false;
+var hide = false;
+var manifestParsed = false;
+var passwordHashed = false;
+for(var i = 0; i < process.argv.length; i++){
+	if(process.argv[i] === '-m'){
+		var manifestPath = process.argv[i+1];
+		try{
+			var electionManifest = JSON.parse(fs.readFileSync(manifestPath));
+		} catch (err) {
+			if (err.code !== 'ENOENT') throw err;
+			// handling file not found
+			console.log("ERROR: file '" + manifestPath + "' not found!");
+			process.exit(1);
+		}
+		parameters = JSON.stringify(electionManifest);
+		manifestParsed=true;
+		i++;
+	}
+	else if(process.argv[i] === '-p'){
+		var salt = bcrypt.genSaltSync(10);
+		hash = bcrypt.hashSync(process.argv[i+1], salt);
+		passwordHashed=true;
+		i++;
+	}
+	else if(process.argv[i] === '-s'){
+		sdomain = process.argv[i+1];
+		i++;
+	}
+	else if(process.argv[i] === '-r'){
+		rand = true;
+	}
+	else if(process.argv[i] === '-h'){
+		hide = true;
+	}
 }
-else if(hidden === 'visible'){
-	hidden = false;
+
+if(!manifestParsed){
+	console.log('ERROR: no manifest provided.');
+	console.log('Usage:\n\t node createCustomizedElection -m PATH/TO/MANIFEST -p PASSWORD [-s SUBDOMAIN] [-h] [-r]');
+	process.exit(1);
 }
-else{
-	console.log("wrong parameters: last argument should be 'hidden' or 'visible'");
-	process.exit()
+if(!passwordHashed){
+	console.log('ERROR: no password to close/remove the election provided.');
+	console.log('Usage:\n\t node createCustomizedElection -m PATH/TO/MANIFEST -p PASSWORD [-s SUBDOMAIN] [-h] [-r]');
+	process.exit(1);
 }
 
-session = spawn('python', ['../src/createElection.py', hidden, parameters]);
+var additionalParam = {userChosenRandomness: rand, password: hash, subdomain: sdomain, hidden: hide}
+additionalParam = JSON.stringify(additionalParam);
+
+session = spawn('python', ['../src/createElection.py', "completeElection", parameters, additionalParam]);
 session.stdout.on('data', function (data) {
 	if(String(data).indexOf("OTP")>-1){
 		var time =  new Date();

@@ -9,7 +9,7 @@ try:
     localpath = sys.argv[1]
     password = sys.argv[2]
 except:
-    sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password [hidden/visible]")
+    sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password (hidden/visible) [random]")
 hidden = "hidden"
 
 if not os.path.isfile(localpath):
@@ -18,9 +18,11 @@ if not os.path.isfile(localpath):
 if(len(sys.argv)>3):
     hidden = sys.argv[3]
     if(hidden <> 'hidden' and hidden <> 'visible'):
-        sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password [hidden/visible]")
+        sys.exit("Script is called with arguments: \n python script.py Path/To/Manifest.json password (hidden/visible) [random]")
     if(len(sys.argv)>4):
-        remotepath = sys.argv[4]
+        rand = sys.argv[4]
+        if(len(sys.argv)>5):
+            remotepath = sys.argv[5]
 
 
 electionURIserverPath = "/home/select/ElectionManager/_configFiles_/electionsURI.json"
@@ -64,7 +66,7 @@ except:
 sftp = ssh.open_sftp()
 sftp.put(localpath, remotepath)
 sftp.close()
-stdin, stdout, stderr = ssh.exec_command('cd /home/select/ElectionManager/CustomizedElection; node createCustomizedElection.js '+remotepath+' '+password+' '+hidden)
+stdin, stdout, stderr = ssh.exec_command('cd /home/select/ElectionManager/CustomizedElection; node createCustomizedElection.js '+remotepath+' '+password+' '+hidden+' '+rand)
 
 terminate = False
 for line in stdout:

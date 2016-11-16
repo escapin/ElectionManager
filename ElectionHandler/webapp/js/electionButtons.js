@@ -3,9 +3,9 @@ function electionButtons() {
 	var electionConf;
 	var votingBooth;
 	var collectingServer;
-	var lastMix;
 	var elections;
-
+	var deployment;
+	
 	var electionManager;
 	var protocol;
 	
@@ -93,8 +93,9 @@ function electionButtons() {
     		closingID = value;
     		disableButtons();
     		$('#processing').fadeIn(150);
+    		csServer = deployment ? protocol+collectingServer.replace(".", ELS+".")+"/admin/close" : protocol+collectingServer+"/"+ELS+"/admin/close"
     		$.ajax({type: "GET", 
-    				url: protocol+collectingServer+"/"+ELS+"/admin/close",
+    				url: csServer,
     				dataType: 'json',
     				headers: {"Authorization": "Basic " + btoa("admin" + ":" + pass)},
     				//beforeSend: function (xhr){ 
@@ -114,7 +115,7 @@ function electionButtons() {
     	    			enableButtons();
     	    			$('#processing').hide();
     	    			if(data.status===502){
-    	    				alerting("cannot connect to CollectingServer at "+ collectingServer+"/"+ELS+"/", false);
+    	    				alerting("cannot connect to CollectingServer at "+ csServer, false);
     	    			}
     	    			else if(data.status===401){
     	    				alerting("wrong password", false);
@@ -124,38 +125,6 @@ function electionButtons() {
     		enableButtons();
     	}
 	}
-	
-    function advancedElection() {
-    	disableButtons();
-		var ename = $('#e-name').val();
-		var edesc = $('#e-desc').val();
-		var startingTime = $('#start-time').val();
-		var endingTime = $('#end-time').val();
-		$('#processing').fadeIn(150);
-		$.post(electionManager+"/election", {task: "advanced", ID: "generated", title: ename, description: edesc, startTime: startingTime, endTime: endingTime})
-		 .done(function(data){
-			$('#processing').fadeOut(150);
-			enableButtons();
-			data = JSON.parse(data);
-			if (data.task == "created") {
-				elections = data.elections;
-				value = null;
-				reloading(true);
-				$('#processing').hide();
-				$('#advanced').fadeOut(150);
-				$('welcome').show();
-			}
-			else{
-				alerting(data.error);
-				$('#processing').hide();
-			}
-		  })
-		 .fail(function(){
-			 enableButtons();
-			 $('#processing').hide();
-			 alerting('cannot connect to ElectionHandler at '+ electionManager);
-		 });
-    }
     
     function completeElection(pass, rand) {
     	window.clearInterval(buttonEnable);
@@ -251,10 +220,9 @@ function electionButtons() {
 		nchoices = nchoices + 1;
 		
 		//save inputs
-		var str = "";
-		for(var i = 3; i < nchoices; i++){
-			str += $('#choice'+(i)).val() + " ";
-		}
+		var oldChoices = [];
+		for(var i = 3; i < nchoices; i++)
+			oldChoices.push($('#choice'+(i)).val());
 		
 		//add new question
 		if(nchoices === 3){
@@ -264,9 +232,8 @@ function electionButtons() {
 			document.getElementById("c-list").innerHTML+='<input id="choice'+nchoices+'" class="pure-input-1" type="text" size="50" style="margin-top: 1.3em;" placeholder="choice '+nchoices+'">';		
 		}
 		//insert previous inputs
-		str = str.split(" ");
 		for(var i = 3; i < nchoices; i++){
-			document.getElementById("choice"+(i)).value = str[i-3];
+			document.getElementById("choice"+(i)).value = oldChoices[i-3];
 		}
 		if(nchoices > 2){
 			$("#remove-choice").prop('disabled', null);
@@ -344,17 +311,23 @@ function electionButtons() {
     	}
     	else{
     		getElectionStatus(value, function (eleID, stat){
-    			if(stat === "open"){
-    				document.getElementById("inviteVoters").style.visibility = "visible";
-    	    		//document.getElementById("votePage").href = votingBooth+"/"+value+"/votingBooth/";
-    	    		//document.getElementById("votePage").innerHTML = votingBooth+"/"+value+"/votingBooth/";
+    			if(deployment){
+    	    		document.getElementById("votePage").href = votingBooth.replace(".", ELS+".") +"/";
+    	    		document.getElementById("votePage").innerHTML = votingBooth.replace(".", ELS+".") +"/";
+    	    		document.getElementById("resultPage").href = votingBooth.replace(".", ELS+".") +"/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth.replace(".", ELS+".") +"/";
+				}
+				else{
     	    		document.getElementById("votePage").href = votingBooth+"/"+ELS +"/";
     	    		document.getElementById("votePage").innerHTML = votingBooth+"/"+ELS +"/";
+    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS +"/";
+    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS +"/";
+				}
+    			if(stat === "open"){
+    				document.getElementById("inviteVoters").style.visibility = "visible";
     			}
     			else if(stat === "closed"){
     				document.getElementById("checkResult").style.visibility = "visible";
-    	    		document.getElementById("resultPage").href = votingBooth+"/"+ELS+"/";
-    	    		document.getElementById("resultPage").innerHTML = votingBooth+"/"+ELS+"/";
     			}
     			else{
     				alerting("Server is not responding");
@@ -620,7 +593,6 @@ function electionButtons() {
 	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the buttons below to create a new election.";
 	     }
 	     else{
-	    	 console.log(elections.length);
 	    	 document.getElementById('gen_info').innerHTML = "&#9656 Click on the <em>entry</em> of the election you want to manage or create a new one.";	    	 
 	     }
 	     
@@ -633,12 +605,13 @@ function electionButtons() {
 		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 		
 		//don't use port 80 if it's not deployed
-		 if(electionConf.deployment === true){
+		 deployment = false;
+		 if(electionConf.deployment){
+			 deployment = true;
 			 var sAddresses = JSON.parse(sAddressesRaw);
 			 electionManager = sAddresses.electionHandler;
 			 votingBooth = sAddresses["server-address"].votingbooth;
 			 collectingServer = sAddresses["server-address"].collectingserver;
-			 lastMix = sAddresses["server-address"].mix2;
 		 }
 		var tmp = collectingServer.split("://");
 		if(tmp.length > 1){
@@ -656,29 +629,31 @@ function electionButtons() {
 	    rows.on('click', function(e) {
 	        row = $(this);
 	        
-	        rows.removeClass('highlight');
-	        row.addClass('highlight');
-	        
-	        value = $(this).children()["0"].innerHTML; 
-	        
-	        // read the time stamp for the election address
-	        var i = 0;
-    		for(i = 0; i < elections.length ; i++) {
-    			if(elections[i].electionID == value){
-    				break;
-    			}
-    		}
-	        ELS = elections[i]["ELS"];
-
-			$("#remove").prop('disabled', null);
-			
-			// Show Invite Voters or Check Result button
-			// (depending on election state) and retest every second
-			window.clearInterval(votingStatus);
-			showVotingState(value);
-		    votingStatus = window.setInterval(function() {
-		    	showVotingState(value);
-		     }, 3000);
+	        if(row.hasClass('elecs')){
+		        rows.removeClass('highlight');
+		        row.addClass('highlight');
+		        
+		        value = $(this).children()["0"].innerHTML; 
+		        
+		        // read the time stamp for the election address
+		        var i = 0;
+	    		for(i = 0; i < elections.length ; i++) {
+	    			if(elections[i].electionID == value){
+	    				break;
+	    			}
+	    		}
+		        ELS = elections[i]["ELS"];
+	
+				$("#remove").prop('disabled', null);
+				
+				// Show Invite Voters or Check Result button
+				// (depending on election state) and retest every second
+				window.clearInterval(votingStatus);
+				showVotingState(value);
+			    votingStatus = window.setInterval(function() {
+			    	showVotingState(value);
+			     }, 3000);
+	        }
 		    
 	        
 	    });
@@ -988,7 +963,7 @@ function electionButtons() {
 	      // checking if the final server has ready result.
 	      //
 	 	 var stat = 'what';
-	 	 var url = protocol + collectingServer+'/'+ELS+'/status';
+	 	 var url = deployment ? protocol+collectingServer.replace(".", ELS+".")+"/status" : protocol+collectingServer+"/"+ELS+"/status"
 	      $.get(url)
 	       .fail(function () { 
 	          var stat = 'no response';

@@ -49,6 +49,19 @@ streams: [{
 }));
 /***********************/
 
+/*********************************************/
+/******* RATE LIMITER for WEB-APIs *******/
+var RateLimit = require('express-rate-limit');
+app.enable('trust proxy');  // app behind the nginx reverse proxy: the client’s IP address is taken from the left-most entry in the X-Forwarded-* header.
+var limiter = new RateLimit({
+	  windowMs: 1000, // 1 sec
+	  max: 3, // limit each IP to 3 requests per windowMs
+	  delayMs: 0 // disable delaying - full speed until the max limit is reached
+	});
+
+//apply to all requests
+app.use(limiter);
+/*********************************************/
 
 // parameter keeping track of the number of mix servers
 var numMix = 0;
@@ -85,7 +98,7 @@ app.post('/election', function(req, res) {
 	
 });
 app.get('/election', function(req, res) {
-	console.log('accessing');
+	res.responseType = "json";
 	res.send({ready: true});
 });
 		
@@ -240,23 +253,22 @@ function spawnServer(req, callback){
 	else if(task === "complete"){
 		var value = req.body.ID;
 		var pass = req.body.password;
-		var ports = "placeholder";
+		var rand = req.body.userChosenRandomness;
 	    var keypairs = [];
 		if(storedKeypairs.length > numMix){
 			for(i = 0; i < numMix+1; i++){
 				keypairs.push(storedKeypairs.pop());
 			}
-			req.body.keys = keypairs;
 		}
-	    
 	    //hash password
 		var salt = bcrypt.genSaltSync(10);
 		var hash = bcrypt.hashSync(pass, salt);
-		req.body.password = hash;
+		
 		var parameters = JSON.stringify(req.body);
+		var additionalParam = JSON.stringify({userChosenRandomness: rand, keys: keypairs, password: hash})
 
 		//call the python script to start the servers
-		session = spawn('python', [SRC_DIR+'createElection.py', ports, parameters]);
+		session = spawn('python', [SRC_DIR+'createElection.py', "completeElection", parameters, additionalParam]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
@@ -312,9 +324,9 @@ function spawnServer(req, callback){
 				keypairs.push(storedKeypairs.pop());
 			}
 		}
-		var mockParam = {mockElection: true, userChosenRandomness: rand, keys: keypairs}
+		var additionalParam = JSON.stringify({userChosenRandomness: rand, keys: keypairs})
 		//call the python script to start the servers
-	    var session = spawn('python', [SRC_DIR+'createElection.py', JSON.stringify(mockParam)]);
+	    var session = spawn('python', [SRC_DIR+'createElection.py', "mockElection", "placeholder", additionalParam]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
 				var time =  new Date();
@@ -344,7 +356,6 @@ function spawnServer(req, callback){
 			//log the error in ERRLOG_FILE, async queue
 	    	//to make sure it's not being written to 
 	    	//simultaneously
-			console.log(data);
 			var dat = {err: data, proc: 'simple'};
 	    	logErrQueue.push(dat);
 
