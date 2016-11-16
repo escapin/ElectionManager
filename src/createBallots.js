@@ -6,9 +6,10 @@ var strHexConversion = require('../sElect/node_modules/strHexConversion');
 var unpair = crypto.deconcatenate;
 var verif = crypto.verifsig;
 
+var receiptID_LENGTH=10; // length of the verification code in case 'userChosenRandomness' is false 
+// (if this number is odd, the next even integer is taken)
 
 //SHORTCUTS
-
 var pair = crypto.concatenate;
 var enc  = crypto.pke_encrypt;
 var dec  = crypto.pke_decrypt;
@@ -56,7 +57,10 @@ function createBallot (choices, userCode) {
     
     } else {	// verificationCode := (TAG_VERIFCODEAUTO, receiptID)
     	var userCode = ''; // NOTE: if userCode doesn't exist, it is set to the empty string
-    	var receiptID = crypto.nonce().slice(0,18);
+    	if(receiptID_LENGTH%2 == 0)
+        	var receiptID = crypto.nonce().slice(0, receiptID_LENGTH);
+        else
+        	var receiptID = crypto.nonce().slice(0, receiptID_LENGTH+1);
     	
     	var verificationCode = pair(exports.TAG_VERIFCODEAUTO, receiptID);
     }
