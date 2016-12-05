@@ -38,10 +38,11 @@ The script can be called with 1 to 3 arguments
 
 [3] argument (optional) should be a stringified JSON object, with optional keys:
         "password": string encrypted with 'bcrypt'
-        "userChosenRandomness" true or false (boolean)
+        "userChosenRandomness": true or false (boolean)
         "hidden": true or false (boolean)
         "subdomain": a subdomain all the servers will be on, this will replace the ELS,
                 therefore two election with the same subdomain should not be created (no check yet).
+        "confidentialVotersFile": path to json file containing a list of emails (voters) in the key "voters"
         "keys": array/list containing 1+<numberOfMixServers> (usually three mix servers) JSON objects
                 containing 4 corresponding keypairs: {encryption_key, verification_key, signing_key, decryption_key}
 '''
@@ -184,11 +185,13 @@ def getInput():
     global hidden
     global ELS
     global getELS
+    global confidentialVotersFile
     
     #get input parameters (if any)
     startingTime = addSec(getTime(), -24*60*60).strftime("%Y-%m-%d %H:%M UTC+0000")
     endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
     voters = []
+    confidentialVotersFile = ""
     mockElection = True if len(sys.argv) < 2 or "mock" in sys.argv[1] else False
     if not mockElection:
         electionArgs = json.loads(sys.argv[2])
@@ -238,6 +241,8 @@ def getInput():
             if len(additionalArgs["subdomain"]) > 0:
                 ELS = "."+additionalArgs["subdomain"]
                 getELS = False
+        if "confidentialVotersFile" in additionalArgs:
+            confidentialVotersFile = additionalArgs["confidentialVotersFile"]
 
 def getMixServerConfig():
     global mixConf
@@ -339,7 +344,8 @@ def sElectCopy(iDlength):
             break
         except:
             iDlength = iDlength+1
-            
+    if confidentialVotersFile is not "":
+        copy(confidentialVotersFile, dstroot+"/CollectingServer/confidentialVoters.json")
     #if "http://localhost" not in serverAddress["collectingserver"]:
     #    ELS = electionID
     #    serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
