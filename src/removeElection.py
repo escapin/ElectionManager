@@ -96,7 +96,8 @@ def shutdownServers():
 
 def writeToHandlerConfig():
     global eleInfo
-    
+    global hidden
+
     #modify electionconfig File
     try:
         jsonFile = open(electionConfig, 'r+')
@@ -122,8 +123,13 @@ def writeToHandlerConfig():
         pass
 	#print(electionID + "not found i electionsURI.json, continue without removing.")
     if not hidden:
-        jwrite.jRemElec(electionConfig, electionID)
-        eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)
+        print("did this")
+        try:
+            jwrite.jRemElec(electionConfig, electionID)
+            eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)
+        except:
+            jwrite.jRemHidden(electionInfoHidden, electionConfig, electionID)
+            hidden = True
     else:
         jwrite.jRemHidden(electionInfoHidden, electionConfig, electionID)
     subprocess.call([rootDirProject + "/ElectionHandler/refreshConfig.sh"], cwd=(rootDirProject + "/ElectionHandler"))
