@@ -6,6 +6,21 @@ import subprocess
 from signal import SIGKILL
 import jwrite
 
+'''
+The script can be called with 3 arguments
+
+[1] argument should be the election ID of the election that is to be removed,
+    as saved in handlerConfigFiles.json (usually 7 characters, unless there are dublicates)
+    
+[2] argument should be the password
+
+[3] argument (optional) should be "true" if the election is hidden, and omitted if it is not
+    (hidden elections will still be removed if the argument was forgotten)
+'''
+
+'''
+retrieve the process ID's from the handlerConfigFile
+'''
 def getProcIDs(src, key, value):
     procID = []
     try:
@@ -21,6 +36,9 @@ def getProcIDs(src, key, value):
     except IOError:
         sys.exit("cannot find process ID.")
 
+'''
+checks if the entered password is correct
+'''
 def matchPass(src, key, value):
     try:
         jsonFile = open(src, 'r')
@@ -37,7 +55,7 @@ def matchPass(src, key, value):
             sys.exit("wrong password")
     except IOError:
         sys.exit("file missing")
-        
+
 def removePass(src, value):
     try:
         jsonFile = open(src, 'r+')
@@ -50,6 +68,10 @@ def removePass(src, value):
     except IOError:
         sys.exit("file missing")
 
+'''
+defines the location of every file that will 
+be written to or read from
+'''
 def setConfigFiles():
     global rootDirProject
     global electionConfig
@@ -71,6 +93,9 @@ def setConfigFiles():
     nginxConf = rootDirProject + "/nginx_config/nginx_select.conf"
     passList = rootDirProject + "/ElectionHandler/_data_/pwd.json"
 
+'''
+handles the input received
+'''
 def getInput():
     global electionID
     global password
@@ -84,6 +109,9 @@ def getInput():
     except:
         hidden = False
 
+'''
+closes the servers by sending 'SIGKILL' using the process ID's
+'''
 def shutdownServers():
     #kill processes
     config = electionInfoHidden if hidden else electionConfig
@@ -94,6 +122,12 @@ def shutdownServers():
         except:
             pass
 
+'''
+removes the election from handlerConfigFile.json
+and election(Hidden)Info.json;
+double checks on hidden elections even if the option
+was not specified
+'''
 def writeToHandlerConfig():
     global eleInfo
     global hidden
@@ -123,7 +157,6 @@ def writeToHandlerConfig():
         pass
 	#print(electionID + "not found i electionsURI.json, continue without removing.")
     if not hidden:
-        print("did this")
         try:
             jwrite.jRemElec(electionConfig, electionID)
             eleInfo = jwrite.jRemElecAndReturn(electionInfo, electionID)
@@ -134,7 +167,13 @@ def writeToHandlerConfig():
         jwrite.jRemHidden(electionInfoHidden, electionConfig, electionID)
     subprocess.call([rootDirProject + "/ElectionHandler/refreshConfig.sh"], cwd=(rootDirProject + "/ElectionHandler"))
     
-
+'''
+removes the servers from the nginx configuration,
+locates the correct server blocks by the commented
+election ID and iterating through the lines until
+the same amount of brackets have been closed as
+opened
+'''
 def writeToNginxConfig():
     #modify nginx File
     nginxFile = open(nginxConf, 'r+')
