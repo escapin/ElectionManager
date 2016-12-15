@@ -47,6 +47,12 @@ The script can be called with 1 to 3 arguments
                 containing 4 corresponding keypairs: {encryption_key, verification_key, signing_key, decryption_key}
 '''
 
+
+
+'''
+single function to copy a directory or file using shutil,
+while some folders can be omitted (specified in the ignore parameter)
+'''
 def copy(src, dest):
     try:
         shutil.copytree(src, dest, symlinks=False, ignore=ignore_patterns("*.py", "00", "01", "02", "tests"))
@@ -61,10 +67,21 @@ def getTime():
     utcTime = datetime.datetime.utcnow()
     return utcTime
 
+'''
+modifies a date by seconds, currently used to set starting time 24h prior
+to creation date for mock elections
+'''
 def addSec(tm, secs):
     fulldate = tm + datetime.timedelta(seconds=secs)
     return fulldate
 
+'''
+defines the location of every file that will 
+be written to or read from, except the files for
+the mix server and key generation, since the 
+number of mix servers can only be determined at 
+a later time; will be defined at getMixServerConfig()
+'''
 def setConfigFiles():
     global rootDirProject
     
@@ -112,9 +129,14 @@ def setConfigFiles():
     authManifest = "/Authenticator/ElectionManifest.json"     
     authConf = "/Authenticator/config.json" 
     mixConf = []
-    
+
+'''
+reads the configuration data for the ElectionManager,
+the ElectionManifest will be read for default configurations;
+parameters will be overwritten if they are specified in the
+input parameters (mock elections will mostly use the default settings)
+'''
 def getConfigData():
-    #get duration and deployment status from handlerConfigFile
     global deployment
     global serverAddr
     global votingTime
@@ -132,6 +154,7 @@ def getConfigData():
     global eleChoices
     global publish
     
+    #get duration and deployment status from handlerConfigFile
     deployment = False
     serverAddr = False
     try:
@@ -164,7 +187,13 @@ def getConfigData():
         jsonFile.close()
     except IOError:
         sys.exit("ElectionManifest missing or corrupt")
-        
+
+
+'''
+handles the input received, in case it is not a
+mock election that is created, most parameters defined
+in getConfigData() will be overwritten
+'''
 def getInput():
     global password
     global mockElection
@@ -192,6 +221,7 @@ def getInput():
     endingTime = addSec(getTime(), votingTime).strftime("%Y-%m-%d %H:%M UTC+0000")
     voters = []
     confidentialVotersFile = ""
+    #check if a mock election should be created
     mockElection = True if len(sys.argv) < 2 or "mock" in sys.argv[1] else False
     if not mockElection:
         electionArgs = json.loads(sys.argv[2])
@@ -202,7 +232,7 @@ def getInput():
         elecQuestion = electionArgs['question']
         try:
             eleChoices = electionArgs['choices[]']
-        except:
+        except:                                     #needed due to differences in how javascript handles json objects
             eleChoices = electionArgs['choices']
         publish = electionArgs['publishListOfVoters']
         publish = True if publish == "true" or publish == True else False
@@ -214,12 +244,12 @@ def getInput():
             maxChoices = electionArgs['maxChoicesPerVoter']
         if "voters" in electionArgs:
             voters = electionArgs['voters']
-        elif "voters[]" in electionArgs:
+        elif "voters[]" in electionArgs:            #needed due to differences in how javascript handles json objects
             voters = electionArgs['voters[]']
         if "furtherInfo" in electionArgs:
         	furtherInfo = electionArgs['furtherInfo']
  
-
+    #get additional parameters
     password = ""
     randomness = False
     keys = []
@@ -241,9 +271,15 @@ def getInput():
             if len(additionalArgs["subdomain"]) > 0:
                 ELS = "."+additionalArgs["subdomain"]
                 getELS = False
+                #if a subdomain is used, the ELS is not needed (since the subdomain should be unique)
         if "confidentialVotersFile" in additionalArgs:
             confidentialVotersFile = additionalArgs["confidentialVotersFile"]
 
+
+'''
+with the number of mix servers now knows, specify
+the file locations
+'''
 def getMixServerConfig():
     global mixConf
     
@@ -254,6 +290,11 @@ def getMixServerConfig():
         else:
             mixConf.append("/templates/config_mix" + str(x) + ".json")
 
+'''
+reads from serverAddresses.json to create the URI
+for the node servers; if a subdomain was not specified,
+it will use a "00" to "99" as the ELS
+'''
 def getServerLocations():
     global ports
     global ELS
@@ -264,20 +305,24 @@ def getServerLocations():
     #get server URI's
     ports = electionUtils.usePorts(electionConfig, 3+numMix)
     if getELS:
-        ELS = electionUtils.getELS(electionConfig)                      #number between 00 and 100/maxElections, corresponds with subdomains
+        ELS = electionUtils.getELS(electionConfig)          #number between 00 and 100/maxElections, corresponds with subdomains
     serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
     #time stamp for folder path
     tStamp = startingTime.replace("-", "").replace(":", "").split()
     sName = tStamp[0] + tStamp[1]
 
+'''
+uses the key generation scripts in sElect/tools
+to create new keys for each election
+'''
 def updateKeys():
     global mixServerEncKey
     global keys
     
     #update encryption keys
-    pattern="[0-9]+"
-    keyGeneratorMix_file="genKeys4mixServer.js"
-    keyGeneratorCS_file="genKeys4collectingServer.js"
+    pattern = "[0-9]+"
+    keyGeneratorMix_file = "genKeys4mixServer.js"
+    keyGeneratorCS_file = "genKeys4collectingServer.js"
     tools_path = sElectDir + "/tools"
     keyFile = rootDirProject + "/ElectionHandler/_data_/keys.json"
     
@@ -325,7 +370,10 @@ def writeManifest():
     for x in range(numMix):
         jwrite.jwriteAdv(sElectDir + manifest, "mixServers", serverAddress["mix"+str(x)], x, "URI")
 
-
+'''
+create the electionID using the hash of the ElectionManifest and
+copy the sElect directory to "elections/<timestamp>_<electionID>_sElect"
+'''
 def sElectCopy(iDlength):
     global dstroot
     global electionID
@@ -346,10 +394,7 @@ def sElectCopy(iDlength):
             iDlength = iDlength+1
     if confidentialVotersFile is not "":
         copy(confidentialVotersFile, dstroot+"/CollectingServer/confidentialVoters.json")
-    #if "http://localhost" not in serverAddress["collectingserver"]:
-    #    ELS = electionID
-    #    serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
-        
+
 def writesElectConfigs():
     #modify Server ports
     jwrite.jwrite(dstroot + collectingConf, "port", ports[0])
@@ -371,21 +416,33 @@ def writesElectConfigs():
         jwrite.jwrite(dstroot + collectingConf, "sendEmail", False)
 
 def updateTrustedOrigins():
+    #split the URI to receive the domain
     authdomain = serverAddress["authenticator"]
     temp = authdomain.split("://")
     temp[1] = temp[1].split("/")[0]
     authdomain = "://".join(temp)
+    
     vbdomain = serverAddress["votingbooth"]
     temp = vbdomain.split("://")
     temp[1] = temp[1].split("/")[0]
     vbdomain = "://".join(temp)
+    
+    #specify the voting booth and authenticator domains as trusted domains
     varname = "trustedOrigins"
     csTrusts = 'var '+varname+' = ["'+vbdomain+'","'+authdomain+'"];'
     csFile = "/CollectingServer/webapp/trustedOrigins.js"
+    
     file = open(dstroot+csFile, 'w')
     file.write(csTrusts)
     file.close()
 
+'''
+creates a number of ballots determined by <mockVoters>,
+each ballot uses a (pseudo)random number of random choices 
+(within the boundary of how many choices are allowed) and
+saves them in the collecting servers accepted ballots file;
+only used for mock elections
+'''
 def createBallots():
     if mockElection:
         #create Ballots
@@ -397,18 +454,27 @@ def createBallots():
             nChoices = random.randint(minChoices,max)
             userRandom = []
             userChoices = []
+            
+            #add some randomness to the choices made
             for i in range(nChoices):
                 temp = random.randint(0,(len(eleChoices)-1))
                 while temp in userChoices:
                     temp = random.randint(0,(len(eleChoices)-1))
                 userChoices.append(temp)
+            
             userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if randomness else ""
             userEmail = "user"+str(x)+"@uni-trier.de"
             userChoices = str(userChoices).replace(" ", "").replace("u'", "").replace("'", "")
+            
             ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, userChoices, electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
         ballots.wait()
 
-
+'''
+starts the node servers for sElect, redirects their STDOUT
+to log files while keeping the STDERR linked to the parent,
+so that the parent node application (which calls this file)
+can handle the errors that arise.
+'''
 def sElectStart():
     global newPIDs
     
@@ -421,6 +487,7 @@ def sElectStart():
     subprocess.call([dstroot + "/VotingBooth/refresh.sh"], cwd=(dstroot+"/VotingBooth"))
     subprocess.call([dstroot + "/Authenticator/refresh.sh"], cwd=(dstroot+"/Authenticator"))
     with open(logfolder+"/CollectingServer.log", 'w') as file_out:
+        #since ballots are pre-created for mock elections, the resume option will have to be used
         if mockElection:
             col = subprocess.Popen(["node", "collectingServer.js", "--resume"], stdout=file_out, cwd=(dstroot+"/CollectingServer"))
         else:
@@ -439,7 +506,12 @@ def sElectStart():
         for x in range(numMix):
             newPIDs["m"+str(x)] = mix[x].pid   
 
-
+'''
+writes information about the created election in the
+handlerConfigFile.json (unless hidden), creates a file
+with the minimum amount of information needed for the
+ElectionHandler and sends the returns the information
+'''
 def writeToHandlerConfig():
     global eleInfo
     #add the password
@@ -467,6 +539,11 @@ def writeToHandlerConfig():
         eleInfo = {"electionID": electionID, "electionTitle": elecTitle, "startTime": startingTime, "endTime": endingTime, "ELS": ELS, "processIDs": newPIDs, "used-ports": ports}
         jwrite.jAddList(electionInfoHidden, "elections", eleInfo)
 
+
+'''
+template to redirect a domain to a specified URI,
+used to redirect http to https
+'''
 def redirectHttp(nginxData, electionID, listenPort, domainIN, urlOUT, code):
     counter = 0
     for line in nginxData:
@@ -485,11 +562,39 @@ def redirectHttp(nginxData, electionID, listenPort, domainIN, urlOUT, code):
     
     return nginxData
 
+
+'''
+configures nginx to work with the newly created election,
+differentiates between a local setting (election running on
+local machine and no internet connection required, cannot
+connect from the outside) by checking if the server URI's
+include "https://localhost".
+Further differentiates between a subdomain being used or not
+(in which case multiple redirections are used to make user
+links more flexible.
+In a non a local setting, this method requires the 
+nginx file to have the lines at the end of the http block:
+
+-    #end main server
+-    #end collecting server
+-    #end bulletin board
+-    #end mix server <number>
+-    #end voting booth
+-    #end authenticator
+
+since those will be used to keep structure 
+(see templates/nginx_select.conf)
+'''
 def writeToNginxConfig():
     
     #modify nginx File
     if "http://localhost" not in serverAddress["collectingserver"]:
         onSSL = True
+        ssl_adds = ["    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;\n",
+                            "    ssl_ciphers         HIGH:!aNULL:!MD5;\n", "\n",
+                            "    proxy_set_header X-Forwarded-For $remote_addr;\n", "\n"]
+        
+        #folder containing the folders for certificates
         crtPath = serverAddress["tlspath"]
         listenPort = "    listen " + str(nginxPort)
         if onSSL:
@@ -503,11 +608,14 @@ def writeToNginxConfig():
         if not getELS:
             vb = serverAddress["votingbooth"]
             vb = vb[:len(vb)-1]
+            
             domain = serverAddress["votingbooth"].split("://")[1]
             domain = domain[:len(domain)-1]
+            #certificate folder for this domain
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
+            
             counter = 0
             for line in nginxData:
                 if "end main server" in line:
@@ -530,23 +638,6 @@ def writeToNginxConfig():
             nginxData.extend(comments)
             nginxFile.seek(0)
             
-            '''
-            counter = 0
-            for line in nginxData:
-                if "end main server" in line:
-                    break
-                counter = counter + 1
-            bracketIt = nginxData[counter:]
-            del nginxData[counter:]
-            
-            comments = ["  # Redirect http " + str(electionID) + " \n", "  server {\n", 
-                        "    listen 8080;", "\n",
-                        "    server_name "+ domain + " " + keyFolder + ";\n", "\n"]
-            comments.extend(["    return 302 " + vb, ";\n", "  }\n", "\n"])
-            comments.extend(bracketIt)
-            nginxData.extend(comments)
-            nginxFile.seek(0)
-            '''
             
             csdomain = serverAddress["collectingserver"].split("://")[1]
             csdomain = csdomain[:len(csdomain)-1]
@@ -554,6 +645,7 @@ def writeToNginxConfig():
             bbdomain = bbdomain[:len(bbdomain)-1]
             authdomain = serverAddress["authenticator"].split("://")[1]
             authdomain = authdomain[:len(authdomain)-1]
+            
             cs = serverAddress["collectingserver"]
             cs = cs[:len(cs)-1]
             bb = serverAddress["bulletinboard"]
@@ -580,6 +672,7 @@ def writeToNginxConfig():
         ###### Collecting server ######
         domain = serverAddress["collectingserver"].split("://")[1]
         domain = domain[:len(domain)-1]
+        
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -587,6 +680,7 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
+            
         counter = 0
         for line in nginxData:
             if "end collecting server" in line:
@@ -613,6 +707,7 @@ def writeToNginxConfig():
         ###### Bulletin board ######
         domain = serverAddress["bulletinboard"].split("://")[1]
         domain = domain[:len(domain)-1]
+        
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -620,6 +715,7 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
+            
         counter = 0
         for line in nginxData:
             if "end bulletin board" in line:
@@ -647,6 +743,7 @@ def writeToNginxConfig():
         for x in range(numMix):
             domain = serverAddress["mix"+str(x)].split("://")[1]
             domain = domain[:len(domain)-1]
+            
             keyFolder = domain.split(".")
             keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
             keyFolder = ".".join(keyFolder)
@@ -654,6 +751,7 @@ def writeToNginxConfig():
                 keyFolder = domain.split(".")
                 del keyFolder[0]
                 keyFolder = ".".join(keyFolder)
+                
             counter = 0
             for line in nginxData:
                 if "end mix server " + str(x) in line:
@@ -681,6 +779,7 @@ def writeToNginxConfig():
         ###### Voting Booth ######
         domain = serverAddress["votingbooth"].split("://")[1]
         domain = domain[:len(domain)-1]
+        
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -688,6 +787,7 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
+            
         counter = 0
         for line in nginxData:
             if "end voting booth" in line:
@@ -714,6 +814,7 @@ def writeToNginxConfig():
         ###### Authenticator ######
         domain = serverAddress["authenticator"].split("://")[1]
         domain = domain[:len(domain)-1]
+        
         keyFolder = domain.split(".")
         keyFolder[0] = keyFolder[0][:(len(keyFolder[0])-2)]+"00"
         keyFolder = ".".join(keyFolder)
@@ -721,6 +822,7 @@ def writeToNginxConfig():
             keyFolder = domain.split(".")
             del keyFolder[0]
             keyFolder = ".".join(keyFolder)
+            
         counter = 0
         for line in nginxData:
             if "end authenticator" in line:
