@@ -4,6 +4,7 @@ import codecs
 import json
 import collections
 import socket
+import sys
 
 '''
 checks whether a port is free or in use
