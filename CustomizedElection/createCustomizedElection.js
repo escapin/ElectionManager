@@ -7,17 +7,24 @@ var spawn = child_process.spawn;
 The script can be called with 2 to 4 arguments
 
 SYNOPSIS
-	node createCustomizedElection.js -m PATH/TO/MANIFEST -p PASSWORD [-s SUBDOMAIN] [-h] [-r]
+	node createCustomizedElection.js -m <path/to/manifest.json> -p <pwdToCloseTheElection> [-v <path/to/confidentialVoters.json>] [-s <subdomain>] [-h] [-r]
 
-DESCRIPTION:
-	-m PATH/TO/MANIFEST: PATH/TO/MANIFEST will be used as the election manifest for the election
-	-p PASSWORD: set password to close and remove the election to PASSWORD
-	[-s SUBDOMAIN: the election will be displayed at SUBDOMAIN.serverdomain 
-		(server domain is set in deployment/serverAddresses.json), no ELS will be used, optional argument]
-	[-v PATH/TO/VOTERS: path to a file containing the confidential voters
-		(json file with a root key "voters" containing a list of emails)]
-	[-h: the election will be hidden from the ElectionManager, optional argument]
-	[-r: user has to enter part of the verification code, userchosenRandomness set to true, optional argument]
+OPTIONS:
+	-m <path/to/manifest.json>
+	            Provide the election manifest file
+	-p <pwdToCloseTheElection>
+	            Set password to close and remove the election to <pwdToCloseTheElection>
+	-s <subdomain>
+	            Optional argument: instead of using the Election Lookup String (ELS) in the URI, the election will be displayed 
+		    at localhost:[port]/<subdomain> if the system run in localhost, <subdomain>.serverdomain otherwise.
+	-v <path/to/confidentialVoters.json 
+	            Optional argument: instead of making the list of voters' email addresses publicly available in the election manifest, 
+		    provide them only to the collecting server.
+	-h: 
+	            Optional argument: the election will be hidden from the ElectionHandler web interface, if any
+	-r: 
+	            Optional argument: the user has to provide part of the verification code which will later be used to verify 
+		    that her vote has been properly counted. This would weaker the assumption on the voting booth's honesty.
 
 **/
 
