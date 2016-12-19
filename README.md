@@ -84,11 +84,10 @@ servers URI/cryptographic keys by the scripts creating the election.
 
 In the `CustomizedElection` folder, a fully customized election can be created with
 
-SYNOPSIS
 ```
 node createCustomizedElection.js -m <path/to/manifest.json> -p <pwdToCloseTheElection> [-v <path/to/confidentialVoters.json>] [-s <subdomain>] [-h] [-r]
 ```
-OPTIONS
+where the parameters are
 ```
 	-m <path/to/manifest.json>
 	    Provide the election manifest file
@@ -109,12 +108,10 @@ OPTIONS
 
 In the `CustomizedElection` folder, a fully customized election can be removed with
 
-SYNOPSIS
 ```
 node removeCustomizedElection.js -e <atLeast7charOfElectionID> -p <pwdInsertedWhenElectionCreated> [-h]
 ```
-
-OPTIONS
+where the parameters are
 ```
 	-e <atLeast7charOfElectionID>
 	    The electionID of the election to be removed (at least 7 digits of the electionID are required)
