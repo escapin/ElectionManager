@@ -10,10 +10,6 @@ var async = require('async');
 var toobusy = require('toobusy-js');
 const readline = require('readline');
 
-//var https = require('https');
-//var certificate = fs.readFileSync("../deployment/cert/select.chained.crt", 'utf8');
-//var certificate_key = fs.readFileSync("../deployment/cert/select.key", 'utf8');
-//var credentials = {key: certificate_key, cert: certificate};
 var cors = require('cors');
 var child_process = require("child_process");
 var config = require('../src/file2JSON');
@@ -23,7 +19,6 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended : false }));
 var spawn = child_process.spawn;
 var path = 'webapp/';
-//var httpsserver = https.createServer(credentials, app);
 
 //SRC directory of the project
 var SRC_DIR = "../src/"
@@ -63,8 +58,7 @@ var limiter = new RateLimit({
 app.use(limiter);
 /*********************************************/
 
-// parameter keeping track of the number of mix servers
-var numMix = 0;
+var numMix = 0;					//number of mix servers, set later
 var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConfigFile.json"));
 var maxElections = handlerConfigFile.maxNumberOfElections;
 var createdElections = handlerConfigFile.electionsCreated;
@@ -74,9 +68,13 @@ var storedKeypairs = [];
 
 ERRLOG_FILE = DATA_DIR + '/err.log';
 
+//handle incoming connections, expects a json object
 app.post('/election', function(req, res) {
 	var task = req.body.task;
 	
+	//create a new election (complete or simple), or remove an existing one
+	//puts all requests in a queue, in order to prevent multiple scripts 
+	//writing to the same file at the same time
 	if((task === "complete" || task === "simple") && createdElections < maxElections) {
 		// add the the async queue the task to be performed
 		pythonQueue.push(req, function(data){
@@ -102,28 +100,13 @@ app.get('/election', function(req, res) {
 	res.send({ready: true});
 });
 		
-/**
- * Create a ghost server and let it listen
- * to a port to check if the port is in use.
- */
-var portInUse = function(port){
-	var ghost = net.createServer();
-	ghost.listen(port, function(err){
-		ghost.once('close', function(){
-			return false;
-		});
-		ghost.close();
-	});
-	ghost.on('error', function(err){
-		if(err.code !== 'EADDRINUSE'){
-			return err;
-		}
-		return true;
-	})
-	ghost.close()
-	return false;
-};
 
+/**
+ * Writes occuring errors to the error log file and adds a 
+ * timestamp to every error that occurs more than one second
+ * after the previous. Written in order to be queued, so that
+ * multiple calls won't write to the same file at the same time
+ */
 var prevTime = new Date();
 var prevProc = "";
 function logError(data, callback){
@@ -158,14 +141,16 @@ function spawnServer(req, callback){
 		 callback("Max Number of Elections reached: Remove an election (if possible) or wait until an authorized user does it.");
 		 return;
 	}
-	/**
-	 * the "retry" task is only called in case "EADDRINUSE" error
-	 * happens during the spawning of a servers.
-	 * In the old version of nodejs, there exists a documented bug where nodejs
-	 * return "EADDRINUSE" even if the port is actually free.
-	 * This method copes with this issue.
-	 */
+	
+	//handle the different tasks (retry, resume, remove, simple, complete)
 	if(task === "retry"){
+		/**
+		 * the "retry" task is only called in case "EADDRINUSE" error
+		 * happens during the spawning of a servers.
+		 * In the old version of nodejs, there exists a documented bug where nodejs
+		 * return "EADDRINUSE" even if the port is actually free.
+		 * This method copes with this issue.
+		 */
 		var errPort = req.errPort
 		
 		console.log("\nPort " + errPort + " in use, attempting to start server on different port:")
@@ -195,7 +180,8 @@ function spawnServer(req, callback){
 	    reSession.stderr.on('data', function (data) {
 	    	//log the error in ERRLOG_FILE, async queue
 	    	//to make sure it's not being written to 
-	    	//simultaneously
+	    	//simultaneously, call the function with 
+	    	//the 'retry' task if port errror occurs
 	    	var dat = {err: data, proc: 'respawn'};
 	    	logErrQueue.push(dat);
 
@@ -213,6 +199,13 @@ function spawnServer(req, callback){
 		});
 	}
 	else if(task === "resume"){
+		/**
+		 * 'resume' is called when the server is started 
+		 * and there previously created elections still
+		 * running (checks handlerConfigFile.json if there
+		 * are elections saved), will attempt to resume
+		 * those elections.
+		 */
 		var oldSession = spawn('python', [SRC_DIR+'resumeElection.py']);
 		oldSession.stdout.on('data', function (data) {
 			if(String(data).indexOf("OTP")>-1){
@@ -233,7 +226,8 @@ function spawnServer(req, callback){
 		oldSession.stderr.on('data', function (data) {
 			//log the error in ERRLOG_FILE, async queue
 	    	//to make sure it's not being written to 
-	    	//simultaneously
+	    	//simultaneously, call the function with 
+	    	//the 'retry' task if port errror occurs
 			var dat = {err: data, proc: 'resume'};
 	    	logErrQueue.push(dat);
 	    	
@@ -251,6 +245,10 @@ function spawnServer(req, callback){
 		});
 	}
 	else if(task === "complete"){
+		/**
+		 * creates a new election with arguments passed
+		 * down in the json object
+		 */
 		var value = req.body.ID;
 		var pass = req.body.password;
 		var rand = req.body.userChosenRandomness;
@@ -279,11 +277,20 @@ function spawnServer(req, callback){
 				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
 			if(String(data).indexOf("start test information::")>-1){
+				//for debugging: writing
+				//print(start test information::)
+				//print(<data>)
+				//print(::end test information)
+				//in the called python script (createElection.py)
+				//will cause the <data> to be displayed on the console screen
 				var testPrint = String(data).split("start test information::")[1];
 				testPrint = testPrint.split("::end test information")[0];
 				console.log(testPrint);
 			}
 			if(String(data).indexOf("electionInfo.json:\n")>-1){
+				//recieves a reduced version of the handlerConfigFile.json,
+				//with only the information relevant for the web interface to
+				//communicate with the servers, to reduce upload time
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
 				eleInfo = JSON.parse(eleInfo);
@@ -297,7 +304,8 @@ function spawnServer(req, callback){
 		session.stderr.on('data', function (data) {
 			//log the error in ERRLOG_FILE, async queue
 	    	//to make sure it's not being written to 
-	    	//simultaneously
+	    	//simultaneously, call the function with 
+	    	//the 'retry' task if port errror occurs
 			var dat = {err: data, proc: 'complete'};
 	    	logErrQueue.push(dat);
 
@@ -315,6 +323,10 @@ function spawnServer(req, callback){
 		});
 	}
 	else if(task === "simple"){
+		/**
+		 * creates a mock election, only needs to receive
+		 * the 'userChosenRandomness' parameter
+		 */
 		var value = req.body.ID;
 		var pass = req.body.password;
 		var rand = req.body.userChosenRandomness;
@@ -337,11 +349,20 @@ function spawnServer(req, callback){
 				console.log('[' + time +  '] Mix Server STDOUT:\n\t' + data);
 			}
 			if(String(data).indexOf("start test information::")>-1){
+				//for debugging: writing
+				//print(start test information::)
+				//print(<data>)
+				//print(::end test information)
+				//in the called python script (createElection.py)
+				//will cause the <data> to be displayed on the console screen
 				var testPrint = String(data).split("start test information::")[1];
 				testPrint = testPrint.split("::end test information")[0];
 				console.log(testPrint);
 			}
 			if(String(data).indexOf("electionInfo.json:\n")>-1){
+				//recieves a reduced version of the handlerConfigFile.json,
+				//with only the information relevant for the web interface to
+				//communicate with the servers, to reduce upload time
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
 				eleInfo = JSON.parse(eleInfo);
@@ -355,7 +376,8 @@ function spawnServer(req, callback){
 		session.stderr.on('data', function (data) {
 			//log the error in ERRLOG_FILE, async queue
 	    	//to make sure it's not being written to 
-	    	//simultaneously
+	    	//simultaneously, call the function with 
+	    	//the 'retry' task if port errror occurs
 			var dat = {err: data, proc: 'simple'};
 	    	logErrQueue.push(dat);
 
@@ -373,6 +395,10 @@ function spawnServer(req, callback){
 		});
 	}
 	else if(task === "remove"){
+		/**
+		 * removes an election, requires the electionID
+		 * and a password (possibly empty)
+		 */
 		var value = req.body.ID;
 		var pass = req.body.password;
 		
@@ -401,11 +427,20 @@ function spawnServer(req, callback){
 		session = spawn('python', [SRC_DIR+'removeElection.py', value, pass]);
 		session.stdout.on('data', function (data) {
 			if(String(data).indexOf("start test information::")>-1){
+				//for debugging: writing
+				//print(start test information::)
+				//print(<data>)
+				//print(::end test information)
+				//in the called python script (createElection.py)
+				//will cause the <data> to be displayed on the console screen
 				var testPrint = String(data).split("start test information::")[1];
 				testPrint = testPrint.split("::end test information")[0];
 				console.log(testPrint);
 			}
 			if(String(data).indexOf("electionInfo.json:\n">-1)){
+				//recieves a reduced version of the handlerConfigFile.json,
+				//with only the information relevant for the web interface to
+				//communicate with the servers, to reduce upload time
 				eleInfo = String(data).split("electionInfo.json:\n")
 				eleInfo = eleInfo[eleInfo.length-1];
 				eleInfo = JSON.parse(eleInfo);
@@ -434,6 +469,9 @@ function spawnServer(req, callback){
 		});
 	}
 	else if(task = "saveKeys"){
+		/**
+		 * stores the created keys for the sElect servers
+		 */
 		var keyFile = DATA_DIR+"/keys.json"
 		var obj = {keys: storedKeypairs};
 		fs.writeFileSync(keyFile, JSON.stringify(obj, null, 4), {spaces:4});
@@ -446,7 +484,10 @@ function spawnServer(req, callback){
 // dispatcher can run at any time
 var pythonQueue = async.queue(spawnServer, 1);
 
-
+/**
+ * generates keys for the sElect servers in advance,
+ * in order to reduce the time needed to create them.
+ */
 function generateKeys(callback){
 	if(storedKeypairs.length < maxStoredKeypairs){
 		keyGen = spawn('node', ['../sElect/tools/keyGen.js']);
@@ -513,7 +554,6 @@ function verify(passwd){
 
 // start the services
 function start(){
-	//var server = httpsserver.listen(port, function() {
 	var server = app.listen(port, function() {
 	    console.log('Serving on, port :%d', server.address().port);
 	});
