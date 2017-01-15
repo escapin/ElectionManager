@@ -94,7 +94,7 @@ function electionButtons() {
     		disableButtons();
     		$('#processing').fadeIn(150);
     		csServer = deployment ? protocol+collectingServer.replace(".", ELS+".")+"/admin/close" : protocol+collectingServer+"/"+ELS+"/admin/close"
-    		$.ajax({type: "GET", 
+    		$.ajax({type: "POST", 
     				url: csServer,
     				dataType: 'json',
     				headers: {"Authorization": "Basic " + btoa("admin" + ":" + pass)},
