@@ -269,7 +269,10 @@ def getInput():
             hidden = True if hidden == "true" or hidden == True else False
         if "subdomain" in additionalArgs:
             if len(additionalArgs["subdomain"]) > 0:
-                ELS = "."+additionalArgs["subdomain"]
+                if mockElection:
+                    ELS = additionalArgs["subdomain"]
+                else:
+                    ELS = "."+additionalArgs["subdomain"]
                 getELS = False
                 #if a subdomain is used, the ELS is not needed (since the subdomain should be unique)
         if "confidentialVotersFile" in additionalArgs:
@@ -871,7 +874,7 @@ def writeToNginxConfig():
         bracketIt = nginxData[prevBracket:]
         del nginxData[prevBracket:]
         comments = ["    # Voting Booth " + electionID + " \n", 
-                    "    location " + "/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
+                    "    location " + "/" + "vb/" + str(ELS) + "/ {\n", "        alias " + dstroot + "/VotingBooth/webapp/;\n", "        index votingBooth.html;\n","    }\n", "\n"]
         comments.extend(bracketIt)
         nginxData.extend(comments)
         nginxFile.seek(0)    

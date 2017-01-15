@@ -601,7 +601,7 @@ function electionButtons() {
 	     
 	     
 		 electionManager = "http://localhost:"+electionConf["nginx-port"]+"/electionManager";
-		 votingBooth = "http://localhost:"+electionConf["nginx-port"];
+		 votingBooth = "http://localhost:"+electionConf["nginx-port"]+"/vb";
 		 collectingServer = "http://localhost:"+electionConf["nginx-port"]+"/cs";
 		
 		//don't use port 80 if it's not deployed
