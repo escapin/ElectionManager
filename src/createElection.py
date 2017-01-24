@@ -269,10 +269,7 @@ def getInput():
             hidden = True if hidden == "true" or hidden == True else False
         if "subdomain" in additionalArgs:
             if len(additionalArgs["subdomain"]) > 0:
-                if mockElection:
-                    ELS = additionalArgs["subdomain"]
-                else:
-                    ELS = "."+additionalArgs["subdomain"]
+                ELS = "."+additionalArgs["subdomain"]
                 getELS = False
                 #if a subdomain is used, the ELS is not needed (since the subdomain should be unique)
         if "confidentialVotersFile" in additionalArgs:
@@ -310,6 +307,10 @@ def getServerLocations():
     if getELS:
         ELS = electionUtils.getELS(electionConfig)          #number between 00 and 100/maxElections, corresponds with subdomains
     serverAddress = electionUtils.getsAddress(electionConfig, deployment, numMix, nginxPort, ELS, serverAddr)
+    if "http://localhost" in serverAddress["collectingserver"]:
+        for key in serverAddress:
+            serverAddress[key] = serverAddress[key].replace("/.", "/")
+        
     #time stamp for folder path
     tStamp = startingTime.replace("-", "").replace(":", "").split()
     sName = tStamp[0] + tStamp[1]
