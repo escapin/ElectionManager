@@ -21,11 +21,7 @@ nginx:
 	python configNginx.py
 
 select:
-	@if [ -d "$sElect" ]; then\
-		cd sElect; git pull; \
-	else\
-		git clone -b master https://sElectVoting:fc-dLEhqSKRG0exK@bitbucket.org/escapin/select.git sElect;\
-	fi;\
+	git clone -b master https://sElectVoting:fc-dLEhqSKRG0exK@bitbucket.org/escapin/select.git sElect
 	cd sElect; make devenv;
 	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
 	cp sElect/templates/ElectionManifest.json _configFiles_/ElectionManifest.json
@@ -49,7 +45,7 @@ customclean:
 	cd CustomizedElection; make clean
 
 selectclean:
-	cd sElect; make devclean
+	-rm -rf sElect/
 
 nginxclean:	
 	-rm -rf nginx_config/
