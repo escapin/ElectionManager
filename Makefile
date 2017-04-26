@@ -21,8 +21,12 @@ nginx:
 	python configNginx.py
 
 select:
-	git clone -b master https://sElectVoting:fc-dLEhqSKRG0exK@bitbucket.org/escapin/select.git sElect
-	cd sElect; make devenv
+	@if [ -d "$sElect" ]; then\
+		cd sElect; git pull; \
+	else\
+		git clone -b master https://sElectVoting:fc-dLEhqSKRG0exK@bitbucket.org/escapin/select.git sElect;\
+	fi;\
+	cd sElect; make devenv;
 	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
 	cp sElect/templates/ElectionManifest.json _configFiles_/ElectionManifest.json
 	cp sElect/templates/favicon/* ElectionHandler/webapp/
@@ -44,11 +48,11 @@ handlerclean:
 customclean:
 	cd CustomizedElection; make clean
 
+selectclean:
+	cd sElect; make devclean
+
 nginxclean:	
 	-rm -rf nginx_config/
-
-selectclean:
-	-rm -rf sElect/
 
 elclean:
 	-rm -rf elections/
