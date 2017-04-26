@@ -10,10 +10,10 @@ remove **secure** and **verifiable** elections powered by sElect.
 * python (tested on v.2.7.12)
 * nginx (tested on v1.10)
 * git and wget (only for downloading the proper files and library)
-* Java JDK (tested with openjdk-8).
+* Java JDK (tested with openjdk-9).
 
 
-The system has been developed and deployed on Ubuntu Server 16.04.1 LTS.
+The system has been developed and deployed on Ubuntu Server 14.04.2 LTS.
 
 
 ## Design
