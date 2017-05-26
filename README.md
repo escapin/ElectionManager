@@ -58,7 +58,6 @@ confirmation, if the password was set.
 to be saved on the server, the election must have been previously closed. 
 It requires password confirmation, if the password was set.
 
-
 A) When the election is open, **Invite Voters to Vote** shows a link to the 
 voting booth web-page. To allow eligible voters to cast their ballot, invite them 
 to visit this web-page.
@@ -66,6 +65,7 @@ to visit this web-page.
 B) Once the election is closed, **Check Election Result** shows a link to the same 
 voting booth web-page. To allow voters to check the election result, invite them to 
 visit this web-page, namely the _same_ web-page they used to vote.
+
 
 This act triggers the *fully automated verification* procedure to investigate whether the 
 voter's choice has been actually counted.
