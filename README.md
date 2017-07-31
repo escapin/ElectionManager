@@ -77,8 +77,8 @@ voter's choice has been actually counted.
 Besides using the web interface, it is possible to create fully
 customized election by providing a properly configured election manifest
 and, optionally, a file containing a list of confidential voters which
-only the collection server has access to.  In the election manifest
-provided the URI and the public/private keys of the servers may not be
+only the Collecting Server has access to.  In the Election Manifest
+provided, the URI and the public/private keys of the servers may not be
 specified: these fields will anyway be overwritten with the proper
 servers URI/cryptographic keys by the scripts creating the election.
 
