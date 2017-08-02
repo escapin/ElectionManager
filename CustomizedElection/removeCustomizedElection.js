@@ -8,12 +8,18 @@ var spawn = child_process.spawn;
 The script can be called with 2 to 4 arguments
 
 SYNOPSIS
-	node removeCustomizedElection.js -e ELECTIONID -p PASSWORD [-h]
+	node removeCustomizedElection.js -e <atLeast7charOfElectionID> -p <pwdInsertedWhenElectionCreated> [-h]
 
 OPTIONS:
-	-e ELECTIONID: the electionID for the election, at least 7 digits of the electionID are required
-	-p PASSWORD: the password to remove the election
-	[-h]: if the election is hidden, this argument is required to remove it
+	-e <atLeast7charOfElectionID>
+	    The electionID of the election to be removed (at least 7 digits of the electionID are required)
+	-p <pwdInsertedWhenElectionCreated>
+	    The password inserted at creation time, which can also be used to close the election before the pre-set closing time
+	-h 
+	    Optional argument: the election to be removed is among the elections not shown in the election handler web interface, if any
+	    (such elections are referred to as 'hidden elections').
+	    If this argument is not provided, in case the election is not among the election displayed in the election handler, 
+	    it will anyway check whether such an election is among the 'hidden elections'.
 **/
 
 

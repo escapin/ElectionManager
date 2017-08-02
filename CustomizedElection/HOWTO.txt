@@ -1,3 +1,0 @@
-node createCustomizedElection.js -m </path/to/manifest.json> -p <pwd> -s <subdomain> [-h] [-r]
-
-node removeCustomizedElection.js -e <electionID-atleast7digits> -p <pwd> [-h]

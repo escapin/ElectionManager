@@ -4,7 +4,11 @@ import codecs
 import json
 import collections
 import socket
+import sys
 
+'''
+checks whether a port is free or in use
+'''
 def portOpen(port):
     host = "127.0.0.1"
     captive_dns_addr = ""
@@ -25,6 +29,10 @@ def portOpen(port):
 
     return True
 
+'''
+returns an array of ports that are
+not used by running elections
+'''
 def usePorts(src, num):
     newPorts = []
     try:
@@ -47,6 +55,11 @@ def usePorts(src, num):
         sys.exit("handlerConfigFile.json missing or corrupt")
     return newPorts
 
+
+'''
+returns a string between "00" and "99" (included),
+that is not already used by another election
+'''
 def getELS(src):
     usedELS = []
     newELS = -1
@@ -77,6 +90,11 @@ def getELS(src):
         newELS = "0"+newELS
     return newELS
 
+'''
+returns an array containing the URI's of the
+sElect servers, read from serverAddresses.json
+(if deployment is set to false, uses localhost)
+'''
 def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
     sAddress = []
     try:
@@ -112,12 +130,18 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
         sys.exit("serverAddresses.json missing or corrupt")
     return jsonAddress
 
+'''
+returns a part of the hashed ElectinoManifest
+'''
 def getID(src, num):
     manifestHash = hashManifest(src)
     elecID = manifestHash[:num]
     print(manifestHash)
     return elecID
 
+'''
+returns the hash of the ElectinoManifest
+'''
 def hashManifest(src):
     manifest_raw = codecs.open(src, 'r', encoding='utf8').read()
     manifest_raw = manifest_raw.replace("\n", '').replace("\r", '').strip()
@@ -125,6 +149,9 @@ def hashManifest(src):
     m.update(manifest_raw)
     return m.hexdigest()
 
+'''
+creates symlinks for the servers
+'''
 def link(dstroot, manifest, votingManifest, authManifest):
     os.mkdir(dstroot+"/mix/00")
     os.mkdir(dstroot+"/mix/01")
