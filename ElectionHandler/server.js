@@ -515,7 +515,7 @@ function verify(passwd){
 function start(){
 	//var server = httpsserver.listen(port, function() {
         var server = app.listen(port, function() {
-	    //console.log('Serving on, port :%d', server.address().port);
+	    console.log('[Election Handler] Serving on, port :%d', server.address().port);
 	});
 	try{
 		var manifest = JSON.parse(fs.readFileSync("../_configFiles_/ElectionManifest.json"));
