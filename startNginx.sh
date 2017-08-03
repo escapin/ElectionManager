@@ -12,6 +12,8 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
 
-echo Start the nginx services managing the servers of sElect
-/usr/sbin/nginx -c $DIR/nginx_config/nginx_select.conf 2>/dev/null
-/usr/sbin/nginx -c $DIR/nginx_config/nginx_select.conf -s reload 2>/dev/null
+echo Starting the nginx services managing the servers of sElect...
+echo \(Note that only an \"[emerg]\" indicates a problem with the current nginx configuration\)
+echo
+/usr/sbin/nginx -c $DIR/nginx_config/nginx_select.conf
+/usr/sbin/nginx -c $DIR/nginx_config/nginx_select.conf -s reload
