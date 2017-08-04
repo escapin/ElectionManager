@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo Refreshing the Election Handler\'s config files... 
 ./refreshConfig.sh
 
 echo 
