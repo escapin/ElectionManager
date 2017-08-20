@@ -8,7 +8,7 @@
         "authchannel":	"http://localhost/authChannel/",
         "bulletinboard": "http://localhost/bb", 
         "collectingserver": "http://localhost/cs", 
-        "votingbooth": "http://localhost"
+        "votingbooth": "http://localhost/vb"
     },
     "tls_cert_path": "/PATH/TO/TLS/CERTS/"
 }

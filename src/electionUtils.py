@@ -106,7 +106,7 @@ def getsAddress(src, deployment, numMix, nginxPort, ELS, serverAddr):
                 jsonAddress["mix"+str(x)] = "http://localhost:"+str(nginxPort)+"/m"+str(x)+"/"+str(ELS)+"/"
             jsonAddress["collectingserver"] = "http://localhost:"+str(nginxPort)+"/cs/"+str(ELS)+"/"
             jsonAddress["bulletinboard"] = "http://localhost:"+str(nginxPort)+"/bb/"+str(ELS)+"/"
-            jsonAddress["votingbooth"] = "http://localhost:"+str(nginxPort)+"/"+str(ELS)+"/"
+            jsonAddress["votingbooth"] = "http://localhost:"+str(nginxPort)+"/vb/"+str(ELS)+"/"
             jsonAddress["authenticator"] = "http://localhost:"+str(nginxPort)+"/auth/"+str(ELS)+"/"
             jsonAddress["authchannel"] = "http://localhost:"+str(nginxPort)+"/cs/"+str(ELS)+"/authChannel.html"
             jsonFile.close()
