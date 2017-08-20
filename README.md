@@ -6,7 +6,7 @@ remove **secure** and **verifiable** elections powered by sElect.
 
 ## Dependencies
 
-* node.js and npm (tested on v5.0.0 and v3.5.2, respectively)
+* node.js and npm (tested on v6.11.2 and v3.10.10, respectively)
 * python (tested on v.2.7.12)
 * nginx (tested on v1.10)
 * git and wget (only for downloading the proper files and library)
@@ -59,7 +59,6 @@ confirmation, if the password was set.
 to be saved on the server, the election must have been previously closed. 
 It requires password confirmation, if the password was set.
 
-
 A) When the election is open, **Invite Voters to Vote** shows a link to the 
 voting booth web-page. To allow eligible voters to cast their ballot, invite them 
 to visit this web-page.
@@ -67,6 +66,7 @@ to visit this web-page.
 B) Once the election is closed, **Check Election Result** shows a link to the same 
 voting booth web-page. To allow voters to check the election result, invite them to 
 visit this web-page, namely the _same_ web-page they used to vote.
+
 
 This act triggers the *fully automated verification* procedure to investigate whether the 
 voter's choice has been actually counted.

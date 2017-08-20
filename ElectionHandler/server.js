@@ -554,8 +554,9 @@ function verify(passwd){
 
 // start the services
 function start(){
-	var server = app.listen(port, function() {
-	    console.log('Serving on, port :%d', server.address().port);
+	//var server = httpsserver.listen(port, function() {
+        var server = app.listen(port, function() {
+	    console.log('[Election Handler] Serving on, port :%d', server.address().port);
 	});
 	try{
 		var manifest = JSON.parse(fs.readFileSync("../_configFiles_/ElectionManifest.json"));
@@ -568,11 +569,11 @@ function start(){
 	try{
 		var handlerConfigFile = JSON.parse(fs.readFileSync("../_configFiles_/handlerConfigFile.json"));
 		var usePorts = handlerConfigFile["available-ports"];
-		console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
-				"Each election needs at least 3 different servers: a collecting server, a bulletin board, and a mix server.\n" +
-			    "However, the number of mix servers is not fixed: we suggest to use 3 to 5 mix servers for each elections.\n" +
-			    "Assuming you use 3 mix servers, you can run up to *" + Math.floor((usePorts[1]-(usePorts[0]+1))/6) + "* elections at the same time " + 
-			    "(if your hardware supports them).\n");
+		// console.log("\nPort range usable by the sElect servers: [" + usePorts[0] + " - " + usePorts[1] + "]\n" +
+	        //	"Each election needs at least 3 different servers: a collecting server, a bulletin board, and a mix server.\n" +
+	        //	"However, the number of mix servers is not fixed: we suggest to use 3 to 5 mix servers for each elections.\n" +
+		//	"Assuming you use 3 mix servers, you can run up to *" + Math.floor((usePorts[1]-(usePorts[0]+1))/6) + "* elections at the same time " + 
+		//	"(if your hardware supports them).\n");
 	}
 	catch(e){
 		console.log("../_configFiles_/handlerConfigFile.json is missing or corrupt ([available-ports] field not found)");

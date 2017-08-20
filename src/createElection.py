@@ -467,7 +467,7 @@ def createBallots():
                 userChoices.append(temp)
             
             userRandom = "".join([random.choice(string.ascii_letters + string.digits) for n in xrange(8)]) if randomness else ""
-            userEmail = "user"+str(x)+"@uni-trier.de"
+            userEmail = "user"+str(x)+"@select.org"
             userChoices = str(userChoices).replace(" ", "").replace("u'", "").replace("'", "")
             
             ballots = subprocess.Popen(["node", "createBallots.js", ballotFile, userEmail, userRandom, userChoices, electionUtils.hashManifest(sElectDir+manifest), mixServerEncKeyString], cwd=(rootDirProject+"/src"))
