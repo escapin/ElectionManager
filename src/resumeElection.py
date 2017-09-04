@@ -87,7 +87,7 @@ for x in range (len(elecs)):
             mix.append(subprocess.Popen(["node", "mixServer.js", "--serveResult"], cwd=(dstroot+"/mix/"+numMixStr)))
         else:
             mix.append(subprocess.Popen(["node", "mixServer.js"], cwd=(dstroot+"/mix/"+numMixStr)))
-    if os.path.exists(dstroot+"/BulletinBoard/_data_/resultMIX"+str(numMix)+".msg"):
+    if os.path.exists(dstroot+"/BulletinBoard/_data_/resultMIX"+str(numMix-1)+".msg"):
         bb = subprocess.Popen(["node", "bb.js", "--serveResult"], cwd=(dstroot+"/BulletinBoard"))
     else:
         bb = subprocess.Popen(["node", "bb.js"], cwd=(dstroot+"/BulletinBoard"))
