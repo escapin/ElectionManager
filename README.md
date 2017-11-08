@@ -173,5 +173,5 @@ where the parameters are
 
 * At client side date and time are displayed in the user's machine 
   timezone, whereas at server side the UTC timezone is used.
-* Using `createCustomElection.sh` might interfere with an election created 
+* `createCustomElection.sh` might interfere with an election created 
   by `server.js` if they are created at the same time.
