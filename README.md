@@ -131,10 +131,10 @@ node createCustomizedElection.js -m <path/to/manifest.json>
 ```
 where,
 
-`-m <path/to/manifest.json>`
-   Provide the election manifest file
-`-p <pwdToCloseTheElection>`
-   Set password to close and remove the election to <pwdToCloseTheElection>
+`-m <path/to/manifest.json>`<br>
+   Provide the election manifest file<br>
+`-p <pwdToCloseTheElection>`<br>
+   Set password to close and remove the election to <pwdToCloseTheElectio><br>
 `-s <subdomain>`
    Optional: instead of using the Election Lookup String (ELS) in the URI, the election will be
    displayed at `localhost:[port]/<subdomain>` if the system run in localhost,
@@ -148,7 +148,7 @@ where,
     Optional: the user has to provide part of the verification code which will later be used to verify 
     that her vote has been properly counted. This would weaker the assumptions regarding the honesty
     of the voting booth.
-```
+
 
 
 In the `CustomizedElection` folder, a fully customized election can be removed with
