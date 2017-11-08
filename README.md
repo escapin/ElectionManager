@@ -12,7 +12,7 @@ elections powered by sElect.
 * python (tested on v.2.7.12)
 * nginx (tested on v1.10)
 * git and wget (only for downloading the proper files and libraries)
-* Java JDK (tested on openjdk-9).
+* Java JDK (tested on openjdk-9)
 
 
 The system has been developed and deployed on Ubuntu Server 16.04.3 LTS.
@@ -33,7 +33,41 @@ indicates a problem communicating with the server collecting the
 ballots).
 
 
-## Usage
+# Development Environment
+
+The development environment can be created with
+
+```
+make devenv
+```
+
+It creates a locally runnable configuration for the web interface, it
+downloads the sElect system and creates its development
+environment. This operation can be reverted by `make devclean`.
+
+
+The election manager and the nginx sessions used to handle the elections 
+created can be started by:
+
+```
+./run.sh
+```
+
+When starting the server for the first time, the user will be prompted
+to enter a master password used to manage all the elections (even those
+protected by an user-password).
+
+
+##### It is now possible to access the election manager at ``localhost:8443``.
+
+
+The nginx sessions created can be stopped by
+
+```
+./stopNginx.sh
+```
+
+## Usage of the web interface
 
 The web interface contains the following options to manage elections:
 
@@ -72,41 +106,6 @@ visit this web-page, namely the _same_ web-page they used to vote.
 This act triggers a *fully automated verification procedure* to investigate whether the 
 voter's choice has been actually counted.
 
-
-
-## Development Environment
-
-The development environment can be created with
-
-```
-make devenv
-```
-
-It creates a locally runnable configuration for the web interface, it
-downloads the sElect system and creates its development
-environment. This operation can be reverted by `make devclean`.
-
-
-The election manager and the nginx sessions used to handle the elections 
-created can be started by:
-
-```
-./run.sh
-```
-
-When starting the server for the first time, the user will be prompted
-to enter the administrator password used to manage any election (even
-those protected by an user-password).
-
-
-##### It is now possible to access the election manager by typing ``localhost:8443`` in the address bar of a browser.
-
-
-The nginx sessions created can be stopped by
-
-```
-./stopNginx.sh
-```
 
 
 ## Create Fully Customized Election
