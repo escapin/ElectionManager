@@ -130,25 +130,25 @@ node createCustomizedElection.js -m <path/to/manifest.json>
 				 [-s <subdomain>] [-h] [-r]
 ```
 where,
-
-`-m <path/to/manifest.json>`<br>
-   Provide the election manifest file<br>
-`-p <pwdToCloseTheElection>`<br>
+```
+-m <path/to/manifest.json>
+   Provide the election manifest file
+-p <pwdToCloseTheElection>
    Set password to close and remove the election to <pwdToCloseTheElectio><br>
-`-s <subdomain>`
+-s <subdomain>`
    Optional: instead of using the Election Lookup String (ELS) in the URI, the election will be
-   displayed at `localhost:[port]/<subdomain>` if the system run in localhost,
-   `<subdomain>.serverdomain` otherwise.
-`-v <path/to/confidentialVoters.json`
+   displayed at localhost:[port]/<subdomain> if the system run in localhost,
+   <subdomain>.serverdomain otherwise.
+-v <path/to/confidentialVoters.json`
     Optional: instead of making the list of voters' email addresses publicly available
     in the election manifest, provide them only to the collecting server.
-`-h` 
+-h 
     Optional: the election has to stay hidden from the ElectionHandler web interface, if any.
-`-r`
+-r
     Optional: the user has to provide part of the verification code which will later be used to verify 
     that her vote has been properly counted. This would weaker the assumptions regarding the honesty
     of the voting booth.
-
+```
 
 
 In the `CustomizedElection` folder, a fully customized election can be removed with
