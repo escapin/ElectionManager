@@ -146,8 +146,7 @@ where,
     Optional: the election has to stay hidden from the ElectionHandler web interface, if any.
 -r
     Optional: the user has to provide part of the verification code which will later be used to verify 
-    that her vote has been properly counted. This would weaker the assumptions regarding the honesty
-    of the voting booth.
+    that her vote has been properly counted.
 ```
 
 
