@@ -1,9 +1,9 @@
 # An Election Manager for sElect
 
 An Election Manager for the sElect e-voting system
-(https://github.com/escapin/sElect.git).  It allows one to create,
-customize, and remove **secure**, **verifiable**, and **accountable**
-elections powered by sElect.
+(https://github.com/escapin/sElect.git).  It allows for easy creation
+and management of **secure** and **verifiable** elections powered by
+sElect.
 
 
 ### Dependencies
@@ -19,9 +19,9 @@ The system has been developed and deployed on Ubuntu Server 16.04.3 LTS.
 
 ### Design
 
-The election manager provides a web interface allowing for easy creation
-and management of elections powered by the sElect e-voting system on a
-single server instance.
+The election manager provides a web interface allowing one to create,
+customize, and remove elections powered by the sElect e-voting system on
+a single server instance.
 
 The web interface displays a list of elections. Each election has an
 unique electionID, a given title, and a starting/ending time. Moreover,
