@@ -102,8 +102,8 @@ voting booth web-page. To allow voters to check the election result, invite them
 visit this web-page, namely the _same_ web-page they used to vote.
 
 
-This act triggers a *fully automated verification procedure* to investigate whether the 
-voter's choice has been actually counted.
+This act triggers a *fully automated verification procedure*
+investigating whether the voter's choice has been actually counted.
 
 
 
