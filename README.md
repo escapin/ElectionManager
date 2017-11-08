@@ -10,7 +10,7 @@ by sElect.
 * node.js and npm (tested on v6.11.2 LTS and v3.10.10, respectively)
 * python (tested on v.2.7.12)
 * nginx (tested on v1.10)
-* git and wget (only for downloading the proper files and library)
+* git and wget (only for downloading the proper files and libraries)
 * Java JDK (tested on openjdk-9).
 
 
@@ -157,7 +157,7 @@ In the `CustomizedElection` folder, a fully customized election can be removed w
 node removeCustomizedElection.js -e <atLeast7charOfElectionID> -p <pwdInsertedWhenElectionCreated> [-h]
 ```
 
-where the parameters are
+where,
 ```
 -e <atLeast7charOfElectionID>
     The electionID of the election to be removed (at least 7 digits of the electionID are required).
