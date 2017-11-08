@@ -6,7 +6,7 @@ customize, and remove **secure**, **verifiable**, and **accountable**
 elections powered by sElect.
 
 
-## Dependencies
+### Dependencies
 
 * node.js and npm (tested on v6.11.2 LTS and v3.10.10, respectively)
 * python (tested on v.2.7.12)
@@ -18,7 +18,7 @@ elections powered by sElect.
 The system has been developed and deployed on Ubuntu Server 16.04.3 LTS.
 
 
-## Design
+### Design
 
 The election manager provides a web interface allowing for easy creation
 and management of elections powered by the sElect e-voting system on a
@@ -33,7 +33,7 @@ indicates a problem communicating with the server collecting the
 ballots).
 
 
-# Development Environment
+## Development Environment
 
 The development environment can be created with
 
@@ -67,7 +67,7 @@ The nginx sessions created can be stopped by
 ./stopNginx.sh
 ```
 
-## Usage of the web interface
+### Usage of the web interface
 
 The web interface contains the following options to manage elections:
 
