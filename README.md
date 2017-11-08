@@ -1,9 +1,9 @@
 # An Election Manager for sElect
 
 An Election Manager for the sElect e-voting system
-(https://github.com/escapin/sElect.git).  It allows for easy creation
-and management of **secure** and **verifiable** elections powered by
-sElect.
+(https://github.com/escapin/sElect.git).  It allows for the easy
+creation and management of **secure** and **verifiable** elections
+powered by sElect.
 
 
 ### Dependencies
