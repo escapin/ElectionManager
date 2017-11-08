@@ -8,12 +8,11 @@ elections powered by sElect.
 
 ### Dependencies
 
-* node.js and npm (tested on v6.11.2 LTS and v3.10.10, respectively)
-* python (tested on v.2.7.12)
-* nginx (tested on v1.10)
-* git and wget (only for downloading the proper files and libraries)
-* Java JDK (tested on openjdk-9)
-
+* node.js and npm - tested on v6.11.2 LTS and v3.10.10, respectively;
+* python - tested on v.2.7.12;
+* nginx - tested on v1.10;
+* git and wget - only for downloading the proper files and libraries;
+* Java JDK - tested on openjdk-9.
 
 The system has been developed and deployed on Ubuntu Server 16.04.3 LTS.
 
