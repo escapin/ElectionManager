@@ -66,7 +66,7 @@ The nginx sessions created can be stopped by
 ./stopNginx.sh
 ```
 
-### Usage of the web interface
+### Web Interface Usage
 
 The web interface contains the following options to manage elections:
 
