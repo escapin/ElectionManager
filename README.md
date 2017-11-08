@@ -19,14 +19,13 @@ The system has been developed and deployed on Ubuntu Server 16.04.3 LTS.
 
 ## Design
 
-The election manager provides a web interface allowing easy
-creations and management of customized elections powered by the sElect
-system (https://github.com/escapin/sElect.git) on a single server
-instance.
+The election manager provides a web interface allowing for easy creation
+and management of elections powered by the sElect e-voting system
+(https://github.com/escapin/sElect.git) on a single server instance.
 
 The web interface displays a list of elections. Each election has an
-unique ID, a given title, and a starting/ending time. Moreover, each
-election is either *open* - the election is currently running and
+unique electionID, a given title, and a starting/ending time. Moreover,
+each election is either *open* - the election is currently running and
 eligible voters can cast their votes - or *closed* - the election is
 over and the final result is ready and available (*not responding*
 indicates a problem communicating with the server collecting the
@@ -131,20 +130,21 @@ node createCustomizedElection.js -m <path/to/manifest.json>
 				 [-s <subdomain>] [-h] [-r]
 ```
 where,
-```
--m <path/to/manifest.json>
+
+`-m <path/to/manifest.json>`
    Provide the election manifest file
--p <pwdToCloseTheElection>
+`-p <pwdToCloseTheElection>`
    Set password to close and remove the election to <pwdToCloseTheElection>
--s <subdomain>
-   Optional: instead of using the Election Lookup String (ELS) in the URI, the election will be displayed 
-   at localhost:[port]/<subdomain> if the system run in localhost, <subdomain>.serverdomain otherwise.
--v <path/to/confidentialVoters.json
+`-s <subdomain>`
+   Optional: instead of using the Election Lookup String (ELS) in the URI, the election will be
+   displayed at `localhost:[port]/<subdomain>` if the system run in localhost,
+   `<subdomain>.serverdomain` otherwise.
+`-v <path/to/confidentialVoters.json`
     Optional: instead of making the list of voters' email addresses publicly available
     in the election manifest, provide them only to the collecting server.
--h: 
-    Optional: the election will be hidden from the ElectionHandler web interface, if any.
--r:
+`-h` 
+    Optional: the election has to stay hidden from the ElectionHandler web interface, if any.
+`-r`
     Optional: the user has to provide part of the verification code which will later be used to verify 
     that her vote has been properly counted. This would weaker the assumptions regarding the honesty
     of the voting booth.
@@ -156,18 +156,17 @@ In the `CustomizedElection` folder, a fully customized election can be removed w
 ```
 node removeCustomizedElection.js -e <atLeast7charOfElectionID> -p <pwdInsertedWhenElectionCreated> [-h]
 ```
+
 where the parameters are
-```
--e <atLeast7charOfElectionID>
+
+`-e <atLeast7charOfElectionID>`
     The electionID of the election to be removed (at least 7 digits of the electionID are required)
--p <pwdInsertedWhenElectionCreated>
-    The password inserted at creation time, which can also be used to close the election before the pre-set closing time
--h 
-    Optional: the election to be removed is among the elections not shown in the election handler web interface, if any
-    (We refer to such elections as 'hidden elections').
-    In case the election is not among the elections displayed in the election handler and this argument is not provided, 
-    it anyway checks whether such an election is among the 'hidden elections'.
-```
+`-p <pwdInsertedWhenElectionCreated>`
+    The password inserted at creation time, which can also be used to close the election before
+    the pre-set closing time
+`-h `
+    Optional: the election to be removed is among the elections not shown in the election handler
+    web interface, if any (we refer to such elections as 'hidden elections').
 
 
 ### Notes
