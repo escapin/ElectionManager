@@ -21,7 +21,7 @@ nginx:
 	python configNginx.py
 
 select:
-	git clone -b dev https://github.com/escapin/sElect/ sElect
+	git clone https://github.com/escapin/sElect/ sElect
 	cd sElect; make devenv
 	cp templates/refreshFilesVotingBooth.sh sElect/VotingBooth/refresh.sh
 	cp sElect/templates/ElectionManifest.json _configFiles_/ElectionManifest.json
