@@ -1,7 +1,8 @@
 # Election Manager
 
 An Election Manager for sElect.  It allows one to create, customize, and
-remove **secure** and **verifiable** elections powered by sElect.
+remove **secure**, **verifiable**, and **accountable** elections powered
+by sElect.
 
 
 ## Dependencies
@@ -13,7 +14,7 @@ remove **secure** and **verifiable** elections powered by sElect.
 * Java JDK (tested on openjdk-9).
 
 
-The system has been developed and deployed on Ubuntu Server 16.04.1 LTS.
+The system has been developed and deployed on Ubuntu Server 16.04.3 LTS.
 
 
 ## Design
@@ -68,61 +69,10 @@ voting booth web-page. To allow voters to check the election result, invite them
 visit this web-page, namely the _same_ web-page they used to vote.
 
 
-This act triggers the *fully automated verification* procedure to investigate whether the 
+This act triggers a *fully automated verification procedure* to investigate whether the 
 voter's choice has been actually counted.
 
 
-## Create Fully Customized Election
-
-Besides using the web interface, it is possible to create fully
-customized election by providing a properly configured election manifest
-and, optionally, a file containing a list of confidential voters which
-only the Collecting Server has access to.  In the Election Manifest
-provided, the URI and the public/private keys of the servers may not be
-specified: these fields will anyway be overwritten with the proper
-servers URI/cryptographic keys by the scripts creating the election.
-
-In the `CustomizedElection` folder, a fully customized election can be created with
-
-```
-node createCustomizedElection.js -m <path/to/manifest.json> -p <pwdToCloseTheElection> [-v <path/to/confidentialVoters.json>] [-s <subdomain>] [-h] [-r]
-```
-where the parameters are
-```
-	-m <path/to/manifest.json>
-	    Provide the election manifest file
-	-p <pwdToCloseTheElection>
-		Set password to close and remove the election to <pwdToCloseTheElection>
-	-s <subdomain>
-		Optional argument: instead of using the Election Lookup String (ELS) in the URI, the election will be displayed 
-		at localhost:[port]/<subdomain> if the system run in localhost, <subdomain>.serverdomain otherwise.
-	-v <path/to/confidentialVoters.json 
-		Optional argument: instead of making the list of voters' email addresses publicly available in the election manifest, 
-		provide them only to the collecting server.
-	-h: 
-		Optional argument: the election will be hidden from the ElectionHandler web interface, if any
-	-r: 
-		Optional argument: the user has to provide part of the verification code which will later be used to verify 
-		that her vote has been properly counted. This would weaker the assumption on the voting booth's honesty.
-```
-
-In the `CustomizedElection` folder, a fully customized election can be removed with
-
-```
-node removeCustomizedElection.js -e <atLeast7charOfElectionID> -p <pwdInsertedWhenElectionCreated> [-h]
-```
-where the parameters are
-```
-	-e <atLeast7charOfElectionID>
-	    The electionID of the election to be removed (at least 7 digits of the electionID are required)
-	-p <pwdInsertedWhenElectionCreated>
-	    The password inserted at creation time, which can also be used to close the election before the pre-set closing time
-	-h 
-	    Optional argument: the election to be removed is among the elections not shown in the election handler web interface, if any
-	    (such elections are referred to as 'hidden elections').
-	    If this argument is not provided, in case the election is not among the election displayed in the election handler, 
-	    it will anyway check whether such an election is among the 'hidden elections'.
-```
 
 ## Development Environment
 
@@ -132,10 +82,9 @@ The development environment can be created with
 make devenv
 ```
 
-It creates a locally runnable configuration for the
-web interface, it downloads the sElect system and creates its
-development environment. This operation can be reverted by
-`make devclean`.
+It creates a locally runnable configuration for the web interface, it
+downloads the sElect system and creates its development
+environment. This operation can be reverted by `make devclean`.
 
 
 The election manager and the nginx sessions used to handle the elections 
@@ -158,6 +107,67 @@ The nginx sessions created can be stopped by
 ```
 ./stopNginx.sh
 ```
+
+
+## Create Fully Customized Election
+
+
+Besides using the web interface, it is possible to create fully
+customized elections by providing a properly configured election
+manifest and, optionally, a file containing a list of confidential
+voters which only the Collecting Server has access to.  In the Election
+Manifest, the URI and the public/private keys of the servers may not be
+specified: these fields are set/overwritten by the python scripts
+creating the election with the proper servers URI and cryptographic
+keys.
+
+
+In the `CustomizedElection` folder, a fully customized election can be created with
+
+```
+node createCustomizedElection.js -m <path/to/manifest.json>
+                                 -p <pwdToCloseTheElection>
+				 [-v <path/to/confidentialVoters.json>]
+				 [-s <subdomain>] [-h] [-r]
+```
+where,
+```
+-m <path/to/manifest.json>
+   Provide the election manifest file
+-p <pwdToCloseTheElection>
+   Set password to close and remove the election to <pwdToCloseTheElection>
+-s <subdomain>
+   Optional: instead of using the Election Lookup String (ELS) in the URI, the election will be displayed 
+   at localhost:[port]/<subdomain> if the system run in localhost, <subdomain>.serverdomain otherwise.
+-v <path/to/confidentialVoters.json
+    Optional: instead of making the list of voters' email addresses publicly available in the election manifest,
+    provide them only to the collecting server.
+-h: 
+    Optional: the election will be hidden from the ElectionHandler web interface, if any
+-r:
+    Optional: the user has to provide part of the verification code which will later be used to verify 
+    that her vote has been properly counted. This would weaker the assumptions on the voting booth's honesty.
+```
+
+
+In the `CustomizedElection` folder, a fully customized election can be removed with
+
+```
+node removeCustomizedElection.js -e <atLeast7charOfElectionID> -p <pwdInsertedWhenElectionCreated> [-h]
+```
+where the parameters are
+```
+-e <atLeast7charOfElectionID>
+    The electionID of the election to be removed (at least 7 digits of the electionID are required)
+-p <pwdInsertedWhenElectionCreated>
+    The password inserted at creation time, which can also be used to close the election before the pre-set closing time
+-h 
+    Optional: the election to be removed is among the elections not shown in the election handler web interface, if any
+    (We refer to such elections as 'hidden elections').
+    In case the election is not among the elections displayed in the election handler and this argument is not provided, 
+    it anyway checks whether such an election is among the 'hidden elections'.
+```
+
 
 ### Notes
 
