@@ -140,13 +140,14 @@ where,
    Optional: instead of using the Election Lookup String (ELS) in the URI, the election will be displayed 
    at localhost:[port]/<subdomain> if the system run in localhost, <subdomain>.serverdomain otherwise.
 -v <path/to/confidentialVoters.json
-    Optional: instead of making the list of voters' email addresses publicly available in the election manifest,
-    provide them only to the collecting server.
+    Optional: instead of making the list of voters' email addresses publicly available
+    in the election manifest, provide them only to the collecting server.
 -h: 
-    Optional: the election will be hidden from the ElectionHandler web interface, if any
+    Optional: the election will be hidden from the ElectionHandler web interface, if any.
 -r:
     Optional: the user has to provide part of the verification code which will later be used to verify 
-    that her vote has been properly counted. This would weaker the assumptions on the voting booth's honesty.
+    that her vote has been properly counted. This would weaker the assumptions regarding the honesty
+    of the voting booth.
 ```
 
 
