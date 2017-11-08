@@ -135,11 +135,11 @@ where,
    Provide the election manifest file
 -p <pwdToCloseTheElection>
    Set password to close and remove the election to <pwdToCloseTheElectio><br>
--s <subdomain>`
+-s <subdomain>
    Optional: instead of using the Election Lookup String (ELS) in the URI, the election will be
    displayed at localhost:[port]/<subdomain> if the system run in localhost,
    <subdomain>.serverdomain otherwise.
--v <path/to/confidentialVoters.json`
+-v <path/to/confidentialVoters.json
     Optional: instead of making the list of voters' email addresses publicly available
     in the election manifest, provide them only to the collecting server.
 -h 
@@ -158,16 +158,16 @@ node removeCustomizedElection.js -e <atLeast7charOfElectionID> -p <pwdInsertedWh
 ```
 
 where the parameters are
-
-`-e <atLeast7charOfElectionID>`
+```
+-e <atLeast7charOfElectionID>
     The electionID of the election to be removed (at least 7 digits of the electionID are required)
-`-p <pwdInsertedWhenElectionCreated>`
+-p <pwdInsertedWhenElectionCreated>
     The password inserted at creation time, which can also be used to close the election before
     the pre-set closing time
-`-h `
+-h
     Optional: the election to be removed is among the elections not shown in the election handler
     web interface, if any (we refer to such elections as 'hidden elections').
-
+```
 
 ### Notes
 
