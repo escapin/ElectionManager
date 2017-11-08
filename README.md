@@ -132,9 +132,9 @@ node createCustomizedElection.js -m <path/to/manifest.json>
 where,
 ```
 -m <path/to/manifest.json>
-   Provide the election manifest file
+   Provide the election manifest file.
 -p <pwdToCloseTheElection>
-   Set password to close and remove the election to <pwdToCloseTheElectio>.
+   Set password to close and remove the election to <pwdToCloseTheElection>.
 -s <subdomain>
    Optional: instead of using the Election Lookup String (ELS) in the URI, the election will be
    displayed at localhost:[port]/<subdomain> if the system run in localhost,
