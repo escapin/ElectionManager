@@ -1,4 +1,4 @@
-build: 	devenv references roboto
+build: 	devenv roboto
 
 devenv:
 	npm install
@@ -9,12 +9,6 @@ devenv:
 	cd webapp/js; wget -N http://code.jquery.com/jquery-1.11.1.min.js
 	cd webapp/js; wget -N https://cdn.jsdelivr.net/bluebird/latest/bluebird.min.js
 	mkdir -p _data_
-
-references:
-	mkdir -p webapp/ref
-	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-CSF-2016.bib; mv KuestersMuellerScapinTruderung-CSF-2016.bib KuestersMuellerScapinTruderung-CSF-2016.bib.txt
-	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/KuestersMuellerScapinTruderung-CSF-2016.abstract; mv KuestersMuellerScapinTruderung-CSF-2016.abstract KuestersMuellerScapinTruderung-CSF-2016.abstract.txt
-	cd webapp/ref; wget -N http://infsec.uni-trier.de/people/publications/paper/KuestersMuellerScapinTruderung-CSF-2016.pdf
 
 roboto:
 	cd webapp/roboto; wget -N https://fonts.gstatic.com/s/roboto/v15/Jzo62I39jc0gQRrbndN6nfesZW2xOQ-xsNqO47m55DA.ttf
@@ -37,6 +31,6 @@ devclean:
 
 refclean:
 	-rm -r webapp/ref
-	
+
 robotoclean:
 	-rm webapp/roboto/*.ttf
