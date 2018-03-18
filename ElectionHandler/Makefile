@@ -29,8 +29,5 @@ devclean:
 	-rm webapp/js/bluebird.min.js
 	-rm -r _data_
 
-refclean:
-	-rm -r webapp/ref
-
 robotoclean:
 	-rm webapp/roboto/*.ttf
